@@ -1,0 +1,293 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum Category {
+  KEYBOARD
+  SWITCH
+  KEYCAP
+  PLATE
+  PCB
+  STABILIZER
+  ACCESSORY
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  SHIPPED
+  CANCELLED
+  COMPLETED
+}
+
+enum Layout {
+  ALICE
+  ORTHOLINEAR
+  P60
+  P65
+  P75
+  TKL
+  FULL
+  OTHER
+}
+
+enum MountingStyle {
+  TRAY
+  GASKET
+  TOP
+  PLATE
+  OTHER
+}
+
+enum CaseMaterial {
+  ALUMINUM
+  ABS
+  PC
+  ACRYLIC
+  PBT
+  OTHER
+}
+
+enum RGBOrientation {
+  SOUTH
+  NORTH
+  NONE
+}
+
+enum SwitchCompatibility {
+  THREE_PIN
+  FIVE_PIN
+  BOTH
+}
+
+enum Connectivity {
+  WIRED
+  WIRELESS
+  BLUETOOTH
+  TWO_POINT_FOUR_GHZ
+}
+
+enum SwitchType {
+  LINEAR
+  TACTILE
+  CLICKY
+  OTHER
+}
+
+enum PlateMaterial {
+  ALUMINUM
+  BRASS
+  FR4
+  PC
+  STEEL
+  OTHER
+}
+
+enum KeycapProfile {
+  CHERRY
+  OEM
+  SA
+  DSA
+  XDA
+  OTHER
+}
+
+enum KeycapMaterial {
+  PBT
+  ABS
+  OTHER
+}
+
+enum StabilizerType {
+  SCREW_IN
+  CLIP_IN
+  PCB_MOUNT
+  OTHER
+}
+
+model User {
+  id        String    @id @default(uuid())
+  email     String    @unique
+  password  String
+  name      String?
+  role      UserRole  @default(USER)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  orders    Order[]
+  cart      Cart?
+}
+
+model Product {
+  id            String          @id @default(uuid())
+  name          String
+  slug          String          @unique
+  description   String?
+  price         Int             // cents
+  category      Category
+  status        String?         // "IN_STOCK" | "GROUP_BUY" | "PREORDER" (free-form for flexibility)
+  images        Json?           // array of image URLs
+  gallery       Json?           // more media
+  soundTests    Json?           // array of sound test urls
+  explodedView  String?         // url to exploded view
+  technicalSpec  String?        // freeform/markdown url or blob (optional)
+
+  // Relations to typed specs (only one will typically be present depending on category)
+  keyboardSpec  KeyboardSpec?
+  switchSpec    SwitchSpec?
+  keycapSpec    KeycapSpec?
+
+  variants      ProductVariant[]
+  inventory     Inventory?
+  cartItems     CartItem[]
+  orderItems    OrderItem[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+}
+
+model ProductVariant {
+  id          String  @id @default(uuid())
+  productId   String
+  sku         String? @unique
+  name        String  // e.g. "Black - ANSI", "V1 - 67g"
+  extraPrice  Int     @default(0) // cents
+  images      Json?
+  // variant-level specs (if variants differ in layout, material etc)
+  specs       Json?   // flexible JSON for variant-level attributes
+
+  product     Product @relation(fields: [productId], references: [id])
+  inventory   Inventory?
+  cartItems   CartItem[]
+  orderItems  OrderItem[]
+}
+
+model Inventory {
+  id         String  @id @default(uuid())
+  productId  String? @unique
+  variantId  String? @unique
+  stock      Int     @default(0)
+
+  product    Product?        @relation(fields: [productId], references: [id])
+  variant    ProductVariant? @relation(fields: [variantId], references: [id])
+}
+
+model Cart {
+  id        String     @id @default(uuid())
+  userId    String     @unique
+  items     CartItem[]
+  updatedAt DateTime   @updatedAt
+
+  user      User       @relation(fields: [userId], references: [id])
+}
+
+model CartItem {
+  id         String   @id @default(uuid())
+  cartId     String
+  productId  String
+  variantId  String?
+  quantity   Int      @default(1)
+
+  cart       Cart     @relation(fields: [cartId], references: [id])
+  product    Product  @relation(fields: [productId], references: [id])
+  variant    ProductVariant? @relation(fields: [variantId], references: [id])
+}
+
+model Order {
+  id          String      @id @default(uuid())
+  userId      String
+  status      OrderStatus @default(PENDING)
+  totalAmount Int
+  createdAt   DateTime    @default(now())
+
+  user        User        @relation(fields: [userId], references: [id])
+  items       OrderItem[]
+}
+
+model OrderItem {
+  id         String   @id @default(uuid())
+  orderId    String
+  productId  String
+  variantId  String?
+  quantity   Int
+  price      Int       // snapshot in cents
+
+  order      Order     @relation(fields: [orderId], references: [id])
+  product    Product   @relation(fields: [productId], references: [id])
+  variant    ProductVariant? @relation(fields: [variantId], references: [id])
+}
+
+/*
+  Keyboard-specific specs
+*/
+model KeyboardSpec {
+  id                  String          @id @default(uuid())
+  productId           String          @unique
+  layout              Layout
+  mountingStyle       MountingStyle
+  caseMaterial        CaseMaterial
+  rgbOrientation      RGBOrientation
+  hotSwap             Boolean         @default(false)
+  switchCompatibility SwitchCompatibility
+  connectivity        Json?           // array of Connectivity values
+  plateMaterial       PlateMaterial?
+  plateMountIncluded  Boolean         @default(false)
+  stabilizerType      StabilizerType?
+  weightGrams         Int?            // total case weight (optional)
+  firmware            String?         // qmk, via, v0, open-source, etc
+  isoAnsi             String?         // "ISO" | "ANSI" | null
+  notes               String?
+
+  product             Product         @relation(fields: [productId], references: [id])
+}
+
+/*
+  Switch-specific specs
+*/
+model SwitchSpec {
+  id             String     @id @default(uuid())
+  productId      String     @unique
+  switchType     SwitchType
+  stemMaterial   String?    // e.g. "POM", "Nylon"
+  topHousing     String?
+  bottomHousing  String?
+  springWeight   Int?       // grams
+  preTravel      Float?     // mm
+  totalTravel    Float?     // mm
+  lubed          Boolean?   @default(false)
+  soundProfile   String?    // descriptive: "thocky", "clacky" etc
+  pins           String?    // "3-pin", "5-pin"
+
+  product        Product    @relation(fields: [productId], references: [id])
+}
+
+/*
+  Keycap-specific specs
+*/
+model KeycapSpec {
+  id             String       @id @default(uuid())
+  productId      String       @unique
+  profile        KeycapProfile
+  material       KeycapMaterial
+  thickness      Float?       // mm average
+  legends        String?      // "double-shot", "dye-sub", "pad-print"
+  rowSupport     Boolean?     // sculpted rows true/false
+  notes          String?
+
+  product        Product      @relation(fields: [productId], references: [id])
+}
