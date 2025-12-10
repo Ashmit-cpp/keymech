@@ -623,6 +623,143 @@
           "orders"
         ]
       }
+    },
+    "/wishlist": {
+      "get": {
+        "operationId": "WishlistController_getWishlist",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Wishlist retrieved successfully"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get authenticated user wishlist",
+        "tags": [
+          "wishlist"
+        ]
+      },
+      "delete": {
+        "operationId": "WishlistController_clearWishlist",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Wishlist cleared successfully"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Clear authenticated user wishlist",
+        "tags": [
+          "wishlist"
+        ]
+      }
+    },
+    "/wishlist/items": {
+      "post": {
+        "operationId": "WishlistController_addItem",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateWishlistItemDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Item added to wishlist successfully"
+          },
+          "400": {
+            "description": "Bad request - item already exists or invalid data"
+          },
+          "404": {
+            "description": "Product or variant not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Add an item to authenticated user wishlist",
+        "tags": [
+          "wishlist"
+        ]
+      }
+    },
+    "/wishlist/items/{wishlistItemId}": {
+      "delete": {
+        "operationId": "WishlistController_removeItem",
+        "parameters": [
+          {
+            "name": "wishlistItemId",
+            "required": true,
+            "in": "path",
+            "description": "Wishlist item UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Item removed successfully"
+          },
+          "404": {
+            "description": "Wishlist item not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove an item from authenticated user wishlist",
+        "tags": [
+          "wishlist"
+        ]
+      }
+    },
+    "/wishlist/merge": {
+      "post": {
+        "operationId": "WishlistController_mergeGuestWishlist",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MergeGuestWishlistDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Guest wishlist merged successfully"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Merge guest wishlist items into authenticated user wishlist",
+        "tags": [
+          "wishlist"
+        ]
+      }
     }
   },
   "info": {
@@ -651,6 +788,10 @@
     {
       "name": "auth",
       "description": "Authentication endpoints"
+    },
+    {
+      "name": "wishlist",
+      "description": "Wishlist management endpoints"
     }
   ],
   "servers": [],
@@ -784,6 +925,41 @@
           "razorpay_order_id",
           "razorpay_payment_id",
           "razorpay_signature"
+        ]
+      },
+      "CreateWishlistItemDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "GuestWishlistItemDto": {
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "string",
+            "description": "Product ID"
+          },
+          "variantId": {
+            "type": "string",
+            "description": "Variant ID (optional)"
+          }
+        },
+        "required": [
+          "productId"
+        ]
+      },
+      "MergeGuestWishlistDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "description": "Array of wishlist items from guest wishlist",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GuestWishlistItemDto"
+            }
+          }
+        },
+        "required": [
+          "items"
         ]
       }
     }

@@ -22,7 +22,7 @@ export default function CategoryPage() {
       label: category ? category.charAt(0).toUpperCase() + category.slice(1) : "Category",
     };
 
-  const { data: response, isLoading, error, refetch, isFetching } = useProductsControllerFindAll(
+  const { data: response, isLoading, error, refetch } = useProductsControllerFindAll(
     {
       search: "",
       category: backendCategory || "",
@@ -50,9 +50,6 @@ export default function CategoryPage() {
             <h1 className="text-3xl font-bold">{headingLabel}</h1>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm" disabled={isFetching} onClick={() => refetch()}>
-              {isFetching ? "Refreshing…" : "Refresh"}
-            </Button>
             <Button variant="ghost" size="sm" onClick={() => navigate("/products")}>
               View All
             </Button>

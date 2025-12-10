@@ -273,12 +273,17 @@ export default function ProductDetailPage() {
     isInWishlist,
     justAddedToWishlist,
   ]);
-
+  const handleShare = (name: string) => {
+    navigator.clipboard.writeText(`${window.location.origin}/products/${product?.id}`);
+    toast.success(`Link to ${name} copied to clipboard`);
+  };
   // --- top-level error states ---
   if (isError)
     return <div className="p-8 text-center">Error loading product</div>;
   if (!product && !isLoading)
     return <div className="p-8 text-center">Product not found</div>;
+
+
 
   return (
     <div className="min-h-screen bg-background pt-24 pb-20">
@@ -441,7 +446,7 @@ export default function ProductDetailPage() {
                     />
                   </Button>
 
-                  <Button variant="outline" size="lg" className="px-4">
+                  <Button variant="outline" size="lg" className="px-4" onClick={() => handleShare(product.name)}>
                     <Share2 className="w-5 h-5" />
                   </Button>
                 </div>
@@ -539,7 +544,6 @@ export default function ProductDetailPage() {
                       </div>
                     ) : (
                       <>
-                        <Youtube className="w-5 h-5" />
                         <p>No sound tests available.</p>
                       </>
                     )}
