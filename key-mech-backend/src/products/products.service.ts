@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma, Category } from '../../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CreateProductDto } from './dto/create-product.dto.js';
 import { UpdateProductDto } from './dto/update-product.dto.js';
@@ -47,8 +48,34 @@ export class ProductsService {
     });
   }
 
-  findAll() {
+  findAll(params?: { search?: string; category?: string }) {
+    const search = params?.search?.trim();
+    const category = params?.category?.trim();
+
+    const where: Prisma.ProductWhereInput = {};
+
+    const categoryEnum =
+      category &&
+      Category[category.toUpperCase() as keyof typeof Category];
+    if (categoryEnum) {
+      where.category = categoryEnum;
+    }
+
+    const or: Prisma.ProductWhereInput['OR'] = search
+      ? [
+          { name: { contains: search, mode: 'insensitive' } },
+          { description: { contains: search, mode: 'insensitive' } },
+        ]
+      : undefined;
+
+    if (or) {
+      where.OR = or;
+    }
+
+    const hasFilters = Boolean(categoryEnum) || Boolean(or);
+
     return this.prisma.product.findMany({
+      where: hasFilters ? where : undefined,
       include: {
         variants: true,
         keyboardSpec: true,

@@ -7,17 +7,19 @@ import { OrdersModule } from './orders/orders.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
 import { ProductsModule } from './products/products.module.js';
 import { UsersModule } from './users/users.module.js';
-
+import { AuthModule } from './auth/auth.module.js';
+import { WishlistModule } from './wishlist/wishlist.module.js';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }), // reads .env
+    ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
     ProductsModule,
     UsersModule,
     CartModule,
     OrdersModule,
-    // TODO: add feature modules like ProductsModule
+    AuthModule,
+    WishlistModule,
   ],
   controllers: [AppController],
   providers: [AppService],

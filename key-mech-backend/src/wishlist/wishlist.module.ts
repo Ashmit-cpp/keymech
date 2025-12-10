@@ -1,7 +1,7 @@
 import { Module, MiddlewareConsumer, NestModule, forwardRef } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
-import { CartController } from './cart.controller.js';
-import { CartService } from './cart.service.js';
+import { WishlistController } from './wishlist.controller.js';
+import { WishlistService } from './wishlist.service.js';
 import { AuthModule } from '../auth/auth.module.js';
 import { AuthMiddleware } from '../auth/auth.middleware.js';
 
@@ -13,12 +13,12 @@ import { AuthMiddleware } from '../auth/auth.middleware.js';
       signOptions: { expiresIn: '7d' },
     }),
   ],
-  controllers: [CartController],
-  providers: [CartService, AuthMiddleware],
-  exports: [CartService],
+  controllers: [WishlistController],
+  providers: [WishlistService, AuthMiddleware],
+  exports: [WishlistService],
 })
-export class CartModule implements NestModule {
+export class WishlistModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(AuthMiddleware).forRoutes('cart');
+    consumer.apply(AuthMiddleware).forRoutes('wishlist');
   }
 }

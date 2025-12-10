@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  Query,
   Post,
   Put,
   UsePipes,
@@ -32,8 +33,11 @@ export class ProductsController {
   @Get()
   @ApiOperation({ summary: 'Get all products' })
   @ApiResponse({ status: 200, description: 'List of products' })
-  findAll() {
-    return this.service.findAll();
+  findAll(
+    @Query('search') search?: string,
+    @Query('category') category?: string,
+  ) {
+    return this.service.findAll({ search, category });
   }
 
   @Get(':id')

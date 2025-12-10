@@ -2,12 +2,29 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module.js';
+import cookieParser from 'cookie-parser';
 
 import * as fs from 'fs';
 import { join } from 'path';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // Enable CORS first, before any other middleware
+  app.enableCors({
+    origin: [
+      'http://localhost:5173',
+      'http://localhost:3000',
+      process.env.FRONTEND_URL || 'http://localhost:5173',
+    ].filter(Boolean),
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+    exposedHeaders: ['Set-Cookie'],
+  });
+
+  app.use(cookieParser());
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
 
   const config = new DocumentBuilder()
     .setTitle('KeyMech API')
@@ -17,6 +34,8 @@ async function bootstrap() {
     .addTag('users', 'User management endpoints')
     .addTag('orders', 'Order management endpoints')
     .addTag('cart', 'Shopping cart endpoints')
+    .addTag('auth', 'Authentication endpoints')
+    .addTag('wishlist', 'Wishlist management endpoints')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
@@ -33,9 +52,10 @@ async function bootstrap() {
     JSON.stringify(document, null, 2),
   );
   
-
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
-  app.enableCors();
-  await app.listen(process.env.PORT || 3005);
+  const port = process.env.PORT || 3006;
+  await app.listen(port);
+  console.log(`🚀 Server running on http://localhost:${port}`);
+  console.log(`📚 API Documentation: http://localhost:${port}/api`);
+  console.log(`🔧 Environment: ${process.env.NODE_ENV || 'development'}`);
 }
 bootstrap();
