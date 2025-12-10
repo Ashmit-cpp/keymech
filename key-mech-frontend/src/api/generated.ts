@@ -10,15 +10,21 @@ import {
   useQuery
 } from '@tanstack/react-query';
 import type {
+  DataTag,
+  DefinedInitialDataOptions,
+  DefinedUseQueryResult,
   MutationFunction,
+  QueryClient,
   QueryFunction,
   QueryKey,
+  UndefinedInitialDataOptions,
   UseMutationOptions,
   UseMutationResult,
   UseQueryOptions,
   UseQueryResult
 } from '@tanstack/react-query';
 
+import { customFetch } from '../lib/custom-fetch';
 export interface CreateProductDto { [key: string]: unknown }
 
 export interface UpdateProductDto { [key: string]: unknown }
@@ -27,9 +33,59 @@ export interface CreateUserDto { [key: string]: unknown }
 
 export interface UpdateUserDto { [key: string]: unknown }
 
-export interface CreateCartDto { [key: string]: unknown }
-
 export interface CreateCartItemDto { [key: string]: unknown }
+
+export interface GuestCartItemDto {
+  /** Product ID */
+  productId: string;
+  /** Variant ID (optional) */
+  variantId?: string;
+  /** Quantity */
+  quantity: number;
+}
+
+export interface MergeGuestCartDto {
+  /** Array of cart items from guest cart */
+  items: GuestCartItemDto[];
+}
+
+export interface LoginDto { [key: string]: unknown }
+
+export interface CreateRazorpayOrderDto {
+  /** User ID */
+  userId: string;
+}
+
+export interface RazorpayOrderResponseDto {
+  /** Razorpay order ID */
+  orderId: string;
+  /** Amount in smallest currency unit (paise) */
+  amount: number;
+  /** Currency code */
+  currency: string;
+  /** Razorpay key ID for frontend checkout */
+  keyId: string;
+}
+
+export interface VerifyPaymentDto {
+  /** User ID */
+  userId: string;
+  /** Razorpay order ID */
+  razorpay_order_id: string;
+  /** Razorpay payment ID */
+  razorpay_payment_id: string;
+  /** Razorpay signature */
+  razorpay_signature: string;
+}
+
+export type ProductsControllerFindAllParams = {
+search: string;
+category: string;
+};
+
+type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
+
+
 
 export type appControllerGetHelloResponse200 = {
   data: void
@@ -53,20 +109,14 @@ export const getAppControllerGetHelloUrl = () => {
 
 export const appControllerGetHello = async ( options?: RequestInit): Promise<appControllerGetHelloResponse> => {
   
-  const res = await fetch(getAppControllerGetHelloUrl(),
+  return customFetch<appControllerGetHelloResponse>(getAppControllerGetHelloUrl(),
   {      
     ...options,
     method: 'GET'
     
     
   }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: appControllerGetHelloResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as appControllerGetHelloResponse
-}
+);}
 
 
 
@@ -79,37 +129,61 @@ export const getAppControllerGetHelloQueryKey = () => {
     }
 
     
-export const getAppControllerGetHelloQueryOptions = <TData = Awaited<ReturnType<typeof appControllerGetHello>>, TError = unknown>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof appControllerGetHello>>, TError, TData>, fetch?: RequestInit}
+export const getAppControllerGetHelloQueryOptions = <TData = Awaited<ReturnType<typeof appControllerGetHello>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof appControllerGetHello>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
-const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getAppControllerGetHelloQueryKey();
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof appControllerGetHello>>> = ({ signal }) => appControllerGetHello({ signal, ...fetchOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof appControllerGetHello>>> = ({ signal }) => appControllerGetHello({ signal, ...requestOptions });
 
       
 
       
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof appControllerGetHello>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof appControllerGetHello>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type AppControllerGetHelloQueryResult = NonNullable<Awaited<ReturnType<typeof appControllerGetHello>>>
 export type AppControllerGetHelloQueryError = unknown
 
 
+export function useAppControllerGetHello<TData = Awaited<ReturnType<typeof appControllerGetHello>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof appControllerGetHello>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof appControllerGetHello>>,
+          TError,
+          Awaited<ReturnType<typeof appControllerGetHello>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAppControllerGetHello<TData = Awaited<ReturnType<typeof appControllerGetHello>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof appControllerGetHello>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof appControllerGetHello>>,
+          TError,
+          Awaited<ReturnType<typeof appControllerGetHello>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAppControllerGetHello<TData = Awaited<ReturnType<typeof appControllerGetHello>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof appControllerGetHello>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
 export function useAppControllerGetHello<TData = Awaited<ReturnType<typeof appControllerGetHello>>, TError = unknown>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof appControllerGetHello>>, TError, TData>, fetch?: RequestInit}
-  
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof appControllerGetHello>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getAppControllerGetHelloQueryOptions(options)
 
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   query.queryKey = queryOptions.queryKey ;
 
@@ -152,7 +226,7 @@ export const getProductsControllerCreateUrl = () => {
 
 export const productsControllerCreate = async (createProductDto: CreateProductDto, options?: RequestInit): Promise<productsControllerCreateResponse> => {
   
-  const res = await fetch(getProductsControllerCreateUrl(),
+  return customFetch<productsControllerCreateResponse>(getProductsControllerCreateUrl(),
   {      
     ...options,
     method: 'POST',
@@ -160,27 +234,21 @@ export const productsControllerCreate = async (createProductDto: CreateProductDt
     body: JSON.stringify(
       createProductDto,)
   }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: productsControllerCreateResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as productsControllerCreateResponse
-}
+);}
 
 
 
 
 export const getProductsControllerCreateMutationOptions = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof productsControllerCreate>>, TError,{data: CreateProductDto}, TContext>, fetch?: RequestInit}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof productsControllerCreate>>, TError,{data: CreateProductDto}, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof productsControllerCreate>>, TError,{data: CreateProductDto}, TContext> => {
 
 const mutationKey = ['productsControllerCreate'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+      : {mutation: { mutationKey, }, request: undefined};
 
       
 
@@ -188,7 +256,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof productsControllerCreate>>, {data: CreateProductDto}> = (props) => {
           const {data} = props ?? {};
 
-          return  productsControllerCreate(data,fetchOptions)
+          return  productsControllerCreate(data,requestOptions)
         }
 
         
@@ -204,8 +272,8 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
  * @summary Create a new product
  */
 export const useProductsControllerCreate = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof productsControllerCreate>>, TError,{data: CreateProductDto}, TContext>, fetch?: RequestInit}
- ): UseMutationResult<
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof productsControllerCreate>>, TError,{data: CreateProductDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof productsControllerCreate>>,
         TError,
         {data: CreateProductDto},
@@ -214,7 +282,7 @@ export const useProductsControllerCreate = <TError = void,
 
       const mutationOptions = getProductsControllerCreateMutationOptions(options);
 
-      return useMutation(mutationOptions);
+      return useMutation(mutationOptions, queryClient);
     }
     
 /**
@@ -232,76 +300,101 @@ export type productsControllerFindAllResponseSuccess = (productsControllerFindAl
 
 export type productsControllerFindAllResponse = (productsControllerFindAllResponseSuccess)
 
-export const getProductsControllerFindAllUrl = () => {
+export const getProductsControllerFindAllUrl = (params: ProductsControllerFindAllParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
+    
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
 
-  
+  const stringifiedParams = normalizedParams.toString();
 
-  return `/products`
+  return stringifiedParams.length > 0 ? `/products?${stringifiedParams}` : `/products`
 }
 
-export const productsControllerFindAll = async ( options?: RequestInit): Promise<productsControllerFindAllResponse> => {
+export const productsControllerFindAll = async (params: ProductsControllerFindAllParams, options?: RequestInit): Promise<productsControllerFindAllResponse> => {
   
-  const res = await fetch(getProductsControllerFindAllUrl(),
+  return customFetch<productsControllerFindAllResponse>(getProductsControllerFindAllUrl(params),
   {      
     ...options,
     method: 'GET'
     
     
   }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: productsControllerFindAllResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as productsControllerFindAllResponse
-}
+);}
 
 
 
 
 
-export const getProductsControllerFindAllQueryKey = () => {
+export const getProductsControllerFindAllQueryKey = (params?: ProductsControllerFindAllParams,) => {
     return [
-    `/products`
+    `/products`, ...(params ? [params]: [])
     ] as const;
     }
 
     
-export const getProductsControllerFindAllQueryOptions = <TData = Awaited<ReturnType<typeof productsControllerFindAll>>, TError = unknown>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof productsControllerFindAll>>, TError, TData>, fetch?: RequestInit}
+export const getProductsControllerFindAllQueryOptions = <TData = Awaited<ReturnType<typeof productsControllerFindAll>>, TError = unknown>(params: ProductsControllerFindAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof productsControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
-const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getProductsControllerFindAllQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getProductsControllerFindAllQueryKey(params);
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof productsControllerFindAll>>> = ({ signal }) => productsControllerFindAll({ signal, ...fetchOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof productsControllerFindAll>>> = ({ signal }) => productsControllerFindAll(params, { signal, ...requestOptions });
 
       
 
       
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof productsControllerFindAll>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof productsControllerFindAll>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type ProductsControllerFindAllQueryResult = NonNullable<Awaited<ReturnType<typeof productsControllerFindAll>>>
 export type ProductsControllerFindAllQueryError = unknown
 
 
+export function useProductsControllerFindAll<TData = Awaited<ReturnType<typeof productsControllerFindAll>>, TError = unknown>(
+ params: ProductsControllerFindAllParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof productsControllerFindAll>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof productsControllerFindAll>>,
+          TError,
+          Awaited<ReturnType<typeof productsControllerFindAll>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useProductsControllerFindAll<TData = Awaited<ReturnType<typeof productsControllerFindAll>>, TError = unknown>(
+ params: ProductsControllerFindAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof productsControllerFindAll>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof productsControllerFindAll>>,
+          TError,
+          Awaited<ReturnType<typeof productsControllerFindAll>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useProductsControllerFindAll<TData = Awaited<ReturnType<typeof productsControllerFindAll>>, TError = unknown>(
+ params: ProductsControllerFindAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof productsControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get all products
  */
 
 export function useProductsControllerFindAll<TData = Awaited<ReturnType<typeof productsControllerFindAll>>, TError = unknown>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof productsControllerFindAll>>, TError, TData>, fetch?: RequestInit}
-  
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+ params: ProductsControllerFindAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof productsControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getProductsControllerFindAllQueryOptions(options)
+  const queryOptions = getProductsControllerFindAllQueryOptions(params,options)
 
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   query.queryKey = queryOptions.queryKey ;
 
@@ -344,20 +437,14 @@ export const getProductsControllerFindOneUrl = (id: string,) => {
 
 export const productsControllerFindOne = async (id: string, options?: RequestInit): Promise<productsControllerFindOneResponse> => {
   
-  const res = await fetch(getProductsControllerFindOneUrl(id),
+  return customFetch<productsControllerFindOneResponse>(getProductsControllerFindOneUrl(id),
   {      
     ...options,
     method: 'GET'
     
     
   }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: productsControllerFindOneResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as productsControllerFindOneResponse
-}
+);}
 
 
 
@@ -370,40 +457,64 @@ export const getProductsControllerFindOneQueryKey = (id?: string,) => {
     }
 
     
-export const getProductsControllerFindOneQueryOptions = <TData = Awaited<ReturnType<typeof productsControllerFindOne>>, TError = void>(id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof productsControllerFindOne>>, TError, TData>, fetch?: RequestInit}
+export const getProductsControllerFindOneQueryOptions = <TData = Awaited<ReturnType<typeof productsControllerFindOne>>, TError = void>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof productsControllerFindOne>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
-const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getProductsControllerFindOneQueryKey(id);
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof productsControllerFindOne>>> = ({ signal }) => productsControllerFindOne(id, { signal, ...fetchOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof productsControllerFindOne>>> = ({ signal }) => productsControllerFindOne(id, { signal, ...requestOptions });
 
       
 
       
 
-   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof productsControllerFindOne>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof productsControllerFindOne>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type ProductsControllerFindOneQueryResult = NonNullable<Awaited<ReturnType<typeof productsControllerFindOne>>>
 export type ProductsControllerFindOneQueryError = void
 
 
+export function useProductsControllerFindOne<TData = Awaited<ReturnType<typeof productsControllerFindOne>>, TError = void>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof productsControllerFindOne>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof productsControllerFindOne>>,
+          TError,
+          Awaited<ReturnType<typeof productsControllerFindOne>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useProductsControllerFindOne<TData = Awaited<ReturnType<typeof productsControllerFindOne>>, TError = void>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof productsControllerFindOne>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof productsControllerFindOne>>,
+          TError,
+          Awaited<ReturnType<typeof productsControllerFindOne>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useProductsControllerFindOne<TData = Awaited<ReturnType<typeof productsControllerFindOne>>, TError = void>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof productsControllerFindOne>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get a product by ID
  */
 
 export function useProductsControllerFindOne<TData = Awaited<ReturnType<typeof productsControllerFindOne>>, TError = void>(
- id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof productsControllerFindOne>>, TError, TData>, fetch?: RequestInit}
-  
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof productsControllerFindOne>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getProductsControllerFindOneQueryOptions(id,options)
 
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   query.queryKey = queryOptions.queryKey ;
 
@@ -452,7 +563,7 @@ export const getProductsControllerUpdateUrl = (id: string,) => {
 export const productsControllerUpdate = async (id: string,
     updateProductDto: UpdateProductDto, options?: RequestInit): Promise<productsControllerUpdateResponse> => {
   
-  const res = await fetch(getProductsControllerUpdateUrl(id),
+  return customFetch<productsControllerUpdateResponse>(getProductsControllerUpdateUrl(id),
   {      
     ...options,
     method: 'PUT',
@@ -460,27 +571,21 @@ export const productsControllerUpdate = async (id: string,
     body: JSON.stringify(
       updateProductDto,)
   }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: productsControllerUpdateResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as productsControllerUpdateResponse
-}
+);}
 
 
 
 
 export const getProductsControllerUpdateMutationOptions = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof productsControllerUpdate>>, TError,{id: string;data: UpdateProductDto}, TContext>, fetch?: RequestInit}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof productsControllerUpdate>>, TError,{id: string;data: UpdateProductDto}, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof productsControllerUpdate>>, TError,{id: string;data: UpdateProductDto}, TContext> => {
 
 const mutationKey = ['productsControllerUpdate'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+      : {mutation: { mutationKey, }, request: undefined};
 
       
 
@@ -488,7 +593,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof productsControllerUpdate>>, {id: string;data: UpdateProductDto}> = (props) => {
           const {id,data} = props ?? {};
 
-          return  productsControllerUpdate(id,data,fetchOptions)
+          return  productsControllerUpdate(id,data,requestOptions)
         }
 
         
@@ -504,8 +609,8 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
  * @summary Update a product
  */
 export const useProductsControllerUpdate = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof productsControllerUpdate>>, TError,{id: string;data: UpdateProductDto}, TContext>, fetch?: RequestInit}
- ): UseMutationResult<
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof productsControllerUpdate>>, TError,{id: string;data: UpdateProductDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof productsControllerUpdate>>,
         TError,
         {id: string;data: UpdateProductDto},
@@ -514,7 +619,7 @@ export const useProductsControllerUpdate = <TError = void,
 
       const mutationOptions = getProductsControllerUpdateMutationOptions(options);
 
-      return useMutation(mutationOptions);
+      return useMutation(mutationOptions, queryClient);
     }
     
 /**
@@ -549,34 +654,28 @@ export const getProductsControllerRemoveUrl = (id: string,) => {
 
 export const productsControllerRemove = async (id: string, options?: RequestInit): Promise<productsControllerRemoveResponse> => {
   
-  const res = await fetch(getProductsControllerRemoveUrl(id),
+  return customFetch<productsControllerRemoveResponse>(getProductsControllerRemoveUrl(id),
   {      
     ...options,
     method: 'DELETE'
     
     
   }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: productsControllerRemoveResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as productsControllerRemoveResponse
-}
+);}
 
 
 
 
 export const getProductsControllerRemoveMutationOptions = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof productsControllerRemove>>, TError,{id: string}, TContext>, fetch?: RequestInit}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof productsControllerRemove>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof productsControllerRemove>>, TError,{id: string}, TContext> => {
 
 const mutationKey = ['productsControllerRemove'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+      : {mutation: { mutationKey, }, request: undefined};
 
       
 
@@ -584,7 +683,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof productsControllerRemove>>, {id: string}> = (props) => {
           const {id} = props ?? {};
 
-          return  productsControllerRemove(id,fetchOptions)
+          return  productsControllerRemove(id,requestOptions)
         }
 
         
@@ -600,8 +699,8 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
  * @summary Delete a product
  */
 export const useProductsControllerRemove = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof productsControllerRemove>>, TError,{id: string}, TContext>, fetch?: RequestInit}
- ): UseMutationResult<
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof productsControllerRemove>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof productsControllerRemove>>,
         TError,
         {id: string},
@@ -610,7 +709,7 @@ export const useProductsControllerRemove = <TError = void,
 
       const mutationOptions = getProductsControllerRemoveMutationOptions(options);
 
-      return useMutation(mutationOptions);
+      return useMutation(mutationOptions, queryClient);
     }
     
 /**
@@ -638,7 +737,7 @@ export const getUsersControllerCreateUrl = () => {
 
 export const usersControllerCreate = async (createUserDto: CreateUserDto, options?: RequestInit): Promise<usersControllerCreateResponse> => {
   
-  const res = await fetch(getUsersControllerCreateUrl(),
+  return customFetch<usersControllerCreateResponse>(getUsersControllerCreateUrl(),
   {      
     ...options,
     method: 'POST',
@@ -646,27 +745,21 @@ export const usersControllerCreate = async (createUserDto: CreateUserDto, option
     body: JSON.stringify(
       createUserDto,)
   }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: usersControllerCreateResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as usersControllerCreateResponse
-}
+);}
 
 
 
 
 export const getUsersControllerCreateMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof usersControllerCreate>>, TError,{data: CreateUserDto}, TContext>, fetch?: RequestInit}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof usersControllerCreate>>, TError,{data: CreateUserDto}, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof usersControllerCreate>>, TError,{data: CreateUserDto}, TContext> => {
 
 const mutationKey = ['usersControllerCreate'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+      : {mutation: { mutationKey, }, request: undefined};
 
       
 
@@ -674,7 +767,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof usersControllerCreate>>, {data: CreateUserDto}> = (props) => {
           const {data} = props ?? {};
 
-          return  usersControllerCreate(data,fetchOptions)
+          return  usersControllerCreate(data,requestOptions)
         }
 
         
@@ -690,8 +783,8 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
  * @summary Create a new user
  */
 export const useUsersControllerCreate = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof usersControllerCreate>>, TError,{data: CreateUserDto}, TContext>, fetch?: RequestInit}
- ): UseMutationResult<
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof usersControllerCreate>>, TError,{data: CreateUserDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof usersControllerCreate>>,
         TError,
         {data: CreateUserDto},
@@ -700,7 +793,7 @@ export const useUsersControllerCreate = <TError = unknown,
 
       const mutationOptions = getUsersControllerCreateMutationOptions(options);
 
-      return useMutation(mutationOptions);
+      return useMutation(mutationOptions, queryClient);
     }
     
 /**
@@ -728,20 +821,14 @@ export const getUsersControllerFindAllUrl = () => {
 
 export const usersControllerFindAll = async ( options?: RequestInit): Promise<usersControllerFindAllResponse> => {
   
-  const res = await fetch(getUsersControllerFindAllUrl(),
+  return customFetch<usersControllerFindAllResponse>(getUsersControllerFindAllUrl(),
   {      
     ...options,
     method: 'GET'
     
     
   }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: usersControllerFindAllResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as usersControllerFindAllResponse
-}
+);}
 
 
 
@@ -754,40 +841,64 @@ export const getUsersControllerFindAllQueryKey = () => {
     }
 
     
-export const getUsersControllerFindAllQueryOptions = <TData = Awaited<ReturnType<typeof usersControllerFindAll>>, TError = unknown>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof usersControllerFindAll>>, TError, TData>, fetch?: RequestInit}
+export const getUsersControllerFindAllQueryOptions = <TData = Awaited<ReturnType<typeof usersControllerFindAll>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
-const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getUsersControllerFindAllQueryKey();
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof usersControllerFindAll>>> = ({ signal }) => usersControllerFindAll({ signal, ...fetchOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof usersControllerFindAll>>> = ({ signal }) => usersControllerFindAll({ signal, ...requestOptions });
 
       
 
       
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof usersControllerFindAll>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof usersControllerFindAll>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type UsersControllerFindAllQueryResult = NonNullable<Awaited<ReturnType<typeof usersControllerFindAll>>>
 export type UsersControllerFindAllQueryError = unknown
 
 
+export function useUsersControllerFindAll<TData = Awaited<ReturnType<typeof usersControllerFindAll>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersControllerFindAll>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof usersControllerFindAll>>,
+          TError,
+          Awaited<ReturnType<typeof usersControllerFindAll>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useUsersControllerFindAll<TData = Awaited<ReturnType<typeof usersControllerFindAll>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersControllerFindAll>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof usersControllerFindAll>>,
+          TError,
+          Awaited<ReturnType<typeof usersControllerFindAll>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useUsersControllerFindAll<TData = Awaited<ReturnType<typeof usersControllerFindAll>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get all users
  */
 
 export function useUsersControllerFindAll<TData = Awaited<ReturnType<typeof usersControllerFindAll>>, TError = unknown>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof usersControllerFindAll>>, TError, TData>, fetch?: RequestInit}
-  
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getUsersControllerFindAllQueryOptions(options)
 
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   query.queryKey = queryOptions.queryKey ;
 
@@ -830,20 +941,14 @@ export const getUsersControllerFindOneUrl = (id: string,) => {
 
 export const usersControllerFindOne = async (id: string, options?: RequestInit): Promise<usersControllerFindOneResponse> => {
   
-  const res = await fetch(getUsersControllerFindOneUrl(id),
+  return customFetch<usersControllerFindOneResponse>(getUsersControllerFindOneUrl(id),
   {      
     ...options,
     method: 'GET'
     
     
   }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: usersControllerFindOneResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as usersControllerFindOneResponse
-}
+);}
 
 
 
@@ -856,40 +961,64 @@ export const getUsersControllerFindOneQueryKey = (id?: string,) => {
     }
 
     
-export const getUsersControllerFindOneQueryOptions = <TData = Awaited<ReturnType<typeof usersControllerFindOne>>, TError = void>(id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof usersControllerFindOne>>, TError, TData>, fetch?: RequestInit}
+export const getUsersControllerFindOneQueryOptions = <TData = Awaited<ReturnType<typeof usersControllerFindOne>>, TError = void>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersControllerFindOne>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
-const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getUsersControllerFindOneQueryKey(id);
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof usersControllerFindOne>>> = ({ signal }) => usersControllerFindOne(id, { signal, ...fetchOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof usersControllerFindOne>>> = ({ signal }) => usersControllerFindOne(id, { signal, ...requestOptions });
 
       
 
       
 
-   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof usersControllerFindOne>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof usersControllerFindOne>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type UsersControllerFindOneQueryResult = NonNullable<Awaited<ReturnType<typeof usersControllerFindOne>>>
 export type UsersControllerFindOneQueryError = void
 
 
+export function useUsersControllerFindOne<TData = Awaited<ReturnType<typeof usersControllerFindOne>>, TError = void>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersControllerFindOne>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof usersControllerFindOne>>,
+          TError,
+          Awaited<ReturnType<typeof usersControllerFindOne>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useUsersControllerFindOne<TData = Awaited<ReturnType<typeof usersControllerFindOne>>, TError = void>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersControllerFindOne>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof usersControllerFindOne>>,
+          TError,
+          Awaited<ReturnType<typeof usersControllerFindOne>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useUsersControllerFindOne<TData = Awaited<ReturnType<typeof usersControllerFindOne>>, TError = void>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersControllerFindOne>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get a user by ID
  */
 
 export function useUsersControllerFindOne<TData = Awaited<ReturnType<typeof usersControllerFindOne>>, TError = void>(
- id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof usersControllerFindOne>>, TError, TData>, fetch?: RequestInit}
-  
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersControllerFindOne>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getUsersControllerFindOneQueryOptions(id,options)
 
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   query.queryKey = queryOptions.queryKey ;
 
@@ -923,7 +1052,7 @@ export const getUsersControllerUpdateUrl = (id: string,) => {
 export const usersControllerUpdate = async (id: string,
     updateUserDto: UpdateUserDto, options?: RequestInit): Promise<usersControllerUpdateResponse> => {
   
-  const res = await fetch(getUsersControllerUpdateUrl(id),
+  return customFetch<usersControllerUpdateResponse>(getUsersControllerUpdateUrl(id),
   {      
     ...options,
     method: 'PUT',
@@ -931,27 +1060,21 @@ export const usersControllerUpdate = async (id: string,
     body: JSON.stringify(
       updateUserDto,)
   }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: usersControllerUpdateResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as usersControllerUpdateResponse
-}
+);}
 
 
 
 
 export const getUsersControllerUpdateMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof usersControllerUpdate>>, TError,{id: string;data: UpdateUserDto}, TContext>, fetch?: RequestInit}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof usersControllerUpdate>>, TError,{id: string;data: UpdateUserDto}, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof usersControllerUpdate>>, TError,{id: string;data: UpdateUserDto}, TContext> => {
 
 const mutationKey = ['usersControllerUpdate'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+      : {mutation: { mutationKey, }, request: undefined};
 
       
 
@@ -959,7 +1082,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof usersControllerUpdate>>, {id: string;data: UpdateUserDto}> = (props) => {
           const {id,data} = props ?? {};
 
-          return  usersControllerUpdate(id,data,fetchOptions)
+          return  usersControllerUpdate(id,data,requestOptions)
         }
 
         
@@ -972,8 +1095,8 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
     export type UsersControllerUpdateMutationError = unknown
 
     export const useUsersControllerUpdate = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof usersControllerUpdate>>, TError,{id: string;data: UpdateUserDto}, TContext>, fetch?: RequestInit}
- ): UseMutationResult<
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof usersControllerUpdate>>, TError,{id: string;data: UpdateUserDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof usersControllerUpdate>>,
         TError,
         {id: string;data: UpdateUserDto},
@@ -982,7 +1105,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
 
       const mutationOptions = getUsersControllerUpdateMutationOptions(options);
 
-      return useMutation(mutationOptions);
+      return useMutation(mutationOptions, queryClient);
     }
     
 export type usersControllerRemoveResponse200 = {
@@ -1007,34 +1130,28 @@ export const getUsersControllerRemoveUrl = (id: string,) => {
 
 export const usersControllerRemove = async (id: string, options?: RequestInit): Promise<usersControllerRemoveResponse> => {
   
-  const res = await fetch(getUsersControllerRemoveUrl(id),
+  return customFetch<usersControllerRemoveResponse>(getUsersControllerRemoveUrl(id),
   {      
     ...options,
     method: 'DELETE'
     
     
   }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: usersControllerRemoveResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as usersControllerRemoveResponse
-}
+);}
 
 
 
 
 export const getUsersControllerRemoveMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof usersControllerRemove>>, TError,{id: string}, TContext>, fetch?: RequestInit}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof usersControllerRemove>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof usersControllerRemove>>, TError,{id: string}, TContext> => {
 
 const mutationKey = ['usersControllerRemove'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+      : {mutation: { mutationKey, }, request: undefined};
 
       
 
@@ -1042,7 +1159,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof usersControllerRemove>>, {id: string}> = (props) => {
           const {id} = props ?? {};
 
-          return  usersControllerRemove(id,fetchOptions)
+          return  usersControllerRemove(id,requestOptions)
         }
 
         
@@ -1055,8 +1172,8 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
     export type UsersControllerRemoveMutationError = unknown
 
     export const useUsersControllerRemove = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof usersControllerRemove>>, TError,{id: string}, TContext>, fetch?: RequestInit}
- ): UseMutationResult<
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof usersControllerRemove>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof usersControllerRemove>>,
         TError,
         {id: string},
@@ -1065,145 +1182,35 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
 
       const mutationOptions = getUsersControllerRemoveMutationOptions(options);
 
-      return useMutation(mutationOptions);
+      return useMutation(mutationOptions, queryClient);
     }
     
 /**
- * @summary Create a new cart
- */
-export type cartControllerCreateResponse201 = {
-  data: void
-  status: 201
-}
-
-export type cartControllerCreateResponse400 = {
-  data: void
-  status: 400
-}
-    
-export type cartControllerCreateResponseSuccess = (cartControllerCreateResponse201) & {
-  headers: Headers;
-};
-export type cartControllerCreateResponseError = (cartControllerCreateResponse400) & {
-  headers: Headers;
-};
-
-export type cartControllerCreateResponse = (cartControllerCreateResponseSuccess | cartControllerCreateResponseError)
-
-export const getCartControllerCreateUrl = () => {
-
-
-  
-
-  return `/cart`
-}
-
-export const cartControllerCreate = async (createCartDto: CreateCartDto, options?: RequestInit): Promise<cartControllerCreateResponse> => {
-  
-  const res = await fetch(getCartControllerCreateUrl(),
-  {      
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      createCartDto,)
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: cartControllerCreateResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as cartControllerCreateResponse
-}
-
-
-
-
-export const getCartControllerCreateMutationOptions = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof cartControllerCreate>>, TError,{data: CreateCartDto}, TContext>, fetch?: RequestInit}
-): UseMutationOptions<Awaited<ReturnType<typeof cartControllerCreate>>, TError,{data: CreateCartDto}, TContext> => {
-
-const mutationKey = ['cartControllerCreate'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
-
-      
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof cartControllerCreate>>, {data: CreateCartDto}> = (props) => {
-          const {data} = props ?? {};
-
-          return  cartControllerCreate(data,fetchOptions)
-        }
-
-        
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type CartControllerCreateMutationResult = NonNullable<Awaited<ReturnType<typeof cartControllerCreate>>>
-    export type CartControllerCreateMutationBody = CreateCartDto
-    export type CartControllerCreateMutationError = void
-
-    /**
- * @summary Create a new cart
- */
-export const useCartControllerCreate = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof cartControllerCreate>>, TError,{data: CreateCartDto}, TContext>, fetch?: RequestInit}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof cartControllerCreate>>,
-        TError,
-        {data: CreateCartDto},
-        TContext
-      > => {
-
-      const mutationOptions = getCartControllerCreateMutationOptions(options);
-
-      return useMutation(mutationOptions);
-    }
-    
-/**
- * @summary Add an item to user cart
+ * @summary Add an item to authenticated user cart
  */
 export type cartControllerAddItemResponse201 = {
   data: void
   status: 201
 }
-
-export type cartControllerAddItemResponse400 = {
-  data: void
-  status: 400
-}
-
-export type cartControllerAddItemResponse404 = {
-  data: void
-  status: 404
-}
     
 export type cartControllerAddItemResponseSuccess = (cartControllerAddItemResponse201) & {
   headers: Headers;
 };
-export type cartControllerAddItemResponseError = (cartControllerAddItemResponse400 | cartControllerAddItemResponse404) & {
-  headers: Headers;
-};
+;
 
-export type cartControllerAddItemResponse = (cartControllerAddItemResponseSuccess | cartControllerAddItemResponseError)
+export type cartControllerAddItemResponse = (cartControllerAddItemResponseSuccess)
 
-export const getCartControllerAddItemUrl = (userId: string,) => {
+export const getCartControllerAddItemUrl = () => {
 
 
   
 
-  return `/cart/${userId}/items`
+  return `/cart/items`
 }
 
-export const cartControllerAddItem = async (userId: string,
-    createCartItemDto: CreateCartItemDto, options?: RequestInit): Promise<cartControllerAddItemResponse> => {
+export const cartControllerAddItem = async (createCartItemDto: CreateCartItemDto, options?: RequestInit): Promise<cartControllerAddItemResponse> => {
   
-  const res = await fetch(getCartControllerAddItemUrl(userId),
+  return customFetch<cartControllerAddItemResponse>(getCartControllerAddItemUrl(),
   {      
     ...options,
     method: 'POST',
@@ -1211,35 +1218,29 @@ export const cartControllerAddItem = async (userId: string,
     body: JSON.stringify(
       createCartItemDto,)
   }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: cartControllerAddItemResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as cartControllerAddItemResponse
-}
+);}
 
 
 
 
-export const getCartControllerAddItemMutationOptions = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof cartControllerAddItem>>, TError,{userId: string;data: CreateCartItemDto}, TContext>, fetch?: RequestInit}
-): UseMutationOptions<Awaited<ReturnType<typeof cartControllerAddItem>>, TError,{userId: string;data: CreateCartItemDto}, TContext> => {
+export const getCartControllerAddItemMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof cartControllerAddItem>>, TError,{data: CreateCartItemDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof cartControllerAddItem>>, TError,{data: CreateCartItemDto}, TContext> => {
 
 const mutationKey = ['cartControllerAddItem'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+      : {mutation: { mutationKey, }, request: undefined};
 
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof cartControllerAddItem>>, {userId: string;data: CreateCartItemDto}> = (props) => {
-          const {userId,data} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof cartControllerAddItem>>, {data: CreateCartItemDto}> = (props) => {
+          const {data} = props ?? {};
 
-          return  cartControllerAddItem(userId,data,fetchOptions)
+          return  cartControllerAddItem(data,requestOptions)
         }
 
         
@@ -1249,117 +1250,128 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
 
     export type CartControllerAddItemMutationResult = NonNullable<Awaited<ReturnType<typeof cartControllerAddItem>>>
     export type CartControllerAddItemMutationBody = CreateCartItemDto
-    export type CartControllerAddItemMutationError = void
+    export type CartControllerAddItemMutationError = unknown
 
     /**
- * @summary Add an item to user cart
+ * @summary Add an item to authenticated user cart
  */
-export const useCartControllerAddItem = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof cartControllerAddItem>>, TError,{userId: string;data: CreateCartItemDto}, TContext>, fetch?: RequestInit}
- ): UseMutationResult<
+export const useCartControllerAddItem = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof cartControllerAddItem>>, TError,{data: CreateCartItemDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof cartControllerAddItem>>,
         TError,
-        {userId: string;data: CreateCartItemDto},
+        {data: CreateCartItemDto},
         TContext
       > => {
 
       const mutationOptions = getCartControllerAddItemMutationOptions(options);
 
-      return useMutation(mutationOptions);
+      return useMutation(mutationOptions, queryClient);
     }
     
 /**
- * @summary Get cart for a user
+ * @summary Get authenticated user cart
  */
 export type cartControllerGetCartResponse200 = {
   data: void
   status: 200
 }
-
-export type cartControllerGetCartResponse404 = {
-  data: void
-  status: 404
-}
     
 export type cartControllerGetCartResponseSuccess = (cartControllerGetCartResponse200) & {
   headers: Headers;
 };
-export type cartControllerGetCartResponseError = (cartControllerGetCartResponse404) & {
-  headers: Headers;
-};
+;
 
-export type cartControllerGetCartResponse = (cartControllerGetCartResponseSuccess | cartControllerGetCartResponseError)
+export type cartControllerGetCartResponse = (cartControllerGetCartResponseSuccess)
 
-export const getCartControllerGetCartUrl = (userId: string,) => {
+export const getCartControllerGetCartUrl = () => {
 
 
   
 
-  return `/cart/${userId}`
+  return `/cart`
 }
 
-export const cartControllerGetCart = async (userId: string, options?: RequestInit): Promise<cartControllerGetCartResponse> => {
+export const cartControllerGetCart = async ( options?: RequestInit): Promise<cartControllerGetCartResponse> => {
   
-  const res = await fetch(getCartControllerGetCartUrl(userId),
+  return customFetch<cartControllerGetCartResponse>(getCartControllerGetCartUrl(),
   {      
     ...options,
     method: 'GET'
     
     
   }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: cartControllerGetCartResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as cartControllerGetCartResponse
-}
+);}
 
 
 
 
 
-export const getCartControllerGetCartQueryKey = (userId?: string,) => {
+export const getCartControllerGetCartQueryKey = () => {
     return [
-    `/cart/${userId}`
+    `/cart`
     ] as const;
     }
 
     
-export const getCartControllerGetCartQueryOptions = <TData = Awaited<ReturnType<typeof cartControllerGetCart>>, TError = void>(userId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof cartControllerGetCart>>, TError, TData>, fetch?: RequestInit}
+export const getCartControllerGetCartQueryOptions = <TData = Awaited<ReturnType<typeof cartControllerGetCart>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof cartControllerGetCart>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
-const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getCartControllerGetCartQueryKey(userId);
+  const queryKey =  queryOptions?.queryKey ?? getCartControllerGetCartQueryKey();
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof cartControllerGetCart>>> = ({ signal }) => cartControllerGetCart(userId, { signal, ...fetchOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof cartControllerGetCart>>> = ({ signal }) => cartControllerGetCart({ signal, ...requestOptions });
 
       
 
       
 
-   return  { queryKey, queryFn, enabled: !!(userId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof cartControllerGetCart>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof cartControllerGetCart>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type CartControllerGetCartQueryResult = NonNullable<Awaited<ReturnType<typeof cartControllerGetCart>>>
-export type CartControllerGetCartQueryError = void
+export type CartControllerGetCartQueryError = unknown
 
 
+export function useCartControllerGetCart<TData = Awaited<ReturnType<typeof cartControllerGetCart>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof cartControllerGetCart>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof cartControllerGetCart>>,
+          TError,
+          Awaited<ReturnType<typeof cartControllerGetCart>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useCartControllerGetCart<TData = Awaited<ReturnType<typeof cartControllerGetCart>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof cartControllerGetCart>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof cartControllerGetCart>>,
+          TError,
+          Awaited<ReturnType<typeof cartControllerGetCart>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useCartControllerGetCart<TData = Awaited<ReturnType<typeof cartControllerGetCart>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof cartControllerGetCart>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary Get cart for a user
+ * @summary Get authenticated user cart
  */
 
-export function useCartControllerGetCart<TData = Awaited<ReturnType<typeof cartControllerGetCart>>, TError = void>(
- userId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof cartControllerGetCart>>, TError, TData>, fetch?: RequestInit}
-  
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+export function useCartControllerGetCart<TData = Awaited<ReturnType<typeof cartControllerGetCart>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof cartControllerGetCart>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getCartControllerGetCartQueryOptions(userId,options)
+  const queryOptions = getCartControllerGetCartQueryOptions(options)
 
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   query.queryKey = queryOptions.queryKey ;
 
@@ -1371,73 +1383,60 @@ export function useCartControllerGetCart<TData = Awaited<ReturnType<typeof cartC
 
 
 /**
- * @summary Clear user cart
+ * @summary Clear authenticated user cart
  */
 export type cartControllerClearCartResponse200 = {
   data: void
   status: 200
 }
-
-export type cartControllerClearCartResponse404 = {
-  data: void
-  status: 404
-}
     
 export type cartControllerClearCartResponseSuccess = (cartControllerClearCartResponse200) & {
   headers: Headers;
 };
-export type cartControllerClearCartResponseError = (cartControllerClearCartResponse404) & {
-  headers: Headers;
-};
+;
 
-export type cartControllerClearCartResponse = (cartControllerClearCartResponseSuccess | cartControllerClearCartResponseError)
+export type cartControllerClearCartResponse = (cartControllerClearCartResponseSuccess)
 
-export const getCartControllerClearCartUrl = (userId: string,) => {
+export const getCartControllerClearCartUrl = () => {
 
 
   
 
-  return `/cart/${userId}`
+  return `/cart`
 }
 
-export const cartControllerClearCart = async (userId: string, options?: RequestInit): Promise<cartControllerClearCartResponse> => {
+export const cartControllerClearCart = async ( options?: RequestInit): Promise<cartControllerClearCartResponse> => {
   
-  const res = await fetch(getCartControllerClearCartUrl(userId),
+  return customFetch<cartControllerClearCartResponse>(getCartControllerClearCartUrl(),
   {      
     ...options,
     method: 'DELETE'
     
     
   }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: cartControllerClearCartResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as cartControllerClearCartResponse
-}
+);}
 
 
 
 
-export const getCartControllerClearCartMutationOptions = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof cartControllerClearCart>>, TError,{userId: string}, TContext>, fetch?: RequestInit}
-): UseMutationOptions<Awaited<ReturnType<typeof cartControllerClearCart>>, TError,{userId: string}, TContext> => {
+export const getCartControllerClearCartMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof cartControllerClearCart>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof cartControllerClearCart>>, TError,void, TContext> => {
 
 const mutationKey = ['cartControllerClearCart'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+      : {mutation: { mutationKey, }, request: undefined};
 
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof cartControllerClearCart>>, {userId: string}> = (props) => {
-          const {userId} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof cartControllerClearCart>>, void> = () => {
+          
 
-          return  cartControllerClearCart(userId,fetchOptions)
+          return  cartControllerClearCart(requestOptions)
         }
 
         
@@ -1447,46 +1446,39 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
 
     export type CartControllerClearCartMutationResult = NonNullable<Awaited<ReturnType<typeof cartControllerClearCart>>>
     
-    export type CartControllerClearCartMutationError = void
+    export type CartControllerClearCartMutationError = unknown
 
     /**
- * @summary Clear user cart
+ * @summary Clear authenticated user cart
  */
-export const useCartControllerClearCart = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof cartControllerClearCart>>, TError,{userId: string}, TContext>, fetch?: RequestInit}
- ): UseMutationResult<
+export const useCartControllerClearCart = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof cartControllerClearCart>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof cartControllerClearCart>>,
         TError,
-        {userId: string},
+        void,
         TContext
       > => {
 
       const mutationOptions = getCartControllerClearCartMutationOptions(options);
 
-      return useMutation(mutationOptions);
+      return useMutation(mutationOptions, queryClient);
     }
     
 /**
- * @summary Remove an item from cart
+ * @summary Remove an item from authenticated user cart
  */
 export type cartControllerRemoveItemResponse200 = {
   data: void
   status: 200
 }
-
-export type cartControllerRemoveItemResponse404 = {
-  data: void
-  status: 404
-}
     
 export type cartControllerRemoveItemResponseSuccess = (cartControllerRemoveItemResponse200) & {
   headers: Headers;
 };
-export type cartControllerRemoveItemResponseError = (cartControllerRemoveItemResponse404) & {
-  headers: Headers;
-};
+;
 
-export type cartControllerRemoveItemResponse = (cartControllerRemoveItemResponseSuccess | cartControllerRemoveItemResponseError)
+export type cartControllerRemoveItemResponse = (cartControllerRemoveItemResponseSuccess)
 
 export const getCartControllerRemoveItemUrl = (cartItemId: string,) => {
 
@@ -1498,34 +1490,28 @@ export const getCartControllerRemoveItemUrl = (cartItemId: string,) => {
 
 export const cartControllerRemoveItem = async (cartItemId: string, options?: RequestInit): Promise<cartControllerRemoveItemResponse> => {
   
-  const res = await fetch(getCartControllerRemoveItemUrl(cartItemId),
+  return customFetch<cartControllerRemoveItemResponse>(getCartControllerRemoveItemUrl(cartItemId),
   {      
     ...options,
     method: 'DELETE'
     
     
   }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: cartControllerRemoveItemResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as cartControllerRemoveItemResponse
-}
+);}
 
 
 
 
-export const getCartControllerRemoveItemMutationOptions = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof cartControllerRemoveItem>>, TError,{cartItemId: string}, TContext>, fetch?: RequestInit}
+export const getCartControllerRemoveItemMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof cartControllerRemoveItem>>, TError,{cartItemId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof cartControllerRemoveItem>>, TError,{cartItemId: string}, TContext> => {
 
 const mutationKey = ['cartControllerRemoveItem'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+      : {mutation: { mutationKey, }, request: undefined};
 
       
 
@@ -1533,7 +1519,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof cartControllerRemoveItem>>, {cartItemId: string}> = (props) => {
           const {cartItemId} = props ?? {};
 
-          return  cartControllerRemoveItem(cartItemId,fetchOptions)
+          return  cartControllerRemoveItem(cartItemId,requestOptions)
         }
 
         
@@ -1543,14 +1529,14 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
 
     export type CartControllerRemoveItemMutationResult = NonNullable<Awaited<ReturnType<typeof cartControllerRemoveItem>>>
     
-    export type CartControllerRemoveItemMutationError = void
+    export type CartControllerRemoveItemMutationError = unknown
 
     /**
- * @summary Remove an item from cart
+ * @summary Remove an item from authenticated user cart
  */
-export const useCartControllerRemoveItem = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof cartControllerRemoveItem>>, TError,{cartItemId: string}, TContext>, fetch?: RequestInit}
- ): UseMutationResult<
+export const useCartControllerRemoveItem = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof cartControllerRemoveItem>>, TError,{cartItemId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof cartControllerRemoveItem>>,
         TError,
         {cartItemId: string},
@@ -1559,7 +1545,342 @@ export const useCartControllerRemoveItem = <TError = void,
 
       const mutationOptions = getCartControllerRemoveItemMutationOptions(options);
 
-      return useMutation(mutationOptions);
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Merge guest cart items into authenticated user cart
+ */
+export type cartControllerMergeGuestCartResponse200 = {
+  data: void
+  status: 200
+}
+    
+export type cartControllerMergeGuestCartResponseSuccess = (cartControllerMergeGuestCartResponse200) & {
+  headers: Headers;
+};
+;
+
+export type cartControllerMergeGuestCartResponse = (cartControllerMergeGuestCartResponseSuccess)
+
+export const getCartControllerMergeGuestCartUrl = () => {
+
+
+  
+
+  return `/cart/merge`
+}
+
+export const cartControllerMergeGuestCart = async (mergeGuestCartDto: MergeGuestCartDto, options?: RequestInit): Promise<cartControllerMergeGuestCartResponse> => {
+  
+  return customFetch<cartControllerMergeGuestCartResponse>(getCartControllerMergeGuestCartUrl(),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      mergeGuestCartDto,)
+  }
+);}
+
+
+
+
+export const getCartControllerMergeGuestCartMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof cartControllerMergeGuestCart>>, TError,{data: MergeGuestCartDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof cartControllerMergeGuestCart>>, TError,{data: MergeGuestCartDto}, TContext> => {
+
+const mutationKey = ['cartControllerMergeGuestCart'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof cartControllerMergeGuestCart>>, {data: MergeGuestCartDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  cartControllerMergeGuestCart(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CartControllerMergeGuestCartMutationResult = NonNullable<Awaited<ReturnType<typeof cartControllerMergeGuestCart>>>
+    export type CartControllerMergeGuestCartMutationBody = MergeGuestCartDto
+    export type CartControllerMergeGuestCartMutationError = unknown
+
+    /**
+ * @summary Merge guest cart items into authenticated user cart
+ */
+export const useCartControllerMergeGuestCart = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof cartControllerMergeGuestCart>>, TError,{data: MergeGuestCartDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof cartControllerMergeGuestCart>>,
+        TError,
+        {data: MergeGuestCartDto},
+        TContext
+      > => {
+
+      const mutationOptions = getCartControllerMergeGuestCartMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Login and receive JWT; merges guest cart into user cart if present
+ */
+export type authControllerLoginResponse200 = {
+  data: void
+  status: 200
+}
+    
+export type authControllerLoginResponseSuccess = (authControllerLoginResponse200) & {
+  headers: Headers;
+};
+;
+
+export type authControllerLoginResponse = (authControllerLoginResponseSuccess)
+
+export const getAuthControllerLoginUrl = () => {
+
+
+  
+
+  return `/auth/login`
+}
+
+export const authControllerLogin = async (loginDto: LoginDto, options?: RequestInit): Promise<authControllerLoginResponse> => {
+  
+  return customFetch<authControllerLoginResponse>(getAuthControllerLoginUrl(),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      loginDto,)
+  }
+);}
+
+
+
+
+export const getAuthControllerLoginMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerLogin>>, TError,{data: LoginDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof authControllerLogin>>, TError,{data: LoginDto}, TContext> => {
+
+const mutationKey = ['authControllerLogin'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof authControllerLogin>>, {data: LoginDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  authControllerLogin(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AuthControllerLoginMutationResult = NonNullable<Awaited<ReturnType<typeof authControllerLogin>>>
+    export type AuthControllerLoginMutationBody = LoginDto
+    export type AuthControllerLoginMutationError = unknown
+
+    /**
+ * @summary Login and receive JWT; merges guest cart into user cart if present
+ */
+export const useAuthControllerLogin = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerLogin>>, TError,{data: LoginDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof authControllerLogin>>,
+        TError,
+        {data: LoginDto},
+        TContext
+      > => {
+
+      const mutationOptions = getAuthControllerLoginMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Register user and receive JWT; merges guest cart if present
+ */
+export type authControllerRegisterResponse201 = {
+  data: void
+  status: 201
+}
+    
+export type authControllerRegisterResponseSuccess = (authControllerRegisterResponse201) & {
+  headers: Headers;
+};
+;
+
+export type authControllerRegisterResponse = (authControllerRegisterResponseSuccess)
+
+export const getAuthControllerRegisterUrl = () => {
+
+
+  
+
+  return `/auth/register`
+}
+
+export const authControllerRegister = async (createUserDto: CreateUserDto, options?: RequestInit): Promise<authControllerRegisterResponse> => {
+  
+  return customFetch<authControllerRegisterResponse>(getAuthControllerRegisterUrl(),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      createUserDto,)
+  }
+);}
+
+
+
+
+export const getAuthControllerRegisterMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerRegister>>, TError,{data: CreateUserDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof authControllerRegister>>, TError,{data: CreateUserDto}, TContext> => {
+
+const mutationKey = ['authControllerRegister'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof authControllerRegister>>, {data: CreateUserDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  authControllerRegister(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AuthControllerRegisterMutationResult = NonNullable<Awaited<ReturnType<typeof authControllerRegister>>>
+    export type AuthControllerRegisterMutationBody = CreateUserDto
+    export type AuthControllerRegisterMutationError = unknown
+
+    /**
+ * @summary Register user and receive JWT; merges guest cart if present
+ */
+export const useAuthControllerRegister = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerRegister>>, TError,{data: CreateUserDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof authControllerRegister>>,
+        TError,
+        {data: CreateUserDto},
+        TContext
+      > => {
+
+      const mutationOptions = getAuthControllerRegisterMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Sign out
+ */
+export type authControllerLogoutResponse200 = {
+  data: void
+  status: 200
+}
+    
+export type authControllerLogoutResponseSuccess = (authControllerLogoutResponse200) & {
+  headers: Headers;
+};
+;
+
+export type authControllerLogoutResponse = (authControllerLogoutResponseSuccess)
+
+export const getAuthControllerLogoutUrl = () => {
+
+
+  
+
+  return `/auth/logout`
+}
+
+export const authControllerLogout = async ( options?: RequestInit): Promise<authControllerLogoutResponse> => {
+  
+  return customFetch<authControllerLogoutResponse>(getAuthControllerLogoutUrl(),
+  {      
+    ...options,
+    method: 'POST'
+    
+    
+  }
+);}
+
+
+
+
+export const getAuthControllerLogoutMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerLogout>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof authControllerLogout>>, TError,void, TContext> => {
+
+const mutationKey = ['authControllerLogout'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof authControllerLogout>>, void> = () => {
+          
+
+          return  authControllerLogout(requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AuthControllerLogoutMutationResult = NonNullable<Awaited<ReturnType<typeof authControllerLogout>>>
+    
+    export type AuthControllerLogoutMutationError = unknown
+
+    /**
+ * @summary Sign out
+ */
+export const useAuthControllerLogout = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerLogout>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof authControllerLogout>>,
+        TError,
+        void,
+        TContext
+      > => {
+
+      const mutationOptions = getAuthControllerLogoutMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
     }
     
 /**
@@ -1594,34 +1915,28 @@ export const getOrdersControllerCreateUrl = (userId: string,) => {
 
 export const ordersControllerCreate = async (userId: string, options?: RequestInit): Promise<ordersControllerCreateResponse> => {
   
-  const res = await fetch(getOrdersControllerCreateUrl(userId),
+  return customFetch<ordersControllerCreateResponse>(getOrdersControllerCreateUrl(userId),
   {      
     ...options,
     method: 'POST'
     
     
   }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: ordersControllerCreateResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as ordersControllerCreateResponse
-}
+);}
 
 
 
 
 export const getOrdersControllerCreateMutationOptions = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof ordersControllerCreate>>, TError,{userId: string}, TContext>, fetch?: RequestInit}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof ordersControllerCreate>>, TError,{userId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof ordersControllerCreate>>, TError,{userId: string}, TContext> => {
 
 const mutationKey = ['ordersControllerCreate'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+      : {mutation: { mutationKey, }, request: undefined};
 
       
 
@@ -1629,7 +1944,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof ordersControllerCreate>>, {userId: string}> = (props) => {
           const {userId} = props ?? {};
 
-          return  ordersControllerCreate(userId,fetchOptions)
+          return  ordersControllerCreate(userId,requestOptions)
         }
 
         
@@ -1645,8 +1960,8 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
  * @summary Create a new order for a user
  */
 export const useOrdersControllerCreate = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof ordersControllerCreate>>, TError,{userId: string}, TContext>, fetch?: RequestInit}
- ): UseMutationResult<
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof ordersControllerCreate>>, TError,{userId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof ordersControllerCreate>>,
         TError,
         {userId: string},
@@ -1655,7 +1970,7 @@ export const useOrdersControllerCreate = <TError = void,
 
       const mutationOptions = getOrdersControllerCreateMutationOptions(options);
 
-      return useMutation(mutationOptions);
+      return useMutation(mutationOptions, queryClient);
     }
     
 /**
@@ -1690,20 +2005,14 @@ export const getOrdersControllerFindForUserUrl = (userId: string,) => {
 
 export const ordersControllerFindForUser = async (userId: string, options?: RequestInit): Promise<ordersControllerFindForUserResponse> => {
   
-  const res = await fetch(getOrdersControllerFindForUserUrl(userId),
+  return customFetch<ordersControllerFindForUserResponse>(getOrdersControllerFindForUserUrl(userId),
   {      
     ...options,
     method: 'GET'
     
     
   }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: ordersControllerFindForUserResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as ordersControllerFindForUserResponse
-}
+);}
 
 
 
@@ -1716,40 +2025,64 @@ export const getOrdersControllerFindForUserQueryKey = (userId?: string,) => {
     }
 
     
-export const getOrdersControllerFindForUserQueryOptions = <TData = Awaited<ReturnType<typeof ordersControllerFindForUser>>, TError = void>(userId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof ordersControllerFindForUser>>, TError, TData>, fetch?: RequestInit}
+export const getOrdersControllerFindForUserQueryOptions = <TData = Awaited<ReturnType<typeof ordersControllerFindForUser>>, TError = void>(userId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersControllerFindForUser>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
-const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getOrdersControllerFindForUserQueryKey(userId);
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof ordersControllerFindForUser>>> = ({ signal }) => ordersControllerFindForUser(userId, { signal, ...fetchOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof ordersControllerFindForUser>>> = ({ signal }) => ordersControllerFindForUser(userId, { signal, ...requestOptions });
 
       
 
       
 
-   return  { queryKey, queryFn, enabled: !!(userId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof ordersControllerFindForUser>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, enabled: !!(userId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof ordersControllerFindForUser>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type OrdersControllerFindForUserQueryResult = NonNullable<Awaited<ReturnType<typeof ordersControllerFindForUser>>>
 export type OrdersControllerFindForUserQueryError = void
 
 
+export function useOrdersControllerFindForUser<TData = Awaited<ReturnType<typeof ordersControllerFindForUser>>, TError = void>(
+ userId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersControllerFindForUser>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof ordersControllerFindForUser>>,
+          TError,
+          Awaited<ReturnType<typeof ordersControllerFindForUser>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useOrdersControllerFindForUser<TData = Awaited<ReturnType<typeof ordersControllerFindForUser>>, TError = void>(
+ userId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersControllerFindForUser>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof ordersControllerFindForUser>>,
+          TError,
+          Awaited<ReturnType<typeof ordersControllerFindForUser>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useOrdersControllerFindForUser<TData = Awaited<ReturnType<typeof ordersControllerFindForUser>>, TError = void>(
+ userId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersControllerFindForUser>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get all orders for a user
  */
 
 export function useOrdersControllerFindForUser<TData = Awaited<ReturnType<typeof ordersControllerFindForUser>>, TError = void>(
- userId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof ordersControllerFindForUser>>, TError, TData>, fetch?: RequestInit}
-  
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+ userId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersControllerFindForUser>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getOrdersControllerFindForUserQueryOptions(userId,options)
 
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   query.queryKey = queryOptions.queryKey ;
 
@@ -1792,20 +2125,14 @@ export const getOrdersControllerFindOneUrl = (id: string,) => {
 
 export const ordersControllerFindOne = async (id: string, options?: RequestInit): Promise<ordersControllerFindOneResponse> => {
   
-  const res = await fetch(getOrdersControllerFindOneUrl(id),
+  return customFetch<ordersControllerFindOneResponse>(getOrdersControllerFindOneUrl(id),
   {      
     ...options,
     method: 'GET'
     
     
   }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: ordersControllerFindOneResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as ordersControllerFindOneResponse
-}
+);}
 
 
 
@@ -1818,42 +2145,252 @@ export const getOrdersControllerFindOneQueryKey = (id?: string,) => {
     }
 
     
-export const getOrdersControllerFindOneQueryOptions = <TData = Awaited<ReturnType<typeof ordersControllerFindOne>>, TError = void>(id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof ordersControllerFindOne>>, TError, TData>, fetch?: RequestInit}
+export const getOrdersControllerFindOneQueryOptions = <TData = Awaited<ReturnType<typeof ordersControllerFindOne>>, TError = void>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersControllerFindOne>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
-const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getOrdersControllerFindOneQueryKey(id);
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof ordersControllerFindOne>>> = ({ signal }) => ordersControllerFindOne(id, { signal, ...fetchOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof ordersControllerFindOne>>> = ({ signal }) => ordersControllerFindOne(id, { signal, ...requestOptions });
 
       
 
       
 
-   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof ordersControllerFindOne>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof ordersControllerFindOne>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type OrdersControllerFindOneQueryResult = NonNullable<Awaited<ReturnType<typeof ordersControllerFindOne>>>
 export type OrdersControllerFindOneQueryError = void
 
 
+export function useOrdersControllerFindOne<TData = Awaited<ReturnType<typeof ordersControllerFindOne>>, TError = void>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersControllerFindOne>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof ordersControllerFindOne>>,
+          TError,
+          Awaited<ReturnType<typeof ordersControllerFindOne>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useOrdersControllerFindOne<TData = Awaited<ReturnType<typeof ordersControllerFindOne>>, TError = void>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersControllerFindOne>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof ordersControllerFindOne>>,
+          TError,
+          Awaited<ReturnType<typeof ordersControllerFindOne>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useOrdersControllerFindOne<TData = Awaited<ReturnType<typeof ordersControllerFindOne>>, TError = void>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersControllerFindOne>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get an order by ID
  */
 
 export function useOrdersControllerFindOne<TData = Awaited<ReturnType<typeof ordersControllerFindOne>>, TError = void>(
- id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof ordersControllerFindOne>>, TError, TData>, fetch?: RequestInit}
-  
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersControllerFindOne>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getOrdersControllerFindOneQueryOptions(id,options)
 
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   query.queryKey = queryOptions.queryKey ;
 
   return query;
 }
+
+
+
+
+
+/**
+ * @summary Create a Razorpay order for payment
+ */
+export type ordersControllerCreateRazorpayOrderResponse201 = {
+  data: RazorpayOrderResponseDto
+  status: 201
+}
+
+export type ordersControllerCreateRazorpayOrderResponse400 = {
+  data: void
+  status: 400
+}
+    
+export type ordersControllerCreateRazorpayOrderResponseSuccess = (ordersControllerCreateRazorpayOrderResponse201) & {
+  headers: Headers;
+};
+export type ordersControllerCreateRazorpayOrderResponseError = (ordersControllerCreateRazorpayOrderResponse400) & {
+  headers: Headers;
+};
+
+export type ordersControllerCreateRazorpayOrderResponse = (ordersControllerCreateRazorpayOrderResponseSuccess | ordersControllerCreateRazorpayOrderResponseError)
+
+export const getOrdersControllerCreateRazorpayOrderUrl = () => {
+
+
+  
+
+  return `/orders/payment/create-razorpay-order`
+}
+
+export const ordersControllerCreateRazorpayOrder = async (createRazorpayOrderDto: CreateRazorpayOrderDto, options?: RequestInit): Promise<ordersControllerCreateRazorpayOrderResponse> => {
+  
+  return customFetch<ordersControllerCreateRazorpayOrderResponse>(getOrdersControllerCreateRazorpayOrderUrl(),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      createRazorpayOrderDto,)
+  }
+);}
+
+
+
+
+export const getOrdersControllerCreateRazorpayOrderMutationOptions = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof ordersControllerCreateRazorpayOrder>>, TError,{data: CreateRazorpayOrderDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof ordersControllerCreateRazorpayOrder>>, TError,{data: CreateRazorpayOrderDto}, TContext> => {
+
+const mutationKey = ['ordersControllerCreateRazorpayOrder'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof ordersControllerCreateRazorpayOrder>>, {data: CreateRazorpayOrderDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  ordersControllerCreateRazorpayOrder(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type OrdersControllerCreateRazorpayOrderMutationResult = NonNullable<Awaited<ReturnType<typeof ordersControllerCreateRazorpayOrder>>>
+    export type OrdersControllerCreateRazorpayOrderMutationBody = CreateRazorpayOrderDto
+    export type OrdersControllerCreateRazorpayOrderMutationError = void
+
+    /**
+ * @summary Create a Razorpay order for payment
+ */
+export const useOrdersControllerCreateRazorpayOrder = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof ordersControllerCreateRazorpayOrder>>, TError,{data: CreateRazorpayOrderDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof ordersControllerCreateRazorpayOrder>>,
+        TError,
+        {data: CreateRazorpayOrderDto},
+        TContext
+      > => {
+
+      const mutationOptions = getOrdersControllerCreateRazorpayOrderMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Verify payment and create order
+ */
+export type ordersControllerVerifyPaymentResponse201 = {
+  data: void
+  status: 201
+}
+
+export type ordersControllerVerifyPaymentResponse400 = {
+  data: void
+  status: 400
+}
+    
+export type ordersControllerVerifyPaymentResponseSuccess = (ordersControllerVerifyPaymentResponse201) & {
+  headers: Headers;
+};
+export type ordersControllerVerifyPaymentResponseError = (ordersControllerVerifyPaymentResponse400) & {
+  headers: Headers;
+};
+
+export type ordersControllerVerifyPaymentResponse = (ordersControllerVerifyPaymentResponseSuccess | ordersControllerVerifyPaymentResponseError)
+
+export const getOrdersControllerVerifyPaymentUrl = () => {
+
+
+  
+
+  return `/orders/payment/verify`
+}
+
+export const ordersControllerVerifyPayment = async (verifyPaymentDto: VerifyPaymentDto, options?: RequestInit): Promise<ordersControllerVerifyPaymentResponse> => {
+  
+  return customFetch<ordersControllerVerifyPaymentResponse>(getOrdersControllerVerifyPaymentUrl(),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      verifyPaymentDto,)
+  }
+);}
+
+
+
+
+export const getOrdersControllerVerifyPaymentMutationOptions = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof ordersControllerVerifyPayment>>, TError,{data: VerifyPaymentDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof ordersControllerVerifyPayment>>, TError,{data: VerifyPaymentDto}, TContext> => {
+
+const mutationKey = ['ordersControllerVerifyPayment'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof ordersControllerVerifyPayment>>, {data: VerifyPaymentDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  ordersControllerVerifyPayment(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type OrdersControllerVerifyPaymentMutationResult = NonNullable<Awaited<ReturnType<typeof ordersControllerVerifyPayment>>>
+    export type OrdersControllerVerifyPaymentMutationBody = VerifyPaymentDto
+    export type OrdersControllerVerifyPaymentMutationError = void
+
+    /**
+ * @summary Verify payment and create order
+ */
+export const useOrdersControllerVerifyPayment = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof ordersControllerVerifyPayment>>, TError,{data: VerifyPaymentDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof ordersControllerVerifyPayment>>,
+        TError,
+        {data: VerifyPaymentDto},
+        TContext
+      > => {
+
+      const mutationOptions = getOrdersControllerVerifyPaymentMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
