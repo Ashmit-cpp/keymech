@@ -10,7 +10,7 @@ import AccountOrderDetail from '@/pages/account/OrderDetail'
 import AccountOrders from '@/pages/account/Orders'
 import AccountProfile from '@/pages/account/Profile'
 import AccountSettings from '@/pages/account/Settings'
-import AccountWishlist from '@/pages/account/Wishlist'
+import WishlistPage from '@/pages/account/Wishlist'
 import AdminAnalytics from '@/pages/admin/Analytics'
 import AdminDashboard from '@/pages/admin/Dashboard'
 import AdminInventory from '@/pages/admin/Inventory'
@@ -119,6 +119,10 @@ const router = createBrowserRouter([
         element: <CartPage />,
       },
       {
+        path: 'wishlist',
+        element: <WishlistPage />,
+      },
+      {
         path: 'checkout',
         element: (
           <ProtectedRoute>
@@ -168,10 +172,6 @@ const router = createBrowserRouter([
           {
             path: 'addresses',
             element: <AccountAddresses />,
-          },
-          {
-            path: 'wishlist',
-            element: <AccountWishlist />,
           },
           {
             path: 'settings',

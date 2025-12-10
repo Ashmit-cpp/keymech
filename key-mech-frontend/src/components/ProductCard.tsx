@@ -1,5 +1,5 @@
 import React from "react";
-import { ShoppingCart, Star, Eye } from "lucide-react";
+import { ShoppingCart, Eye } from "lucide-react";
 import { Card, CardContent, CardFooter } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
@@ -11,14 +11,13 @@ interface ProductCardProps {
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
   let imageList: string[] = [];
-
   try {
     imageList = JSON.parse(product.images || "[]");
   } catch {
     imageList = [];
   }
 
-  const price = (product.price / 100).toFixed(2);
+  const price = `₹${(product.price / 100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
 
   return (
     <Card
@@ -75,7 +74,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
       </CardContent>
 
       <CardFooter className="p-4 pt-0 flex justify-between items-center mt-auto">
-        <span className="text-xl font-bold text-foreground">${price}</span>
+        <span className="text-xl font-bold text-foreground">{price}</span>
 
         <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity text-primary">
           Details

@@ -9,7 +9,7 @@ export default function ProductsPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const searchTerm = searchParams.get("search")?.trim().toLowerCase() || "";
-  const { data: response, isLoading, error, refetch, isFetching } = useProductsControllerFindAll(
+  const { data: response, isLoading, error, refetch } = useProductsControllerFindAll(
     { search: searchTerm, category: "" },
     { query: { queryKey: ["products", searchTerm] } }
   );
@@ -40,9 +40,6 @@ export default function ProductsPage() {
             <p className="text-sm text-muted-foreground">Catalog</p>
             <h1 className="text-3xl font-bold">All Products</h1>
           </div>
-          <Button variant="outline" size="sm" disabled={isFetching} onClick={() => refetch()}>
-            {isFetching ? "Refreshing…" : "Refresh"}
-          </Button>
         </div>
 
         {isLoading ? (

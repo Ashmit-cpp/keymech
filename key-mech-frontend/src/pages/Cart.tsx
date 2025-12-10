@@ -205,7 +205,7 @@ export default function CartPage() {
           ) : isAuthenticated ? (
             items.map((item: any) => {
               const priceCents = (item.variant?.extraPrice ?? 0) + (item.product?.price ?? 0);
-              const price = (priceCents / 100).toFixed(2);
+              const price = `₹${(priceCents / 100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
               const firstImage = parseFirstImage(item.product?.images);
               return (
                 <Card key={item.id}>
@@ -223,7 +223,7 @@ export default function CartPage() {
                     </div>
                     <div className="flex-1">
                       <h3 className="font-semibold">{item.product?.name ?? "Product"}</h3>
-                      <p className="text-muted-foreground">${price}</p>
+                      <p className="text-muted-foreground">{price}</p>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Button variant="outline" size="sm" onClick={() => handleQuantity(item.id, -1)} disabled={isMutating}>
@@ -244,7 +244,7 @@ export default function CartPage() {
           ) : (
             guestItems.map((item) => {
               const priceCents = (item.variant?.extraPrice ?? 0) + (item.product?.price ?? 0);
-              const price = (priceCents / 100).toFixed(2);
+              const price = `₹${(priceCents / 100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
               const firstImage = parseFirstImage(item.product?.images);
               return (
                 <Card key={`${item.productId}-${item.variantId || 'none'}`}>
@@ -265,7 +265,7 @@ export default function CartPage() {
                       {item.variant?.name && (
                         <p className="text-sm text-muted-foreground">Variant: {item.variant.name}</p>
                       )}
-                      <p className="text-muted-foreground">${price}</p>
+                      <p className="text-muted-foreground">{price}</p>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Button
@@ -305,15 +305,15 @@ export default function CartPage() {
               <Separator />
               <div className="flex justify-between">
                 <span>Subtotal</span>
-                <span>${(subtotal / 100).toFixed(2)}</span>
+                <span>₹{(subtotal / 100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</span>
               </div>
               <div className="flex justify-between">
                 <span>Shipping</span>
-                <span>$0.00</span>
+                <span>₹0.00</span>
               </div>
               <div className="flex justify-between font-semibold">
                 <span>Total</span>
-                <span>${(subtotal / 100).toFixed(2)}</span>
+                <span>₹{(subtotal / 100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</span>
               </div>
             </CardContent>
             <CardFooter>

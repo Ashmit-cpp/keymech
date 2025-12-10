@@ -3,10 +3,11 @@ import type { FormEvent } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
-import { useAuthControllerLogin, getCartControllerGetCartQueryKey, cartControllerMergeGuestCart } from '@/api/generated'
+import { useAuthControllerLogin, getCartControllerGetCartQueryKey, getWishlistControllerGetWishlistQueryKey, cartControllerMergeGuestCart, wishlistControllerMergeGuestWishlist } from '@/api/generated'
 import { toast } from 'sonner'
 import { useAuthStore } from '@/stores/auth-store'
 import { useGuestCartStore } from '@/stores/cart-store'
+import { useGuestWishlistStore } from '@/stores/wishlist-store'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -20,6 +21,9 @@ export default function LoginPage() {
   const setAuth = useAuthStore((state) => state.setAuth)
   const guestCart = useGuestCartStore((state) => state.items)
   const clearGuestCart = useGuestCartStore((state) => state.clearCart)
+  const guestWishlist = useGuestWishlistStore((state) => state.items)
+  const clearGuestWishlist = useGuestWishlistStore((state) => state.clearWishlist)
+  const getWishlistMergeItems = useGuestWishlistStore((state) => state.getMergeItems)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
@@ -32,6 +36,10 @@ export default function LoginPage() {
         const { user, accessToken } = response.data as any
         console.log('[LOGIN] Access token received:', accessToken ? 'YES' : 'NO')
         console.log('[LOGIN] Guest cart items:', guestCart.length)
+        console.log('[LOGIN] Guest wishlist items:', guestWishlist.length)
+        
+        let cartMerged = false;
+        let wishlistMerged = false;
         
         // Merge guest cart items into user cart BEFORE setting auth
         // This ensures we use the token directly from the response
@@ -54,11 +62,45 @@ export default function LoginPage() {
             )
             console.log('[LOGIN] Cart merge successful')
             clearGuestCart()
-            toast.success('Welcome back! Your cart has been restored. 🎉')
+            cartMerged = true;
           } catch (error) {
             console.error('[LOGIN] Failed to merge cart:', error)
-            toast.success('Welcome back! 🎉')
           }
+        }
+
+        // Merge guest wishlist items into user wishlist
+        if (guestWishlist.length > 0) {
+          try {
+            console.log('[LOGIN] Calling merge wishlist with token')
+            const wishlistItems = getWishlistMergeItems();
+            await wishlistControllerMergeGuestWishlist(
+              {
+                items: wishlistItems.map(item => ({
+                  productId: item.productId || undefined,
+                  variantId: item.variantId || undefined,
+                })) as any,
+              },
+              {
+                headers: {
+                  Authorization: `Bearer ${accessToken}`,
+                },
+              }
+            )
+            console.log('[LOGIN] Wishlist merge successful')
+            clearGuestWishlist()
+            wishlistMerged = true;
+          } catch (error) {
+            console.error('[LOGIN] Failed to merge wishlist:', error)
+          }
+        }
+
+        // Show appropriate toast message
+        if (cartMerged && wishlistMerged) {
+          toast.success('Welcome back! Your cart and wishlist have been restored. 🎉')
+        } else if (cartMerged) {
+          toast.success('Welcome back! Your cart has been restored. 🎉')
+        } else if (wishlistMerged) {
+          toast.success('Welcome back! Your wishlist has been restored. 🎉')
         } else {
           toast.success('Welcome back! 🎉')
         }
@@ -68,8 +110,9 @@ export default function LoginPage() {
           setAuth(user, accessToken)
         }
         
-        // Refetch cart with new auth
+        // Refetch cart and wishlist with new auth
         await queryClient.invalidateQueries({ queryKey: getCartControllerGetCartQueryKey() })
+        await queryClient.invalidateQueries({ queryKey: getWishlistControllerGetWishlistQueryKey() })
         
         // Redirect to the page they were trying to access
         navigate(from, { replace: true })

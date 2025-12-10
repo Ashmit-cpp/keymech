@@ -78,6 +78,20 @@ export interface VerifyPaymentDto {
   razorpay_signature: string;
 }
 
+export interface CreateWishlistItemDto { [key: string]: unknown }
+
+export interface GuestWishlistItemDto {
+  /** Product ID */
+  productId: string;
+  /** Variant ID (optional) */
+  variantId?: string;
+}
+
+export interface MergeGuestWishlistDto {
+  /** Array of wishlist items from guest wishlist */
+  items: GuestWishlistItemDto[];
+}
+
 export type ProductsControllerFindAllParams = {
 search: string;
 category: string;
@@ -2391,6 +2405,472 @@ export const useOrdersControllerVerifyPayment = <TError = void,
       > => {
 
       const mutationOptions = getOrdersControllerVerifyPaymentMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Get authenticated user wishlist
+ */
+export type wishlistControllerGetWishlistResponse200 = {
+  data: void
+  status: 200
+}
+    
+export type wishlistControllerGetWishlistResponseSuccess = (wishlistControllerGetWishlistResponse200) & {
+  headers: Headers;
+};
+;
+
+export type wishlistControllerGetWishlistResponse = (wishlistControllerGetWishlistResponseSuccess)
+
+export const getWishlistControllerGetWishlistUrl = () => {
+
+
+  
+
+  return `/wishlist`
+}
+
+export const wishlistControllerGetWishlist = async ( options?: RequestInit): Promise<wishlistControllerGetWishlistResponse> => {
+  
+  return customFetch<wishlistControllerGetWishlistResponse>(getWishlistControllerGetWishlistUrl(),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+
+
+
+
+
+export const getWishlistControllerGetWishlistQueryKey = () => {
+    return [
+    `/wishlist`
+    ] as const;
+    }
+
+    
+export const getWishlistControllerGetWishlistQueryOptions = <TData = Awaited<ReturnType<typeof wishlistControllerGetWishlist>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof wishlistControllerGetWishlist>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getWishlistControllerGetWishlistQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof wishlistControllerGetWishlist>>> = ({ signal }) => wishlistControllerGetWishlist({ signal, ...requestOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof wishlistControllerGetWishlist>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type WishlistControllerGetWishlistQueryResult = NonNullable<Awaited<ReturnType<typeof wishlistControllerGetWishlist>>>
+export type WishlistControllerGetWishlistQueryError = unknown
+
+
+export function useWishlistControllerGetWishlist<TData = Awaited<ReturnType<typeof wishlistControllerGetWishlist>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof wishlistControllerGetWishlist>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof wishlistControllerGetWishlist>>,
+          TError,
+          Awaited<ReturnType<typeof wishlistControllerGetWishlist>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useWishlistControllerGetWishlist<TData = Awaited<ReturnType<typeof wishlistControllerGetWishlist>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof wishlistControllerGetWishlist>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof wishlistControllerGetWishlist>>,
+          TError,
+          Awaited<ReturnType<typeof wishlistControllerGetWishlist>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useWishlistControllerGetWishlist<TData = Awaited<ReturnType<typeof wishlistControllerGetWishlist>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof wishlistControllerGetWishlist>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get authenticated user wishlist
+ */
+
+export function useWishlistControllerGetWishlist<TData = Awaited<ReturnType<typeof wishlistControllerGetWishlist>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof wishlistControllerGetWishlist>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getWishlistControllerGetWishlistQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+/**
+ * @summary Clear authenticated user wishlist
+ */
+export type wishlistControllerClearWishlistResponse200 = {
+  data: void
+  status: 200
+}
+    
+export type wishlistControllerClearWishlistResponseSuccess = (wishlistControllerClearWishlistResponse200) & {
+  headers: Headers;
+};
+;
+
+export type wishlistControllerClearWishlistResponse = (wishlistControllerClearWishlistResponseSuccess)
+
+export const getWishlistControllerClearWishlistUrl = () => {
+
+
+  
+
+  return `/wishlist`
+}
+
+export const wishlistControllerClearWishlist = async ( options?: RequestInit): Promise<wishlistControllerClearWishlistResponse> => {
+  
+  return customFetch<wishlistControllerClearWishlistResponse>(getWishlistControllerClearWishlistUrl(),
+  {      
+    ...options,
+    method: 'DELETE'
+    
+    
+  }
+);}
+
+
+
+
+export const getWishlistControllerClearWishlistMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof wishlistControllerClearWishlist>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof wishlistControllerClearWishlist>>, TError,void, TContext> => {
+
+const mutationKey = ['wishlistControllerClearWishlist'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof wishlistControllerClearWishlist>>, void> = () => {
+          
+
+          return  wishlistControllerClearWishlist(requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type WishlistControllerClearWishlistMutationResult = NonNullable<Awaited<ReturnType<typeof wishlistControllerClearWishlist>>>
+    
+    export type WishlistControllerClearWishlistMutationError = unknown
+
+    /**
+ * @summary Clear authenticated user wishlist
+ */
+export const useWishlistControllerClearWishlist = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof wishlistControllerClearWishlist>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof wishlistControllerClearWishlist>>,
+        TError,
+        void,
+        TContext
+      > => {
+
+      const mutationOptions = getWishlistControllerClearWishlistMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Add an item to authenticated user wishlist
+ */
+export type wishlistControllerAddItemResponse201 = {
+  data: void
+  status: 201
+}
+
+export type wishlistControllerAddItemResponse400 = {
+  data: void
+  status: 400
+}
+
+export type wishlistControllerAddItemResponse404 = {
+  data: void
+  status: 404
+}
+    
+export type wishlistControllerAddItemResponseSuccess = (wishlistControllerAddItemResponse201) & {
+  headers: Headers;
+};
+export type wishlistControllerAddItemResponseError = (wishlistControllerAddItemResponse400 | wishlistControllerAddItemResponse404) & {
+  headers: Headers;
+};
+
+export type wishlistControllerAddItemResponse = (wishlistControllerAddItemResponseSuccess | wishlistControllerAddItemResponseError)
+
+export const getWishlistControllerAddItemUrl = () => {
+
+
+  
+
+  return `/wishlist/items`
+}
+
+export const wishlistControllerAddItem = async (createWishlistItemDto: CreateWishlistItemDto, options?: RequestInit): Promise<wishlistControllerAddItemResponse> => {
+  
+  return customFetch<wishlistControllerAddItemResponse>(getWishlistControllerAddItemUrl(),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      createWishlistItemDto,)
+  }
+);}
+
+
+
+
+export const getWishlistControllerAddItemMutationOptions = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof wishlistControllerAddItem>>, TError,{data: CreateWishlistItemDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof wishlistControllerAddItem>>, TError,{data: CreateWishlistItemDto}, TContext> => {
+
+const mutationKey = ['wishlistControllerAddItem'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof wishlistControllerAddItem>>, {data: CreateWishlistItemDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  wishlistControllerAddItem(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type WishlistControllerAddItemMutationResult = NonNullable<Awaited<ReturnType<typeof wishlistControllerAddItem>>>
+    export type WishlistControllerAddItemMutationBody = CreateWishlistItemDto
+    export type WishlistControllerAddItemMutationError = void
+
+    /**
+ * @summary Add an item to authenticated user wishlist
+ */
+export const useWishlistControllerAddItem = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof wishlistControllerAddItem>>, TError,{data: CreateWishlistItemDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof wishlistControllerAddItem>>,
+        TError,
+        {data: CreateWishlistItemDto},
+        TContext
+      > => {
+
+      const mutationOptions = getWishlistControllerAddItemMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Remove an item from authenticated user wishlist
+ */
+export type wishlistControllerRemoveItemResponse200 = {
+  data: void
+  status: 200
+}
+
+export type wishlistControllerRemoveItemResponse404 = {
+  data: void
+  status: 404
+}
+    
+export type wishlistControllerRemoveItemResponseSuccess = (wishlistControllerRemoveItemResponse200) & {
+  headers: Headers;
+};
+export type wishlistControllerRemoveItemResponseError = (wishlistControllerRemoveItemResponse404) & {
+  headers: Headers;
+};
+
+export type wishlistControllerRemoveItemResponse = (wishlistControllerRemoveItemResponseSuccess | wishlistControllerRemoveItemResponseError)
+
+export const getWishlistControllerRemoveItemUrl = (wishlistItemId: string,) => {
+
+
+  
+
+  return `/wishlist/items/${wishlistItemId}`
+}
+
+export const wishlistControllerRemoveItem = async (wishlistItemId: string, options?: RequestInit): Promise<wishlistControllerRemoveItemResponse> => {
+  
+  return customFetch<wishlistControllerRemoveItemResponse>(getWishlistControllerRemoveItemUrl(wishlistItemId),
+  {      
+    ...options,
+    method: 'DELETE'
+    
+    
+  }
+);}
+
+
+
+
+export const getWishlistControllerRemoveItemMutationOptions = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof wishlistControllerRemoveItem>>, TError,{wishlistItemId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof wishlistControllerRemoveItem>>, TError,{wishlistItemId: string}, TContext> => {
+
+const mutationKey = ['wishlistControllerRemoveItem'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof wishlistControllerRemoveItem>>, {wishlistItemId: string}> = (props) => {
+          const {wishlistItemId} = props ?? {};
+
+          return  wishlistControllerRemoveItem(wishlistItemId,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type WishlistControllerRemoveItemMutationResult = NonNullable<Awaited<ReturnType<typeof wishlistControllerRemoveItem>>>
+    
+    export type WishlistControllerRemoveItemMutationError = void
+
+    /**
+ * @summary Remove an item from authenticated user wishlist
+ */
+export const useWishlistControllerRemoveItem = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof wishlistControllerRemoveItem>>, TError,{wishlistItemId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof wishlistControllerRemoveItem>>,
+        TError,
+        {wishlistItemId: string},
+        TContext
+      > => {
+
+      const mutationOptions = getWishlistControllerRemoveItemMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+/**
+ * @summary Merge guest wishlist items into authenticated user wishlist
+ */
+export type wishlistControllerMergeGuestWishlistResponse200 = {
+  data: void
+  status: 200
+}
+    
+export type wishlistControllerMergeGuestWishlistResponseSuccess = (wishlistControllerMergeGuestWishlistResponse200) & {
+  headers: Headers;
+};
+;
+
+export type wishlistControllerMergeGuestWishlistResponse = (wishlistControllerMergeGuestWishlistResponseSuccess)
+
+export const getWishlistControllerMergeGuestWishlistUrl = () => {
+
+
+  
+
+  return `/wishlist/merge`
+}
+
+export const wishlistControllerMergeGuestWishlist = async (mergeGuestWishlistDto: MergeGuestWishlistDto, options?: RequestInit): Promise<wishlistControllerMergeGuestWishlistResponse> => {
+  
+  return customFetch<wishlistControllerMergeGuestWishlistResponse>(getWishlistControllerMergeGuestWishlistUrl(),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      mergeGuestWishlistDto,)
+  }
+);}
+
+
+
+
+export const getWishlistControllerMergeGuestWishlistMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof wishlistControllerMergeGuestWishlist>>, TError,{data: MergeGuestWishlistDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof wishlistControllerMergeGuestWishlist>>, TError,{data: MergeGuestWishlistDto}, TContext> => {
+
+const mutationKey = ['wishlistControllerMergeGuestWishlist'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof wishlistControllerMergeGuestWishlist>>, {data: MergeGuestWishlistDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  wishlistControllerMergeGuestWishlist(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type WishlistControllerMergeGuestWishlistMutationResult = NonNullable<Awaited<ReturnType<typeof wishlistControllerMergeGuestWishlist>>>
+    export type WishlistControllerMergeGuestWishlistMutationBody = MergeGuestWishlistDto
+    export type WishlistControllerMergeGuestWishlistMutationError = unknown
+
+    /**
+ * @summary Merge guest wishlist items into authenticated user wishlist
+ */
+export const useWishlistControllerMergeGuestWishlist = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof wishlistControllerMergeGuestWishlist>>, TError,{data: MergeGuestWishlistDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof wishlistControllerMergeGuestWishlist>>,
+        TError,
+        {data: MergeGuestWishlistDto},
+        TContext
+      > => {
+
+      const mutationOptions = getWishlistControllerMergeGuestWishlistMutationOptions(options);
 
       return useMutation(mutationOptions, queryClient);
     }

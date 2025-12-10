@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ShoppingCart, Search, Menu, User, X, LogOut } from "lucide-react";
+import { ShoppingCart, Search, Menu, User, X, LogOut, Heart } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
@@ -15,6 +15,8 @@ import {
 import { ModeToggle } from "./mode-toggle";
 import { useAuthStore } from "@/stores/auth-store";
 import { useCartControllerGetCart, useAuthControllerLogout } from "@/api/generated";
+import { useGuestCartStore } from "@/stores/cart-store";
+import { useGuestWishlistStore } from "@/stores/wishlist-store";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -36,6 +38,8 @@ export default function Navbar() {
   const pathname = location.pathname;
   const queryClient = useQueryClient();
   const { user, isAuthenticated, clearAuth } = useAuthStore();
+  const guestCartItems = useGuestCartStore((state) => state.items);
+  const guestWishlistItems = useGuestWishlistStore((state) => state.items);
   const logoutMutation = useAuthControllerLogout({
     mutation: {
       onSuccess: () => {
@@ -50,15 +54,22 @@ export default function Navbar() {
     },
   });
 
-  // Get cart data to show item count
+  // Get cart data to show item count (only for authenticated users)
   const { data: cartData } = useCartControllerGetCart({
     query: {
+      enabled: isAuthenticated, // Only run for authenticated users
       retry: false,
       refetchInterval: 10000, // Refetch every 10 seconds
     },
   });
 
-  const cartItemCount = (cartData?.data as any)?.items?.length || 0;
+  // Calculate cart item count for both authenticated and guest users
+  const authenticatedCartItemCount = (cartData?.data as any)?.items?.length || 0;
+  const guestCartItemCount = guestCartItems.length;
+  const cartItemCount = isAuthenticated ? authenticatedCartItemCount : guestCartItemCount;
+
+  // Calculate wishlist item count (mainly for guest users)
+  const wishlistItemCount = guestWishlistItems.length;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -176,6 +187,19 @@ export default function Navbar() {
                 className="absolute -top-1 -right-1 h-4 w-4 rounded-full p-0 flex items-center justify-center text-[10px] leading-none"
               >
                 {cartItemCount}
+              </Badge>
+            )}
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            className="relative"
+            onClick={() => handleNav("/wishlist")}
+          >
+            <Heart className="h-4 w-4" />
+            {wishlistItemCount > 0 && (
+              <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs">
+                {wishlistItemCount > 9 ? '9+' : wishlistItemCount}
               </Badge>
             )}
           </Button>
