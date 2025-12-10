@@ -64,7 +64,6 @@ export class CartController {
     const userId = this.getUserId(req);
 
     if (userId) {
-      console.log('[CART] Getting authenticated user cart:', userId);
       try {
         return await this.service.getCartByUser(userId);
       } catch (error) {
@@ -77,7 +76,6 @@ export class CartController {
     // Guest user flow
     const cartId = guestCartId || randomUUID();
     res.setHeader('x-guest-cart-id', cartId);
-    console.log('[CART] Getting guest cart:', cartId);
     return this.service.getOrCreateGuestCart(cartId);
   }
 

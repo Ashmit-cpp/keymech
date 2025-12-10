@@ -412,7 +412,7 @@ export default function ProductDetailPage() {
               <div className="flex flex-col sm:flex-row gap-4 mb-4 pb-8 border-b border-border">
                 <Button
                   size="lg"
-                  className="flex-1"
+                  className="w-1/2"
                   disabled={
                     product.status !== "IN_STOCK" || addToCart.isPending
                   }

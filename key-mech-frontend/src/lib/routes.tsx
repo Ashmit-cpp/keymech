@@ -143,9 +143,7 @@ const router = createBrowserRouter([
       {
         path: 'account',
         element: (
-          <ProtectedRoute>
             <AccountLayout />
-          </ProtectedRoute>
         ),
         children: [
           {

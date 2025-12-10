@@ -1,50 +1,118 @@
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Home, Briefcase, MapPin, Plus, Pencil, Trash2 } from "lucide-react";
+
+interface Address {
+  id: string;
+  label: string;
+  name: string;
+  street: string;
+  line2?: string;
+  city: string;
+  state: string;
+  zip: string;
+  country: string;
+  type: "home" | "work" | "other";
+  isDefault?: boolean;
+}
+
+const addresses: Address[] = [
+  {
+    id: "home",
+    label: "Home",
+    name: "John Doe",
+    street: "123 Main Street",
+    line2: "Apt 4B",
+    city: "New York",
+    state: "NY",
+    zip: "10001",
+    country: "United States",
+    type: "home",
+    isDefault: true,
+  },
+  {
+    id: "work",
+    label: "Work",
+    name: "John Doe",
+    street: "456 Business Ave",
+    line2: "Suite 200",
+    city: "New York",
+    state: "NY",
+    zip: "10002",
+    country: "United States",
+    type: "work",
+  },
+];
+
+const typeIconMap: Record<Address["type"], React.ElementType> = {
+  home: Home,
+  work: Briefcase,
+  other: MapPin,
+};
+
 export default function AccountAddresses() {
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold">Addresses</h1>
           <p className="text-muted-foreground">Manage your shipping and billing addresses</p>
         </div>
-        <button className="bg-primary text-primary-foreground px-4 py-2 rounded">
-          Add New Address
-        </button>
+        <Button className="gap-2" size="sm">
+          <Plus className="h-4 w-4" />
+          Add new address
+        </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="p-6 border rounded-lg">
-          <div className="flex items-start justify-between mb-4">
-            <h3 className="text-lg font-semibold">Home Address</h3>
-            <span className="text-sm bg-primary/10 text-primary px-2 py-1 rounded">Default</span>
-          </div>
-          <div className="space-y-1 text-muted-foreground">
-            <p>John Doe</p>
-            <p>123 Main Street</p>
-            <p>Apt 4B</p>
-            <p>New York, NY 10001</p>
-            <p>United States</p>
-          </div>
-          <div className="flex space-x-2 mt-4">
-            <button className="text-primary hover:underline text-sm">Edit</button>
-            <button className="text-red-500 hover:underline text-sm">Delete</button>
-          </div>
-        </div>
-
-        <div className="p-6 border rounded-lg">
-          <h3 className="text-lg font-semibold mb-4">Work Address</h3>
-          <div className="space-y-1 text-muted-foreground">
-            <p>John Doe</p>
-            <p>456 Business Ave</p>
-            <p>Suite 200</p>
-            <p>New York, NY 10002</p>
-            <p>United States</p>
-          </div>
-          <div className="flex space-x-2 mt-4">
-            <button className="text-primary hover:underline text-sm">Edit</button>
-            <button className="text-red-500 hover:underline text-sm">Delete</button>
-          </div>
-        </div>
+      <div className="grid gap-4 md:grid-cols-2">
+        {addresses.map((address) => {
+          const Icon = typeIconMap[address.type];
+          return (
+            <Card key={address.id}>
+              <CardHeader className="flex flex-row items-start justify-between space-y-0">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary">
+                    <Icon className="h-4 w-4" />
+                  </span>
+                  <div>
+                    <CardTitle className="text-base">{address.label} address</CardTitle>
+                    <CardDescription>{address.type === "home" ? "Primary residence" : "Saved location"}</CardDescription>
+                  </div>
+                </div>
+                {address.isDefault && <Badge>Default</Badge>}
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="text-sm text-muted-foreground space-y-1">
+                  <p className="text-foreground font-medium">{address.name}</p>
+                  <p>{address.street}</p>
+                  {address.line2 && <p>{address.line2}</p>}
+                  <p>
+                    {address.city}, {address.state} {address.zip}
+                  </p>
+                  <p>{address.country}</p>
+                </div>
+                <Separator />
+                <div className="flex flex-wrap gap-2">
+                  <Button variant="outline" size="sm" className="gap-1">
+                    <Pencil className="h-4 w-4" />
+                    Edit
+                  </Button>
+                  <Button variant="outline" size="sm" className="gap-1">
+                    <MapPin className="h-4 w-4" />
+                    Set as default
+                  </Button>
+                  <Button variant="destructive" size="sm" className="gap-1">
+                    <Trash2 className="h-4 w-4" />
+                    Delete
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
     </div>
-  )
+  );
 }
