@@ -8,9 +8,11 @@ import { AuthMiddleware } from '../auth/auth.middleware.js';
 @Module({
   imports: [
     forwardRef(() => AuthModule),
-    JwtModule.register({
-      secret: process.env.JWT_SECRET || 'dev-secret',
-      signOptions: { expiresIn: '7d' },
+    JwtModule.registerAsync({
+      useFactory: () => ({
+        secret: process.env.JWT_SECRET,
+        signOptions: { expiresIn: '7d' },
+      }),
     }),
   ],
   controllers: [WishlistController],
