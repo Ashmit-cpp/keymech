@@ -1,73 +1,88 @@
-# React + TypeScript + Vite
+# Key Mech — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Web storefront and admin dashboard for **Key Mech**, built with React and Vite. It talks to the NestJS API in [`../key-mech-backend`](../key-mech-backend); run that service locally (or point `VITE_API_URL` at a deployed API) while developing this app.
 
-Currently, two official plugins are available:
+## Requirements
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Node.js** — a current LTS version compatible with Vite 7 and this project
+- **pnpm** — this package declares `packageManager: pnpm@10.33.0`; use pnpm for installs and scripts
 
-## React Compiler
+## Getting started
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+From the repository root:
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+cd key-mech-frontend
+pnpm install
+cp .env.example .env
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Edit `.env` and set **`VITE_API_URL`** to your API origin (no trailing slash required; the client normalizes it). The example defaults to `http://localhost:3007` when the backend listens there.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Start the dev server:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+pnpm dev
 ```
+
+## Environment variables
+
+| Variable        | Description                                      |
+|-----------------|--------------------------------------------------|
+| `VITE_API_URL`  | Base URL for REST calls (Orval + `customFetch`) |
+
+The API client attaches a `Bearer` token when present in `localStorage` under the `auth-storage` key (Zustand persist).
+
+## Scripts
+
+| Command               | Description                                      |
+|-----------------------|--------------------------------------------------|
+| `pnpm dev`            | Vite dev server with HMR                         |
+| `pnpm build`          | Typecheck (`tsc -b`) then production build       |
+| `pnpm preview`        | Serve the production build locally               |
+| `pnpm lint`           | ESLint                                           |
+| `pnpm gen:api`        | Regenerate Orval client from OpenAPI             |
+| `pnpm gen:api:watch`  | Same as `gen:api`, watch mode                    |
+
+## API client (Orval)
+
+OpenAPI lives at [`../packages/api-schema/openapi.json`](../packages/api-schema/openapi.json). [`orval.config.js`](orval.config.js) reads that path relative to **this** app directory, so you need the **full monorepo** layout: `key-mech-frontend` and `packages` as siblings under the repo root.
+
+After the schema changes, run `pnpm gen:api` (or `pnpm gen:api:watch`). Generated hooks and types are written to [`src/api/generated.ts`](src/api/generated.ts). HTTP calls go through [`src/lib/custom-fetch.ts`](src/lib/custom-fetch.ts) (`customFetch` mutator).
+
+## Project structure (overview)
+
+| Path                 | Role                                                |
+|----------------------|-----------------------------------------------------|
+| `src/lib/`           | Router, utilities, `customFetch`                    |
+| `src/pages/`         | Route screens: public, `account/`, `admin/`, `auth/` |
+| `src/layouts/`       | Root, account, admin, auth shells                   |
+| `src/components/`    | Shared UI; `ui/` holds Radix-style primitives      |
+| `src/stores/`        | Zustand stores (e.g. auth, cart, wishlist)         |
+| `src/contexts/`      | React context (e.g. auth)                          |
+| `src/api/generated.ts` | Orval-generated TanStack Query client            |
+
+Path alias: `@/` → `src/` (see [`vite.config.ts`](vite.config.ts)).
+
+## Routing overview
+
+Routes are defined in [`src/lib/routes.tsx`](src/lib/routes.tsx).
+
+- **Public** — `/`, `/about`, `/contact`, `/blog`, `/blog/:slug`, `/products`, `/products/:id`, category routes (`/category/:category`, `/keyboards`, `/switches`, `/keycaps`, `/accessories`)
+- **Commerce** — `/cart`, `/wishlist`; **`/checkout`** and **`/order-confirmation/:orderId`** are wrapped in `ProtectedRoute`
+- **Account** — `/account` (dashboard), `/account/orders`, `/account/orders/:orderId`, `/account/profile`, `/account/addresses`, `/account/settings`
+- **Admin** — `/admin` and nested routes (products create/edit, orders, users, inventory, analytics, settings) behind `AdminRoute`
+- **Auth (fullscreen)** — `/auth/login`, `/auth/register`, `/auth/forgot-password`, `/auth/reset-password/:token`
+- **Errors** — `/unauthorized`, app-level 404 via `errorElement` / catch-all
+
+## Deployment
+
+Production builds are static assets from Vite (`pnpm build`, output under `dist/`). [`vercel.json`](vercel.json) rewrites all paths to `index.html` so client-side routing works on Vercel.
+
+Set **`VITE_API_URL`** in the hosting environment to your production API origin, and ensure the backend allows this frontend origin (CORS) if the API is on another domain.
+
+## Troubleshooting
+
+- **Requests go to the wrong host or fail immediately** — Check `VITE_API_URL` in `.env`; restart the dev server after changing env files.
+- **CORS errors in the browser** — Backend must permit your frontend origin; fix CORS on the API, not by disabling browser security.
+- **401 on protected routes** — Sign in again; token may be missing or expired in persisted auth storage.
