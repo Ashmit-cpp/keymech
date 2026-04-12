@@ -8,9 +8,15 @@ export class PaymentService {
   private razorpay: Razorpay;
   private keyId: string;
 
-  constructor(private configService: ConfigService) {
-    const keyId = this.configService.get<string>('RAZORPAY_KEY_ID');
-    const keySecret = this.configService.get<string>('RAZORPAY_SECRET');
+  constructor(private configService?: ConfigService) {
+    console.log('[PaymentService] typeof configService:', typeof configService);
+
+    const keyId =
+      this.configService?.get<string>('RAZORPAY_KEY_ID') ??
+      process.env.RAZORPAY_KEY_ID;
+    const keySecret =
+      this.configService?.get<string>('RAZORPAY_SECRET') ??
+      process.env.RAZORPAY_SECRET;
 
     if (!keyId || !keySecret) {
       throw new Error(
@@ -55,7 +61,9 @@ export class PaymentService {
     signature: string,
   ): boolean {
     try {
-      const keySecret = this.configService.get<string>('RAZORPAY_SECRET');
+      const keySecret =
+        this.configService?.get<string>('RAZORPAY_SECRET') ??
+        process.env.RAZORPAY_SECRET;
       if (!keySecret) {
         throw new Error('RAZORPAY_SECRET not configured');
       }
