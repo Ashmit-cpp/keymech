@@ -7,7 +7,6 @@ const HomePage: React.FC = () => {
     <div className="min-h-screen bg-background text-foreground font-sans">
       <main>
         <Hero />
-
         <ProductSection
           title="New Arrivals"
           subtitle="The latest gear fresh from the factory."
