@@ -26,32 +26,33 @@ async function bootstrap() {
   app.use(cookieParser());
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
 
-  const config = new DocumentBuilder()
-    .setTitle('KeyMech API')
-    .setDescription('API documentation for KeyMech mechanical keyboard e-commerce platform')
-    .setVersion('1.0')
-    .addTag('products', 'Product management endpoints')
-    .addTag('users', 'User management endpoints')
-    .addTag('orders', 'Order management endpoints')
-    .addTag('cart', 'Shopping cart endpoints')
-    .addTag('auth', 'Authentication endpoints')
-    .addTag('wishlist', 'Wishlist management endpoints')
-    .build();
+  if (process.env.NODE_ENV !== 'production') {
+    const config = new DocumentBuilder()
+      .setTitle('KeyMech API')
+      .setDescription('API documentation for KeyMech mechanical keyboard e-commerce platform')
+      .setVersion('1.0')
+      .addTag('products', 'Product management endpoints')
+      .addTag('users', 'User management endpoints')
+      .addTag('orders', 'Order management endpoints')
+      .addTag('cart', 'Shopping cart endpoints')
+      .addTag('auth', 'Authentication endpoints')
+      .addTag('wishlist', 'Wishlist management endpoints')
+      .build();
 
-  const document = SwaggerModule.createDocument(app, config);
+    const document = SwaggerModule.createDocument(app, config);
 
-  SwaggerModule.setup('api', app, document);
+    SwaggerModule.setup('api', app, document);
 
-  // 🔥 NEW: Serve openapi.json for Orval/openapi-codegen
-  app.use('/openapi.json', (req, res) => {
-    res.send(document);
-  });
+    app.use('/openapi.json', (req, res) => {
+      res.send(document);
+    });
 
-  fs.writeFileSync(
-    join(process.cwd(), '../packages/api-schema/openapi.json'),
-    JSON.stringify(document, null, 2),
-  );
-  
+    fs.writeFileSync(
+      join(process.cwd(), '../packages/api-schema/openapi.json'),
+      JSON.stringify(document, null, 2),
+    );
+  }
+
   const port = process.env.PORT || 3006;
   await app.listen(port);
   console.log(`🚀 Server running on http://localhost:${port}`);
