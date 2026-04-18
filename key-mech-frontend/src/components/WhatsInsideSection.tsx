@@ -3,7 +3,6 @@ import { motion } from "motion/react";
 import { ArrowUpRight } from "lucide-react";
 import { KeyboardAsideSection } from "@/components/keyboard-aside-section";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { COLORWAYS } from "@/lib/constants";
 
 type Colorway = (typeof COLORWAYS)[number];
@@ -45,16 +44,6 @@ export default function WhatsInsideSection({
               viewport={{ once: true, margin: "-10%" }}
               transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
             >
-              <Badge
-                variant="secondary"
-                className="inline-flex items-center gap-2 px-3 py-1 text-xs font-medium mb-4"
-              >
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
-                </span>
-                Gaming Collection
-              </Badge>
 
               <h2 className="mt-2 text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-foreground leading-tight">
                 KeyMech{" "}
