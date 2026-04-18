@@ -67,7 +67,7 @@ const Footer: React.FC = () => {
 
         <Separator className="my-8" />
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
-            <p>&copy; 2025 KeyMech Inc. All rights reserved.</p>
+            <p>&copy; 2026 KeyMech Inc. All rights reserved.</p>
             <div className="flex gap-6">
                 <a href="#" className="hover:text-foreground transition-colors">Privacy Policy</a>
                 <a href="#" className="hover:text-foreground transition-colors">Terms of Service</a>

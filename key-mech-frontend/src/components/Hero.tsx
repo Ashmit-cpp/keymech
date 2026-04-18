@@ -1,253 +1,174 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useRef } from "react";
+import { motion, type Variants } from "motion/react";
 import { Badge } from "@/components/ui/badge";
-import { motion, useReducedMotion } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { useHero } from "@/hooks/use-hero";
+import BuildSection from "./BuildSection";
+import GroupBuySection from "./GroupBuySection";
+import Keyboard3D from "./keyboard-3d";
+import WhatsInsideSection from "./WhatsInsideSection";
 
-const copyContainer = {
+const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
+
+const copyContainer: Variants = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.06,
+      staggerChildren: 0.07,
+      delayChildren: 0.03,
     },
   },
 };
 
-const copyItem = {
+const copyItem: Variants = {
   hidden: { opacity: 0, y: 22 },
   show: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] },
+    transition: { duration: 0.42, ease: EASE_OUT },
   },
 };
 
-const Hero: React.FC = () => {
-  const navigate = useNavigate();
-  const prefersReducedMotion = useReducedMotion();
-  const [isImageLoaded, setIsImageLoaded] = useState(false);
-
-  const handleShopKeyboards = () => {
-    navigate("/category/keyboards");
-  };
-
-  const handleExploreBuilds = () => {
-    navigate("/products");
-  };
-
-  const easeOut: [number, number, number, number] = [0.22, 1, 0.36, 1];
-  const orbLoopTransition = prefersReducedMotion
-    ? undefined
-    : {
-        duration: 14,
-        repeat: Infinity,
-        repeatType: "reverse" as const,
-        ease: "easeInOut" as const,
-      };
+export default function Hero() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const {
+    x,
+    y,
+    sc,
+    rx,
+    ry,
+    rz,
+    floatY,
+    registerSection,
+    entered,
+    activeColorway,
+    applyColorway,
+    isNarrow,
+    isKeyboardInteractive,
+  } = useHero(containerRef);
 
   return (
-    <section className="relative overflow-hidden pt-5 bg-background">
-      <div className="absolute inset-0 z-0 pointer-events-none">
-        <motion.div
-          className="absolute top-[-15%] right-[-10%] w-[600px] h-[600px] bg-secondary/15 rounded-full blur-[120px]"
-          animate={
-            prefersReducedMotion
-              ? undefined
-              : { scale: [1, 1.06, 1], opacity: [0.12, 0.2, 0.12] }
-          }
-          transition={orbLoopTransition}
-        />
-        <motion.div
-          className="absolute top-[6%] right-[8%] w-[220px] h-[220px] bg-secondary/8 rounded-full blur-3xl"
-          animate={prefersReducedMotion ? undefined : { x: [0, 18, 0], y: [0, -12, 0] }}
-          transition={orbLoopTransition ? { ...orbLoopTransition, duration: 11 } : undefined}
-        />
-        <motion.div
-          className="absolute top-[20%] left-[-12%] w-[520px] h-[520px] bg-secondary/10 rounded-full blur-[120px]"
-          animate={
-            prefersReducedMotion ? undefined : { scale: [1, 1.05, 1], x: [0, -14, 0] }
-          }
-          transition={orbLoopTransition ? { ...orbLoopTransition, duration: 16 } : undefined}
-        />
-      </div>
-
-      <div className="flex flex-col md:flex-row min-h-screen p-10 relative z-10">
-        <div className="flex-1 flex items-center">
-          <motion.div
-            className="container px-4 space-y-8 text-center md:text-left"
-            variants={copyContainer}
-            initial="hidden"
-            animate="show"
+    <div
+      ref={containerRef}
+      className="relative min-h-screen overflow-x-clip bg-background text-foreground"
+    >
+      <div className="relative w-full">
+        {/* ── Sticky 3D keyboard scene ──────────────────────────────────────── */}
+        <div className="absolute inset-0 z-10 pointer-events-none">
+          <div
+            className="pointer-events-none sticky top-0 flex h-screen w-full items-center justify-center overflow-x-clip"
+            style={{
+              perspective: "min(1500px, 135vw)",
+              contain: "layout style",
+            }}
           >
-            <motion.div variants={copyItem}>
-              <Badge
-                variant="secondary"
-                className="inline-flex items-center gap-2 px-3 py-1 text-xs font-medium"
+            <motion.div
+              className="pointer-events-none"
+              initial={false}
+              animate={{
+                z: entered ? 0 : -800,
+                y: entered ? 0 : "100vh",
+                opacity: entered ? 1 : 0,
+              }}
+              transition={{
+                opacity: { duration: 0.55, ease: "easeOut" },
+                default: { duration: 0.88, ease: EASE_OUT },
+              }}
+            >
+              <motion.div
+                className="pointer-events-none"
+                style={{ x, y, scale: sc }}
               >
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
-                </span>
-                New Specter 75 Series Available Now
-              </Badge>
+                <motion.div
+                  className="pointer-events-none"
+                  style={{ y: floatY, rotateZ: rz }}
+                >
+                  <div className="pointer-events-auto inline-flex max-w-full filter drop-shadow-2xl shadow-black/80">
+                    <Keyboard3D
+                      baseRotateX={rx}
+                      baseRotateY={ry}
+                      baseRotateZ={rz}
+                      isInteractive={isKeyboardInteractive}
+                    />
+                  </div>
+                </motion.div>
+              </motion.div>
             </motion.div>
-
-            <motion.h1
-              variants={copyItem}
-              className="text-5xl md:text-7xl font-bold tracking-tight text-foreground leading-[1.1]"
-            >
-              Craft Your Perfect <br />
-              <span className="text-transparent bg-clip-text bg-linear-to-r from-primary to-primary/80">
-                Typing Experience
-              </span>
-            </motion.h1>
-
-            <motion.p
-              variants={copyItem}
-              className="text-base md:text-xl text-muted-foreground max-w-xl mx-auto md:mx-0 leading-relaxed"
-            >
-              Premium mechanical keyboards, custom components, and artisan keycaps for enthusiasts who
-              demand precision and aesthetics.
-            </motion.p>
-
-            <motion.div
-              variants={copyItem}
-              className="flex flex-row items-center gap-4 justify-center md:justify-start"
-            >
-              <Button size="lg" className="min-w-[160px] group" onClick={handleShopKeyboards}>
-                Shop Keyboards
-                <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
-              </Button>
-              <Button size="lg" variant="secondary" className="min-w-[160px]" onClick={handleExploreBuilds}>
-                Explore Builds
-              </Button>
-            </motion.div>
-
-            <motion.div
-              variants={copyItem}
-              className="hidden md:flex items-center justify-center md:justify-start gap-8 pt-4"
-            >
-              <div className="flex flex-col">
-                <span className="text-2xl font-bold text-foreground">2k+</span>
-                <span className="text-xs text-muted-foreground uppercase tracking-wider">Happy Customers</span>
-              </div>
-              <div className="w-px h-10 bg-border" />
-              <div className="flex flex-col">
-                <span className="text-2xl font-bold text-foreground">100%</span>
-                <span className="text-xs text-muted-foreground uppercase tracking-wider">Quality Guarantee</span>
-              </div>
-            </motion.div>
-          </motion.div>
+          </div>
         </div>
 
-        <div className="md:flex-1 w-full md:w-1/2 min-h-[50vh] md:min-h-screen relative perspective-1000">
-          <div
-            className="absolute inset-0 md:left-2 md:right-0 md:top-4 md:bottom-4 rounded-2xl md:rounded-3xl overflow-hidden shadow-2xl ring-1 ring-border/40"
-            style={{ transformStyle: "preserve-3d" }}
+        <div className="relative z-20">
+          <section
+            ref={(el) => registerSection(el, 0)}
+            data-section={0}
+            className="relative z-20 flex min-h-[78vh] flex-col mb-0 md:min-h-[60vh] md:mb-24"
           >
-            <div
-              className={cn(
-                "absolute inset-0 z-20 flex items-center justify-center transition-opacity duration-700 ease-out",
-                isImageLoaded ? "opacity-0 pointer-events-none" : "opacity-100",
-              )}
-              aria-hidden
-            >
-              {!prefersReducedMotion && (
-                <motion.div
-                  className="absolute inset-0 bg-linear-to-r from-transparent via-primary/12 to-transparent skew-x-[-18deg] w-[55%]"
-                  initial={{ x: "-120%" }}
-                  animate={{ x: "220%" }}
-                  transition={{ repeat: Infinity, duration: 2.2, ease: "linear" }}
-                />
-              )}
-              <div className="relative z-10 flex flex-col items-center gap-3 px-6">
-                <motion.div
-                  className="h-1.5 w-24 rounded-full bg-primary/25"
-                  animate={prefersReducedMotion ? undefined : { opacity: [0.35, 0.85, 0.35] }}
-                  transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
-                />
-                <span className="text-xs font-medium text-muted-foreground tracking-wide uppercase">
-                  Loading preview
-                </span>
-              </div>
-            </div>
-
             <motion.div
-              className="absolute inset-0"
-              initial={false}
-              animate={
-                prefersReducedMotion
-                  ? { rotateY: 10 }
-                  : isImageLoaded
-                    ? {
-                        rotateY: 10,
-                        y: [0, -5, 0],
-                      }
-                    : { rotateY: 26 }
-              }
-              whileHover={
-                prefersReducedMotion || !isImageLoaded
-                  ? undefined
-                  : { rotateY: 18, transition: { duration: 0.45, ease: easeOut } }
-              }
-              transition={
-                prefersReducedMotion
-                  ? { duration: 0.35, ease: easeOut }
-                  : isImageLoaded
-                    ? {
-                        rotateY: { duration: 1, ease: easeOut },
-                        y: { duration: 5.5, repeat: Infinity, ease: "easeInOut" },
-                      }
-                    : { duration: 0.6, ease: easeOut }
-              }
-              style={{ transformStyle: "preserve-3d" }}
+              variants={copyContainer}
+              initial="hidden"
+              animate="show"
+              className="relative z-10 mx-auto flex min-h-[78vh] w-full max-w-7xl flex-1 flex-col items-center justify-center px-6 md:min-h-[60vh] md:justify-start md:px-10"
             >
-              <motion.img
-                src="/bg.png"
-                alt="Premium Keyboard Build"
-                decoding="async"
-                fetchPriority="high"
-                loading="eager"
-                onLoad={() => setIsImageLoaded(true)}
-                className="absolute inset-0 w-full h-full object-cover"
-                initial={
-                  prefersReducedMotion
-                    ? { opacity: 0, scale: 1, filter: "blur(0px)" }
-                    : { opacity: 0, scale: 1.06, filter: "blur(14px)" }
-                }
-                animate={
-                  isImageLoaded
-                    ? { opacity: 1, scale: 1, filter: "blur(0px)" }
-                    : prefersReducedMotion
-                      ? { opacity: 0, scale: 1, filter: "blur(0px)" }
-                      : { opacity: 0, scale: 1.06, filter: "blur(14px)" }
-                }
-                transition={
-                  prefersReducedMotion
-                    ? { duration: 0.2, ease: easeOut }
-                    : { duration: 0.85, ease: easeOut }
-                }
-                style={{ transformStyle: "preserve-3d" }}
-              />
-            </motion.div>
-
-            {isImageLoaded && !prefersReducedMotion && (
+              {/* Top: badge (direct child for stagger) */}
               <motion.div
-                className="pointer-events-none absolute inset-0"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.6, delay: 0.15 }}
+                variants={copyItem}
+                className="flex shrink-0 flex-col items-center px-2 pb-2 pt-4 text-center md:pt-20"
+              >
+                <Badge
+                  variant="secondary"
+                  className="inline-flex items-center gap-2 px-3 py-1 text-xs font-medium"
+                >
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
+                  </span>
+                  New Specter 75 Series Available Now
+                </Badge>
+              </motion.div>
+
+              {/* Top: headline — above keyboard */}
+              <motion.h1
+                variants={copyItem}
+                className="shrink-0 px-2 pb-4 text-center text-5xl font-bold leading-[1.05] tracking-tight text-foreground sm:text-6xl md:pb-6 md:text-6xl lg:text-7xl"
+              >
+                Performance
+                <br />
+                <span className="text-transparent bg-clip-text bg-linear-to-r from-primary to-primary/80">
+                  That Lasts
+                </span>
+              </motion.h1>
+            </motion.div>
+          </section>
+
+          {/* SECTION 1: Build — desktop only */}
+          {!isNarrow && (
+            <section className="relative flex-col justify-center">
+              <BuildSection
+                sectionRef={(el) => registerSection(el, 1)}
+                dataSection={1}
+              />
+            </section>
+          )}
+
+          {/* SECTIONS 2 & 3: Details & Group Buy */}
+          <div className="relative">
+            <WhatsInsideSection
+              sectionRef={(el) => registerSection(el, 2)}
+              dataSection={2}
+              activeColorway={activeColorway}
+              applyColorway={applyColorway}
+            />
+
+            {/* Group Buy — desktop only */}
+            {!isNarrow && (
+              <GroupBuySection
+                sectionRef={(el) => registerSection(el, 3)}
+                dataSection={3}
               />
             )}
           </div>
         </div>
       </div>
-    </section>
+    </div>
   );
-};
-
-export default Hero;
+}
