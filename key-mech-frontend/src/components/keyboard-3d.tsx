@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { memo, useRef, useState } from 'react';
 import { motion, type MotionValue, useMotionValue, useTransform } from 'motion/react';
 import { ROWS } from '@/lib/constants';
 
@@ -10,7 +10,7 @@ interface Keyboard3DProps {
   isInteractive?: boolean;
 }
 
-export default function Keyboard3D({
+function Keyboard3D({
   popTrigger = 0,
   baseRotateX = 28,
   baseRotateY = -8,
@@ -163,3 +163,5 @@ export default function Keyboard3D({
     </div>
   );
 }
+
+export default memo(Keyboard3D);
