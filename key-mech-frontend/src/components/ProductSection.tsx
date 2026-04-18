@@ -11,8 +11,6 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import Features from "./Features";
-
 interface APIProduct {
   id: string;
   name: string;
@@ -45,12 +43,8 @@ const ProductSection: React.FC<ProductSectionProps> = ({ title, subtitle }) => {
   };
 
   return (
-    <section className="relative overflow-hidden pt-5 bg-background">
-    <div className="absolute inset-0 z-0 pointer-events-none">
-      <div className="absolute top-[10%] left-1/2 -translate-x-1/2 w-[450px] h-[450px] bg-secondary/15 rounded-full blur-[140px]" />
-      <div className="absolute top-[45%] left-1/2 -translate-x-1/2 w-[280px] h-[280px] bg-secondary/10 rounded-full blur-[100px]" />
-      <div className="absolute top-[65%] left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-secondary/20 rounded-full blur-[160px]" />
-    </div>
+    <section className="relative overflow-hidden pt-5 bg-background z-1000">
+
   
     <section className="relative py-10 bg-background/50 overflow-hidden">
       <div className="container mx-auto px-4 relative z-10">
@@ -110,8 +104,7 @@ const ProductSection: React.FC<ProductSectionProps> = ({ title, subtitle }) => {
       </div>
     </section>
   
-    <Features />
-  </section>
+</section>
   
   );
 };
