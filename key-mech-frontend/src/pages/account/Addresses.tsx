@@ -2,6 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import type { LucideIcon } from "lucide-react";
 import { Home, Briefcase, MapPin, Plus, Pencil, Trash2 } from "lucide-react";
 
 interface Address {
@@ -46,7 +47,7 @@ const addresses: Address[] = [
   },
 ];
 
-const typeIconMap: Record<Address["type"], React.ElementType> = {
+const typeIconMap: Record<Address["type"], LucideIcon> = {
   home: Home,
   work: Briefcase,
   other: MapPin,

@@ -34,7 +34,7 @@ export default function WhatsInsideSection({
   applyColorway,
 }: WhatsInsideSectionProps) {
   return (
-    <div ref={sectionRef} data-section={dataSection}>
+    <div>
       <KeyboardAsideSection align="left">
         <div className="relative z-10 flex flex-col items-start text-left w-full h-full justify-center">
           <div className="relative w-full max-w-[420px]">
@@ -43,6 +43,8 @@ export default function WhatsInsideSection({
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-10%" }}
               transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+              aria-label="Keyboard colorway"
+              ref={sectionRef} data-section={dataSection}
             >
 
               <h2 className="mt-2 text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-foreground leading-tight">
@@ -80,23 +82,22 @@ export default function WhatsInsideSection({
               <div
                 className="relative z-10 flex gap-3 items-center"
                 role="group"
-                aria-label="Keyboard colorway"
               >
-                {INSIDE_COLOR_PICKER.map(({ label, colorway, swatch }) => {
+                {INSIDE_COLOR_PICKER.map(({ colorway, swatch }) => {
                   const isActive =
                     activeColorway != null && activeColorway === colorway;
                   return (
                     <button
-                      key={label}
+                      key={colorway.id}
                       type="button"
                       title={colorway.name}
                       aria-label={`${colorway.name} colorway`}
                       aria-pressed={isActive}
                       disabled={!applyColorway}
                       onClick={() => applyColorway?.(colorway)}
-                      className={`relative z-10 h-9 w-9 shrink-0 cursor-pointer rounded-sm p-[2px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 ${
+                      className={`relative z-10 h-9 w-9 shrink-0 cursor-pointer rounded-sm p-[2px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 ${
                         isActive
-                          ? "border-[1.5px] border-primary"
+                          ? "scale-110 border-2 border-primary ring-2 ring-primary ring-offset-2 ring-offset-background"
                           : "border border-border hover:border-foreground/40"
                       }`}
                     >

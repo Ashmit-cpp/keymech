@@ -1,3 +1,4 @@
+import type { ElementType } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,7 +10,7 @@ interface StatCard {
   title: string;
   value: string;
   description: string;
-  icon: React.ElementType;
+  icon: ElementType<{ className?: string }>;
   accent?: string;
 }
 
@@ -50,18 +51,21 @@ export default function AccountDashboard() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {statCards.map((card) => (
+        {statCards.map((card) => {
+          const StatIcon = card.icon;
+          return (
           <Card key={card.title}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">{card.title}</CardTitle>
-              <span className={`rounded-full px-2 py-1 text-xs font-medium ${card.accent}`}>{card.icon && <card.icon className="h-4 w-4" />}</span>
+              <span className={`rounded-full px-2 py-1 text-xs font-medium ${card.accent}`}>{StatIcon ? <StatIcon className="h-4 w-4" /> : null}</span>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{card.value}</div>
               <p className="text-xs text-muted-foreground">{card.description}</p>
             </CardContent>
           </Card>
-        ))}
+          );
+        })}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">

@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { useHero } from "@/hooks/use-hero";
 import BuildSection from "./BuildSection";
 import GroupBuySection from "./GroupBuySection";
-import Keyboard3D from "./keyboard-3d";
+import GltfKeyboardViewer from "./gltf-keyboard-viewer";
 import WhatsInsideSection from "./WhatsInsideSection";
 
 const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
@@ -34,7 +34,6 @@ export default function Hero() {
   const {
     x,
     y,
-    sc,
     rx,
     ry,
     rz,
@@ -57,10 +56,6 @@ export default function Hero() {
         <div className="absolute inset-0 z-10 pointer-events-none">
           <div
             className="pointer-events-none sticky top-0 flex h-screen w-full items-center justify-center overflow-x-clip"
-            style={{
-              perspective: "min(1500px, 135vw)",
-              contain: "layout style",
-            }}
           >
             <motion.div
               className="pointer-events-none"
@@ -77,14 +72,14 @@ export default function Hero() {
             >
               <motion.div
                 className="pointer-events-none"
-                style={{ x, y, scale: sc }}
+                style={{ x, y }}
               >
                 <motion.div
                   className="pointer-events-none"
-                  style={{ y: floatY, rotateZ: rz }}
+                  style={{ y: floatY }}
                 >
-                  <div className="pointer-events-auto inline-flex max-w-full filter drop-shadow-2xl shadow-black/80">
-                    <Keyboard3D
+                  <div className="pointer-events-auto flex w-full max-w-full justify-center">
+                    <GltfKeyboardViewer
                       baseRotateX={rx}
                       baseRotateY={ry}
                       baseRotateZ={rz}
@@ -101,18 +96,18 @@ export default function Hero() {
           <section
             ref={(el) => registerSection(el, 0)}
             data-section={0}
-            className="relative z-20 flex min-h-[78vh] flex-col mb-0 md:min-h-[60vh] md:mb-24"
+            className="relative z-20 flex min-h-0 flex-col "
           >
             <motion.div
               variants={copyContainer}
               initial="hidden"
               animate="show"
-              className="relative z-10 mx-auto flex min-h-[78vh] w-full max-w-7xl flex-1 flex-col items-center justify-center px-6 md:min-h-[60vh] md:justify-start md:px-10"
+              className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col items-center justify-start px-6 pb-6 pt-2 md:min-h-[60vh] md:justify-start md:px-10 md:pb-0 md:pt-0"
             >
               {/* Top: badge (direct child for stagger) */}
               <motion.div
                 variants={copyItem}
-                className="flex shrink-0 flex-col items-center px-2 pb-2 pt-4 text-center md:pt-20"
+                className="flex shrink-0 flex-col items-center px-2 pb-2 pt-2 text-center md:pt-20"
               >
                 <Badge
                   variant="secondary"
