@@ -12,7 +12,6 @@ import { COLORWAYS } from "@/lib/constants";
 interface KeyboardPos {
   x: number;
   y: number;
-  scale: number;
   rx: number;
   ry: number;
   rz: number;
@@ -22,58 +21,28 @@ interface KeyboardPos {
 interface KeyboardBlueprint {
   xRef: number;
   y: number;
-  scale: number;
   rx: number;
   ry: number;
   rz: number;
 }
 
 const BLUEPRINTS: Record<string, KeyboardBlueprint> = {
-  hero: { xRef: 0, y: 15, scale: 1.1, rx: 22, ry: 0, rz: 0 },
-  build: { xRef: 500, y: 10, scale: 1, rx: 0, ry: 0, rz: 0 },
-  inside: { xRef: 400, y: 0, scale: 1.15, rx: 45, ry: 20, rz: -30 },
-  groupbuy: { xRef: 300, y: 20, scale: 0.72, rx: 28, ry: -18, rz: -6 },
+  hero: { xRef: 0, y: 15, rx: 62, ry: 0, rz: 0 },
+  build: { xRef: 300, y: 30, rx: 90, ry: 0, rz: 0 },
+  inside: { xRef: 340, y: 40, rx: 45, ry: 20, rz: 10 },
 };
 
 interface MobilePortraitBlueprint {
   yVh: number;
-  scale: number;
   rx: number;
   ry: number;
   rz: number;
 }
 
 const MOBILE_BLUEPRINTS: Record<string, MobilePortraitBlueprint> = {
-  // Keyboard pushed slightly below center so the headline clears above it
-  hero: {
-    yVh: 0.07,
-    scale: 0.52,
-    rx: 22,
-    ry: 0,
-    rz: 0,
-  },
-  build: {
-    yVh: 0.05,
-    scale: 0.56,
-    rx: 4,
-    ry: 0,
-    rz: 0,
-  },
-  // Keyboard pushed into top zone so product copy sits below it
-  inside: {
-    yVh: -0.22,
-    scale: 0.48,
-    rx: 40,
-    ry: 16,
-    rz: -12,
-  },
-  groupbuy: {
-    yVh: 0.08,
-    scale: 0.4,
-    rx: 24,
-    ry: 0,
-    rz: -8,
-  },
+  hero: { yVh: -0.2, rx: 62, ry: 0, rz: 0 },
+  build: { yVh: 0, rx: 4, ry: 0, rz: 0 },
+  inside: { yVh: -0.2, rx: 40, ry: 16, rz: -12 },
 };
 
 const DESIGN_WIDTH = 1280;
@@ -95,36 +64,14 @@ function resolveKeyboardPos(
   const widthRatio = clamp(layoutWidth / DESIGN_WIDTH, 0.28, 1.35);
   const xMax = layoutWidth * 0.36;
   const x = clamp(b.xRef * widthRatio, -layoutWidth * 0.04, xMax);
-
-  const scaleFromLayout = Math.pow(widthRatio, 0.48);
-  const scale = clamp(b.scale * scaleFromLayout, 0.56, 1.22);
-
-  return {
-    x,
-    y: b.y,
-    scale,
-    rx: b.rx,
-    ry: b.ry,
-    rz: b.rz,
-  };
+  return { x, y: b.y, rx: b.rx, ry: b.ry, rz: b.rz };
 }
 
 function resolveMobilePortraitPos(
   b: MobilePortraitBlueprint,
-  layoutWidth: number,
   viewportHeight: number,
 ): KeyboardPos {
-  const yPx = b.yVh * viewportHeight;
-  const widthTweak = clamp(layoutWidth / 420, 0.58, 0.95);
-  const scale = clamp(b.scale * widthTweak * 0.8, 0.28, 0.62);
-  return {
-    x: 0,
-    y: yPx,
-    scale,
-    rx: b.rx,
-    ry: b.ry,
-    rz: b.rz,
-  };
+  return { x: 0, y: b.yVh * viewportHeight, rx: b.rx, ry: b.ry, rz: b.rz };
 }
 
 export function useHero(rootRef: RefObject<HTMLElement | null>) {
@@ -184,7 +131,6 @@ export function useHero(rootRef: RefObject<HTMLElement | null>) {
 
   const xBase = useMotionValue(0);
   const yBase = useMotionValue(240);
-  const scBase = useMotionValue(0.7);
   const rxBase = useMotionValue(20);
   const ryBase = useMotionValue(0);
   const rzBase = useMotionValue(0);
@@ -193,7 +139,6 @@ export function useHero(rootRef: RefObject<HTMLElement | null>) {
 
   const x = useSpring(xBase, mobileSpring);
   const y = useSpring(yBase, mobileSpring);
-  const sc = useSpring(scBase, mobileSpring);
   const rx = useSpring(rxBase, mobileSpring);
   const ry = useSpring(ryBase, mobileSpring);
   const rz = useSpring(rzBase, mobileSpring);
@@ -263,11 +208,15 @@ export function useHero(rootRef: RefObject<HTMLElement | null>) {
 
   // On mobile, require the section to be solidly centred in the viewport
   // before switching the keyboard blueprint (prevents early triggers).
+  // Desktop: use the full viewport (0px margins). Negative vertical margins
+  // shrink the intersection root; a section that only occupies the top or bottom
+  // band of the screen then fails to intersect, the active blueprint falls back to
+  // hero, and the sticky keyboard can jump off-screen or look like it vanished.
   const ioMarginY = isNarrow
     ? "-32% 0px -32% 0px"
     : viewportHeight < SHORT_VIEWPORT
-      ? "-10% 0px -10% 0px"
-      : "-15% 0px -15% 0px";
+      ? "-5% 0px -5% 0px"
+      : "0px 0px 0px 0px";
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -304,21 +253,17 @@ export function useHero(rootRef: RefObject<HTMLElement | null>) {
     if (!entered) return;
 
     let key: keyof typeof BLUEPRINTS = "hero";
-    if (!isNarrow && visibleSections.has(3)) key = "groupbuy";
-    else if (visibleSections.has(2)) key = "inside";
-    else if (!isNarrow && visibleSections.has(1)) key = "build";
+    // Section 3 (Group Buy) uses the same pose as "What's inside" — no separate zoom/pan.
+    if (visibleSections.has(2) || (!isNarrow && visibleSections.has(3))) {
+      key = "inside";
+    } else if (!isNarrow && visibleSections.has(1)) key = "build";
 
     const pos = isNarrow
-      ? resolveMobilePortraitPos(
-          MOBILE_BLUEPRINTS[key],
-          layoutWidth,
-          viewportHeight,
-        )
+      ? resolveMobilePortraitPos(MOBILE_BLUEPRINTS[key], viewportHeight)
       : resolveKeyboardPos(BLUEPRINTS[key], layoutWidth);
 
     xBase.set(pos.x);
     yBase.set(pos.y);
-    scBase.set(pos.scale);
     rxBase.set(pos.rx);
     ryBase.set(pos.ry);
     rzBase.set(pos.rz);
@@ -330,7 +275,6 @@ export function useHero(rootRef: RefObject<HTMLElement | null>) {
     isNarrow,
     xBase,
     yBase,
-    scBase,
     rxBase,
     ryBase,
     rzBase,
@@ -342,7 +286,6 @@ export function useHero(rootRef: RefObject<HTMLElement | null>) {
     handleExploreBuilds,
     x,
     y,
-    sc,
     rx,
     ry,
     rz,
