@@ -166,12 +166,13 @@ export interface KeyboardRefs {
 interface KeyboardProps extends React.ComponentProps<"group"> {
   keycapMaterial?: THREE.Material;
   knobColor?: string;
+  caseColor?: string;
   /** When set, top/bottom case materials follow the landing-page colorway. */
   activeColorway?: Colorway;
 }
 
 export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
-  ({ keycapMaterial, knobColor, activeColorway, ...props }, ref) => {
+  ({ keycapMaterial, knobColor, caseColor, activeColorway, ...props }, ref) => {
     const { nodes, materials } = useGLTF(
       "/keyboard.gltf",
     ) as unknown as GLTFResult;
@@ -317,7 +318,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
       container: containerRef,
     }));
 
-    const keycapTexture = useTexture("/dreamboard_uv.png");
+    const keycapTexture = useTexture("/t1.png");
     keycapTexture.flipY = false;
     keycapTexture.colorSpace = THREE.SRGBColorSpace;
 
@@ -353,9 +354,9 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
       roughness: 0.5,
     });
     const bottomCaseColor =
-      activeColorway?.vars["--case-dark"] ?? "#0A1628";
+      caseColor ?? activeColorway?.vars["--case-dark"] ?? "#0A1628";
     const topCaseColor =
-      activeColorway?.vars["--case-color"] ?? "#1A1A2E";
+      caseColor ?? activeColorway?.vars["--case-color"] ?? "#1A1A2E";
     const bottomCaseMat = new THREE.MeshStandardMaterial({
       color: bottomCaseColor,
       roughness: 0.5,

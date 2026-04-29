@@ -8,9 +8,10 @@ import {
   useTransform,
 } from "motion/react";
 import { Scene } from "@/components/scene";
-import { COLORWAYS } from "@/lib/constants";
+import { COLORWAYS, KEYCAP_TEXTURES } from "@/lib/constants";
 
 type Colorway = (typeof COLORWAYS)[number];
+type KeycapTextureId = (typeof KEYCAP_TEXTURES)[number]["id"];
 
 function DragMotionInvalidate({
   dragRx,
@@ -30,7 +31,9 @@ interface GltfKeyboardViewerProps {
   baseRotateY?: MotionValue<number> | number;
   baseRotateZ?: MotionValue<number> | number;
   activeColorway?: Colorway;
+  selectedTextureId?: KeycapTextureId;
   isInteractive?: boolean;
+  isHeroKeyboardInView?: boolean;
 }
 
 function GltfKeyboardViewer({
@@ -38,7 +41,9 @@ function GltfKeyboardViewer({
   baseRotateY = -8,
   baseRotateZ = 0,
   activeColorway,
+  selectedTextureId = KEYCAP_TEXTURES[0].id,
   isInteractive = true,
+  isHeroKeyboardInView = false,
 }: GltfKeyboardViewerProps) {
   const [isDragging, setIsDragging] = useState(false);
   const isDraggingRef = useRef(false);
@@ -150,6 +155,8 @@ function GltfKeyboardViewer({
               rotateY={finalRotateY}
               rotateZ={mvRz}
               activeColorway={activeColorway}
+              selectedTextureId={selectedTextureId}
+              isHeroKeyboardInView={isHeroKeyboardInView}
             />
           </Suspense>
         </Canvas>

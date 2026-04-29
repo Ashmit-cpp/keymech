@@ -12,13 +12,13 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "./ui/dropdown-menu";
-import { ModeToggle } from "./mode-toggle";
 import { useAuthStore } from "@/stores/auth-store";
 import { useCartControllerGetCart, useAuthControllerLogout } from "@/api/generated";
 import { useGuestCartStore } from "@/stores/cart-store";
 import { useGuestWishlistStore } from "@/stores/wishlist-store";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [
   { label: "Keyboards", path: "/category/keyboards" },
@@ -101,39 +101,40 @@ export default function Navbar() {
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
-          ? "bg-background/80 backdrop-blur-md border-b border-border"
-          : "bg-transparent"
+          ? "border-b border-primary/25 bg-background/82 shadow-[0_14px_40px_rgba(0,0,0,0.22)] backdrop-blur-xl"
+          : "border-b border-white/5 bg-background/18 backdrop-blur-[2px]"
       }`}
     >
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/65 to-transparent opacity-80" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/35 to-transparent opacity-60" />
+
+      <div className="mx-auto flex h-16 w-full max-w-[1720px] items-center justify-between px-5 sm:px-8 lg:px-10">
         {/* Logo */}
         <Button
           variant="link"
           size="sm"
-          className="flex items-center gap-2"
+          className="group flex items-center gap-2 px-0 no-underline hover:no-underline"
           onClick={() => handleNav("/")}
           aria-label="Go to home"
         >
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center rotate-3">
-            <span className="text-primary-foreground font-bold text-lg">K</span>
-          </div>
-          <span className="text-xl font-bold tracking-tight text-foreground hover:text-primary">
+          <span className="text-xl font-bold tracking-tight text-foreground transition-colors group-hover:text-primary">
             KeyMech
           </span>
         </Button>
 
         {/* Desktop Links */}
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden items-center gap-3 md:flex">
           {NAV_LINKS.map((link) => (
             <Button
               key={link.path}
               variant="link"
               size="sm"
-              className={` ${
+              className={cn(
+                "relative h-9 rounded-[1px] px-3 text-sm font-medium no-underline transition-colors hover:no-underline",
                 pathname === link.path
-                  ? "text-primary"
-                  : "text-muted-foreground hover:text-primary"
-              }`}
+                  ? "bg-primary/12 text-primary shadow-[inset_0_-1px_0_hsl(var(--primary)/0.55)]"
+                  : "text-muted-foreground hover:bg-white/5 hover:text-foreground",
+              )}
               onClick={() => handleNav(link.path)}
             >
               {link.label}
@@ -142,8 +143,8 @@ export default function Navbar() {
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-4">
-          <div className="hidden md:flex items-center gap-2">
+        <div className="flex items-center gap-3">
+          <div className="hidden items-center gap-2 md:flex">
             {showSearch && (
               <form
                 className="flex items-center gap-2"
@@ -156,9 +157,9 @@ export default function Navbar() {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   placeholder="Search products"
-                  className="w-48"
+                  className="h-9 w-48 border-primary/20 bg-background/70"
                 />
-                <Button type="submit" size="icon" variant="secondary">
+                <Button type="submit" size="icon" variant="secondary" className="h-9 w-9 border border-primary/20">
                   <Search className="h-4 w-4" />
                 </Button>
               </form>
@@ -167,17 +168,18 @@ export default function Navbar() {
               <Button
                 variant="ghost"
                 size="icon"
+                className="h-9 w-9 border border-white/8 bg-background/25 hover:border-primary/30 hover:bg-primary/10 hover:text-primary"
                 onClick={() => setShowSearch(true)}
               >
                 <Search className="h-4 w-4" />
               </Button>
             )}
           </div>
-
+            
           <Button
             variant="outline"
             size="icon"
-            className="relative"
+            className="relative h-9 w-9 border-white/10 bg-background/25 hover:border-primary/35 hover:bg-primary/10 hover:text-primary"
             onClick={() => handleNav("/cart")}
           >
             <ShoppingCart className="h-4 w-4" />
@@ -193,7 +195,7 @@ export default function Navbar() {
           <Button
             variant="outline"
             size="icon"
-            className="relative"
+            className="relative h-9 w-9 border-white/10 bg-background/25 hover:border-primary/35 hover:bg-primary/10 hover:text-primary"
             onClick={() => handleNav("/wishlist")}
           >
             <Heart className="h-4 w-4" />
@@ -203,7 +205,7 @@ export default function Navbar() {
               </Badge>
             )}
           </Button>
-          <ModeToggle />
+          {/* <ModeToggle /> */}
           {isAuthenticated ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -245,7 +247,7 @@ export default function Navbar() {
             <Button
               variant="ghost"
               size="sm"
-              className="hidden sm:flex"
+              className="hidden border border-transparent px-4 font-semibold hover:border-primary/25 hover:bg-primary/10 hover:text-primary sm:flex"
               onClick={() => handleNav("/auth/login")}
             >
               Sign In
@@ -255,7 +257,7 @@ export default function Navbar() {
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden"
+            className="border border-white/10 bg-background/25 md:hidden"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle navigation"
           >
@@ -270,7 +272,9 @@ export default function Navbar() {
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-background border-b border-border absolute w-full px-4 py-4 flex flex-col gap-4 animate-in slide-in-from-top-2">
+        <div className="absolute w-full animate-in slide-in-from-top-2 border-b border-primary/20 bg-background/95 px-4 py-4 shadow-[0_18px_44px_rgba(0,0,0,0.24)] backdrop-blur-xl md:hidden">
+          <div className="mb-4 h-px w-full bg-gradient-to-r from-transparent via-primary/45 to-transparent" />
+          <div className="flex flex-col gap-4">
           <div className="flex items-center gap-2">
             <Input
               value={searchTerm}
@@ -289,11 +293,12 @@ export default function Navbar() {
           {NAV_LINKS.map((link) => (
             <button
               key={link.path}
-              className={`text-sm font-medium text-left transition-colors ${
+              className={cn(
+                "rounded-[1px] px-2 py-2 text-left text-sm font-medium transition-colors",
                 pathname === link.path
-                  ? "text-primary"
-                  : "text-muted-foreground hover:text-primary"
-              }`}
+                  ? "bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:bg-white/5 hover:text-primary",
+              )}
               onClick={() => handleNav(link.path)}
             >
               {link.label}
@@ -338,6 +343,7 @@ export default function Navbar() {
               </Button>
             </div>
           )}
+          </div>
         </div>
       )}
     </nav>

@@ -43,10 +43,14 @@ const ProductSection: React.FC<ProductSectionProps> = ({ title, subtitle }) => {
   };
 
   return (
-    <section className="relative overflow-hidden pt-5 bg-background z-1000">
+    <section className="relative z-10 overflow-visible bg-background pt-5">
 
   
-    <section className="relative py-10 bg-background/50 overflow-hidden">
+    <section className="relative overflow-visible bg-transparent py-10">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute right-[-18%] top-[-26rem] h-[46rem] w-[72rem] rounded-full bg-[radial-gradient(ellipse_at_center,hsl(var(--primary)/0.14),hsl(var(--primary)/0.06)_44%,transparent_76%)] blur-[92px]"
+      />
       <div className="container mx-auto px-4 relative z-10">
         <div className="flex justify-between items-end mb-10">
           <div>

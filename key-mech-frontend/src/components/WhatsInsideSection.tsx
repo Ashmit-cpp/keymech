@@ -3,35 +3,22 @@ import { motion } from "motion/react";
 import { ArrowUpRight } from "lucide-react";
 import { KeyboardAsideSection } from "@/components/keyboard-aside-section";
 import { Button } from "@/components/ui/button";
-import { COLORWAYS } from "@/lib/constants";
+import { KEYCAP_TEXTURES } from "@/lib/constants";
 
-type Colorway = (typeof COLORWAYS)[number];
-
-/** Swatches map to full theme entries in `COLORWAYS` (3D keyboard + CSS vars). */
-const INSIDE_COLOR_PICKER: {
-  label: string;
-  colorway: Colorway;
-  swatch: string;
-}[] = [
-  { label: "Lime", colorway: COLORWAYS[0], swatch: COLORWAYS[0].info.accent },
-  { label: "Crimson", colorway: COLORWAYS[1], swatch: COLORWAYS[1].info.accent },
-  { label: "Stealth", colorway: COLORWAYS[2], swatch: COLORWAYS[2].info.accent },
-  { label: "Stealth", colorway: COLORWAYS[3], swatch: COLORWAYS[3].info.accent },
-  
-];
+type KeycapTexture = (typeof KEYCAP_TEXTURES)[number];
 
 interface WhatsInsideSectionProps {
   sectionRef?: RefCallback<HTMLDivElement>;
   dataSection?: number;
-  activeColorway?: Colorway;
-  applyColorway?: (cw: Colorway) => void;
+  selectedTextureId?: KeycapTexture["id"];
+  applyTexture?: (texture: KeycapTexture) => void;
 }
 
 export default function WhatsInsideSection({
   sectionRef,
   dataSection,
-  activeColorway,
-  applyColorway,
+  selectedTextureId,
+  applyTexture,
 }: WhatsInsideSectionProps) {
   return (
     <div>
@@ -64,7 +51,7 @@ export default function WhatsInsideSection({
               </div>
             </motion.div>
 
-            {/* Color picker */}
+            {/* Texture pack picker */}
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -77,33 +64,35 @@ export default function WhatsInsideSection({
               className="mt-8"
             >
               <span className="text-[13px] font-medium tracking-widest text-muted-foreground uppercase mb-3 block">
-                Color
+                Keycap Color
               </span>
               <div
                 className="relative z-10 flex gap-3 items-center"
                 role="group"
               >
-                {INSIDE_COLOR_PICKER.map(({ colorway, swatch }) => {
-                  const isActive =
-                    activeColorway != null && activeColorway === colorway;
+                {KEYCAP_TEXTURES.map((texture) => {
+                  const isActive = selectedTextureId === texture.id;
                   return (
                     <button
-                      key={colorway.id}
+                      key={texture.id}
                       type="button"
-                      title={colorway.name}
-                      aria-label={`${colorway.name} colorway`}
+                      title={texture.name}
+                      aria-label={`${texture.name} keycap color`}
                       aria-pressed={isActive}
-                      disabled={!applyColorway}
-                      onClick={() => applyColorway?.(colorway)}
-                      className={`relative z-10 h-9 w-9 shrink-0 cursor-pointer rounded-sm p-[2px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 ${
+                      disabled={!applyTexture}
+                      onClick={() => applyTexture?.(texture)}
+                      className={`relative z-10 h-10 w-10 shrink-0 cursor-pointer rounded-sm p-[2px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 ${
                         isActive
                           ? "scale-110 border-2 border-primary ring-2 ring-primary ring-offset-2 ring-offset-background"
                           : "border border-border hover:border-foreground/40"
                       }`}
                     >
                       <span
-                        className="block size-full rounded-[2px]"
-                        style={{ background: swatch }}
+                        className="block size-full rounded-[2px] bg-cover bg-center"
+                        style={{
+                          backgroundColor: texture.knobColor,
+                          backgroundImage: `url(${texture.path})`,
+                        }}
                       />
                     </button>
                   );

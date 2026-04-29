@@ -49,35 +49,84 @@ const Landing: React.FC = () => {
       };
 
   return (
-    <section className="relative overflow-hidden pt-12 md:pt-6 bg-background">
-      <div className="absolute inset-0 z-0 pointer-events-none">
-        <motion.div
-          className="absolute top-[-15%] right-[-10%] w-[600px] h-[600px] bg-secondary/15 rounded-full blur-[120px]"
-          animate={
-            prefersReducedMotion
-              ? undefined
-              : { scale: [1, 1.06, 1], opacity: [0.12, 0.2, 0.12] }
-          }
-          transition={orbLoopTransition}
-        />
-        <motion.div
-          className="absolute top-[6%] right-[8%] w-[220px] h-[220px] bg-secondary/8 rounded-full blur-3xl"
-          animate={prefersReducedMotion ? undefined : { x: [0, 18, 0], y: [0, -12, 0] }}
-          transition={orbLoopTransition ? { ...orbLoopTransition, duration: 11 } : undefined}
-        />
-        <motion.div
-          className="absolute top-[20%] left-[-12%] w-[520px] h-[520px] bg-secondary/10 rounded-full blur-[120px]"
-          animate={
-            prefersReducedMotion ? undefined : { scale: [1, 1.05, 1], x: [0, -14, 0] }
-          }
-          transition={orbLoopTransition ? { ...orbLoopTransition, duration: 16 } : undefined}
-        />
-      </div>
+    <section className="relative overflow-hidden pt-12 md:pt-6">
+     <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+  {/* base dark depth */}
+  <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_45%,hsl(var(--primary)/0.10),transparent_34%),radial-gradient(circle_at_18%_28%,rgba(255,255,255,0.045),transparent_28%),linear-gradient(180deg,rgba(255,255,255,0.025),transparent_38%)]" />
 
-      <div className="flex flex-col md:flex-row min-h-screen p-10 relative z-10">
-        <div className="flex-1 flex items-center">
+  {/* subtle left grid like the mockup */}
+  <div className="absolute left-0 top-0 h-full w-[42%] opacity-[0.11] [background-image:linear-gradient(to_right,rgba(255,255,255,0.14)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.14)_1px,transparent_1px)] [background-size:32px_32px] [mask-image:linear-gradient(to_right,black,transparent)]" />
+
+  {/* page-level diffused corner orbs */}
+  <div className="absolute bottom-[-8%] left-[-12%] h-[560px] w-[560px] rounded-full bg-primary/18 blur-[150px]" />
+  <div className="absolute left-[-16%] top-[-18%] h-[520px] w-[520px] rounded-full bg-white/10 blur-[160px]" />
+
+  {/* red product-side orb */}
+  <motion.div
+    className="absolute right-[6%] bottom-[2%] h-[520px] w-[520px] rounded-full bg-primary/25 blur-[120px]"
+    animate={
+      prefersReducedMotion
+        ? undefined
+        : {
+            scale: [1, 1.08, 1],
+            opacity: [0.18, 0.32, 0.18],
+            x: [0, -18, 0],
+          }
+    }
+    transition={orbLoopTransition ? { ...orbLoopTransition, duration: 13 } : undefined}
+  />
+
+  {/* smaller hot red floor glow */}
+  <motion.div
+    className="absolute right-[16%] bottom-[10%] h-[220px] w-[420px] rounded-full bg-primary/35 blur-[90px]"
+    animate={
+      prefersReducedMotion
+        ? undefined
+        : {
+            opacity: [0.22, 0.42, 0.22],
+            scaleX: [1, 1.14, 1],
+          }
+    }
+    transition={orbLoopTransition ? { ...orbLoopTransition, duration: 10 } : undefined}
+  />
+
+  {/* cool white atmospheric orb behind image */}
+  <motion.div
+    className="absolute right-[28%] top-[12%] h-[360px] w-[360px] rounded-full bg-white/10 blur-[130px]"
+    animate={
+      prefersReducedMotion
+        ? undefined
+        : {
+            y: [0, -18, 0],
+            opacity: [0.08, 0.16, 0.08],
+          }
+    }
+    transition={orbLoopTransition ? { ...orbLoopTransition, duration: 15 } : undefined}
+  />
+
+  {/* left-side faint ambient red */}
+  <motion.div
+    className="absolute left-[-12%] top-[18%] h-[480px] w-[480px] rounded-full bg-primary/10 blur-[140px]"
+    animate={
+      prefersReducedMotion
+        ? undefined
+        : {
+            scale: [1, 1.06, 1],
+            opacity: [0.08, 0.16, 0.08],
+          }
+    }
+    transition={orbLoopTransition ? { ...orbLoopTransition, duration: 17 } : undefined}
+  />
+
+  {/* vignette */}
+  <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_38%,rgba(0,0,0,0.48)_100%)]" />
+</div>
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-56 bg-gradient-to-b from-transparent via-background/80 to-background" />
+
+      <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-[1720px] flex-col gap-8 px-6 py-10 sm:px-8 md:flex-row md:items-center md:gap-6 lg:px-10 xl:gap-8">
+        <div className="flex flex-1 items-center">
           <motion.div
-            className="container px-4 space-y-8 text-center md:text-left"
+            className="w-full max-w-[720px] space-y-8 text-center md:text-left"
             variants={copyContainer}
             initial="hidden"
             animate="show"
@@ -130,9 +179,9 @@ const Landing: React.FC = () => {
           </motion.div>
         </div>
 
-        <div className="md:flex-1 w-full md:w-1/2 min-h-[50vh] md:min-h-screen relative perspective-1000">
+        <div className="relative min-h-[50vh] w-full perspective-1000 md:min-h-[78vh] md:flex-1">
           <div
-            className="absolute inset-0 md:left-2 md:right-0 md:top-4 md:bottom-4 rounded-2xl md:rounded-3xl overflow-hidden shadow-2xl"
+            className="absolute inset-0 overflow-hidden rounded-2xl md:inset-y-4 md:left-0 md:right-0 md:rounded-3xl"
             style={{ transformStyle: "preserve-3d" }}
           >
             <div
@@ -163,62 +212,57 @@ const Landing: React.FC = () => {
             </div>
 
             <motion.div
-              className="absolute inset-0"
+              className="absolute inset-0 flex items-center justify-center overflow-visible"
               initial={false}
               animate={
-                prefersReducedMotion
-                  ? { rotateY: 10 }
-                  : isImageLoaded
-                    ? {
-                        rotateY: 10,
-                        y: [0, -5, 0],
-                      }
-                    : { rotateY: 26 }
-              }
-              whileHover={
-                prefersReducedMotion || !isImageLoaded
-                  ? undefined
-                  : { rotateY: 18, transition: { duration: 0.45, ease: easeOut } }
+                isImageLoaded
+                  ? { rotateX: 0, rotateY: 8, rotateZ: 0, scale: 1.18, y: 0 }
+                  : { rotateX: 0, rotateY: 22, rotateZ: 0, scale: 1, y: 0 }
               }
               transition={
-                prefersReducedMotion
-                  ? { duration: 0.35, ease: easeOut }
-                  : isImageLoaded
-                    ? {
-                        rotateY: { duration: 1, ease: easeOut },
-                        y: { duration: 5.5, repeat: Infinity, ease: "easeInOut" },
-                      }
-                    : { duration: 0.6, ease: easeOut }
+                isImageLoaded
+                  ? {
+                      rotateX: { duration: 1, ease: easeOut },
+                      rotateY: { duration: 1, ease: easeOut },
+                      rotateZ: { duration: 1, ease: easeOut },
+                      scale: { duration: 1, ease: easeOut },
+                      y: { duration: 1, ease: easeOut },
+                    }
+                  : { duration: 0.6, ease: easeOut }
               }
               style={{ transformStyle: "preserve-3d" }}
             >
-              <motion.img
-                src="/bg.png"
-                alt="Premium Keyboard Build"
-                decoding="async"
-                fetchPriority="high"
-                loading="eager"
-                onLoad={() => setIsImageLoaded(true)}
-                className="absolute inset-0 w-full h-full object-cover"
-                initial={
-                  prefersReducedMotion
-                    ? { opacity: 0, scale: 1, filter: "blur(0px)" }
-                    : { opacity: 0, scale: 1.06, filter: "blur(14px)" }
-                }
-                animate={
-                  isImageLoaded
-                    ? { opacity: 1, scale: 1, filter: "blur(0px)" }
-                    : prefersReducedMotion
+              <div className="relative flex w-[155%] max-w-none flex-col items-center md:w-[170%]">
+                <motion.img
+                  src="/landing.png"
+                  alt="Premium Keyboard Build"
+                  decoding="async"
+                  fetchPriority="high"
+                  loading="eager"
+                  onLoad={() => setIsImageLoaded(true)}
+                  className="max-h-[62vh] w-full object-contain object-center blend-multiply md:max-h-[92vh] [mask-image:radial-gradient(ellipse_at_center,black_54%,rgba(0,0,0,0.88)_70%,transparent_100%)]"
+                  initial={
+                    prefersReducedMotion
                       ? { opacity: 0, scale: 1, filter: "blur(0px)" }
                       : { opacity: 0, scale: 1.06, filter: "blur(14px)" }
-                }
-                transition={
-                  prefersReducedMotion
-                    ? { duration: 0.2, ease: easeOut }
-                    : { duration: 0.85, ease: easeOut }
-                }
-                style={{ transformStyle: "preserve-3d" }}
-              />
+                  }
+                  animate={
+                    isImageLoaded
+                      ? { opacity: 1, scale: 1, filter: "blur(0px)" }
+                      : prefersReducedMotion
+                        ? { opacity: 0, scale: 1, filter: "blur(0px)" }
+                        : { opacity: 0, scale: 1.06, filter: "blur(14px)" }
+                  }
+                  transition={
+                    prefersReducedMotion
+                      ? { duration: 0.2, ease: easeOut }
+                      : { duration: 0.85, ease: easeOut }
+                  }
+                  style={{ transformStyle: "preserve-3d" }}
+                />
+                <div className="-mt-1 h-px w-[74%] bg-gradient-to-r from-transparent via-primary/65 to-transparent blur-[1px]" />
+                <div className="-mt-1 h-6 w-[62%] bg-primary/20 blur-2xl" />
+              </div>
             </motion.div>
 
             {isImageLoaded && !prefersReducedMotion && (

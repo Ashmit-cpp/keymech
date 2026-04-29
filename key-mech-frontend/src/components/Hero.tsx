@@ -1,33 +1,13 @@
 import { useRef } from "react";
-import { motion, type Variants } from "motion/react";
-import { Badge } from "@/components/ui/badge";
+import { motion } from "motion/react";
 import { useHero } from "@/hooks/use-hero";
 import BuildSection from "./BuildSection";
 import GroupBuySection from "./GroupBuySection";
 import GltfKeyboardViewer from "./gltf-keyboard-viewer";
+import HeroIntroSection from "./HeroIntroSection";
 import WhatsInsideSection from "./WhatsInsideSection";
 
 const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-const copyContainer: Variants = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.07,
-      delayChildren: 0.03,
-    },
-  },
-};
-
-const copyItem: Variants = {
-  hidden: { opacity: 0, y: 22 },
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.42, ease: EASE_OUT },
-  },
-};
 
 export default function Hero() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -41,15 +21,17 @@ export default function Hero() {
     registerSection,
     entered,
     activeColorway,
-    applyColorway,
+    selectedTextureId,
+    applyTexture,
     isNarrow,
     isKeyboardInteractive,
+    isHeroKeyboardInView,
   } = useHero(containerRef);
 
   return (
     <div
       ref={containerRef}
-      className="relative min-h-screen overflow-x-clip bg-background text-foreground"
+      className="hero relative min-h-screen overflow-x-clip bg-background text-foreground"
     >
       <div className="relative w-full">
         {/* ── Sticky 3D keyboard scene ──────────────────────────────────────── */}
@@ -84,6 +66,9 @@ export default function Hero() {
                       baseRotateY={ry}
                       baseRotateZ={rz}
                       isInteractive={isKeyboardInteractive}
+                      isHeroKeyboardInView={isHeroKeyboardInView}
+                      activeColorway={activeColorway}
+                      selectedTextureId={selectedTextureId}
                     />
                   </div>
                 </motion.div>
@@ -93,47 +78,10 @@ export default function Hero() {
         </div>
 
         <div className="relative z-20">
-          <section
-            ref={(el) => registerSection(el, 0)}
-            data-section={0}
-            className="relative z-20 flex min-h-0 flex-col "
-          >
-            <motion.div
-              variants={copyContainer}
-              initial="hidden"
-              animate="show"
-              className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col items-center justify-start px-6 pb-6 pt-2 md:min-h-[60vh] md:justify-start md:px-10 md:pb-0 md:pt-0"
-            >
-              {/* Top: badge (direct child for stagger) */}
-              <motion.div
-                variants={copyItem}
-                className="flex shrink-0 flex-col items-center px-2 pb-2 pt-2 text-center md:pt-20"
-              >
-                <Badge
-                  variant="secondary"
-                  className="inline-flex items-center gap-2 px-3 py-1 text-xs font-medium"
-                >
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
-                  </span>
-                  New Specter 75 Series Available Now
-                </Badge>
-              </motion.div>
-
-              {/* Top: headline — above keyboard */}
-              <motion.h1
-                variants={copyItem}
-                className="shrink-0 px-2 pb-4 text-center text-5xl font-bold leading-[1.05] tracking-tight text-foreground sm:text-6xl md:pb-6 md:text-6xl lg:text-7xl"
-              >
-                Performance
-                <br />
-                <span className="text-transparent bg-clip-text bg-linear-to-r from-primary to-primary/80">
-                  That Lasts
-                </span>
-              </motion.h1>
-            </motion.div>
-          </section>
+          <HeroIntroSection
+            sectionRef={(el) => registerSection(el, 0)}
+            dataSection={0}
+          />
 
           {/* SECTION 1: Build — desktop only */}
           {!isNarrow && (
@@ -150,8 +98,8 @@ export default function Hero() {
             <WhatsInsideSection
               sectionRef={(el) => registerSection(el, 2)}
               dataSection={2}
-              activeColorway={activeColorway}
-              applyColorway={applyColorway}
+              selectedTextureId={selectedTextureId}
+              applyTexture={applyTexture}
             />
 
             {/* Group Buy — desktop only */}
