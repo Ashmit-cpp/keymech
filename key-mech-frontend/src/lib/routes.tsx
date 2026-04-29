@@ -1,49 +1,47 @@
-import AdminRoute from '@/components/AdminRoute'
-import ProtectedRoute from '@/components/ProtectedRoute'
-import AccountLayout from '@/layouts/AccountLayout'
-import AdminLayout from '@/layouts/AdminLayout'
-import RootLayout from '@/layouts/RootLayout'
-import AboutPage from '@/pages/About'
-import AccountAddresses from '@/pages/account/Addresses'
-import AccountDashboard from '@/pages/account/Dashboard'
-import AccountOrderDetail from '@/pages/account/OrderDetail'
-import AccountOrders from '@/pages/account/Orders'
-import AccountProfile from '@/pages/account/Profile'
-import AccountSettings from '@/pages/account/Settings'
-import WishlistPage from '@/pages/account/Wishlist'
-import AdminAnalytics from '@/pages/admin/Analytics'
-import AdminDashboard from '@/pages/admin/Dashboard'
-import AdminInventory from '@/pages/admin/Inventory'
-import AdminOrderDetail from '@/pages/admin/OrderDetail'
-import AdminOrders from '@/pages/admin/Orders'
-import AdminProductCreate from '@/pages/admin/ProductCreate'
-import AdminProductEdit from '@/pages/admin/ProductEdit'
-import AdminProducts from '@/pages/admin/Products'
-import AdminSettings from '@/pages/admin/Settings'
-import AdminUsers from '@/pages/admin/Users'
-import ForgotPasswordPage from '@/pages/auth/ForgotPassword'
-import LoginPage from '@/pages/auth/Login'
-import RegisterPage from '@/pages/auth/Register'
-import ResetPasswordPage from '@/pages/auth/ResetPassword'
-import BlogPage from '@/pages/Blog'
-import BlogPostPage from '@/pages/BlogPost'
-import CartPage from '@/pages/Cart'
-import CategoryPage from '@/pages/Category'
-import CheckoutPage from '@/pages/Checkout'
-import ContactPage from '@/pages/Contact'
-import HomePage from '@/pages/Home'
-import NotFoundPage from '@/pages/NotFound'
-import OrderConfirmationPage from '@/pages/OrderConfirmation'
-import ProductDetailPage from '@/pages/ProductDetail'
-import ProductsPage from '@/pages/Products'
-import UnauthorizedPage from '@/pages/Unauthorized'
-import { createBrowserRouter, RouterProvider } from 'react-router-dom'
-
-
+import AdminRoute from "@/components/AdminRoute";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import AccountLayout from "@/layouts/AccountLayout";
+import AdminLayout from "@/layouts/AdminLayout";
+import RootLayout from "@/layouts/RootLayout";
+import AboutPage from "@/pages/About";
+import AccountAddresses from "@/pages/account/Addresses";
+import AccountDashboard from "@/pages/account/Dashboard";
+import AccountOrderDetail from "@/pages/account/OrderDetail";
+import AccountOrders from "@/pages/account/Orders";
+import AccountProfile from "@/pages/account/Profile";
+import AccountSettings from "@/pages/account/Settings";
+import WishlistPage from "@/pages/account/Wishlist";
+import AdminAnalytics from "@/pages/admin/Analytics";
+import AdminDashboard from "@/pages/admin/Dashboard";
+import AdminInventory from "@/pages/admin/Inventory";
+import AdminOrderDetail from "@/pages/admin/OrderDetail";
+import AdminOrders from "@/pages/admin/Orders";
+import AdminProductCreate from "@/pages/admin/ProductCreate";
+import AdminProductEdit from "@/pages/admin/ProductEdit";
+import AdminProducts from "@/pages/admin/Products";
+import AdminSettings from "@/pages/admin/Settings";
+import AdminUsers from "@/pages/admin/Users";
+import ForgotPasswordPage from "@/pages/auth/ForgotPassword";
+import LoginPage from "@/pages/auth/Login";
+import RegisterPage from "@/pages/auth/Register";
+import ResetPasswordPage from "@/pages/auth/ResetPassword";
+import BlogPage from "@/pages/Blog";
+import BlogPostPage from "@/pages/BlogPost";
+import CartPage from "@/pages/Cart";
+import CategoryPage from "@/pages/Category";
+import CheckoutPage from "@/pages/Checkout";
+import ContactPage from "@/pages/Contact";
+import HomePage from "@/pages/Home";
+import NotFoundPage from "@/pages/NotFound";
+import OrderConfirmationPage from "@/pages/OrderConfirmation";
+import ProductDetailPage from "@/pages/ProductDetail";
+import ProductsPage from "@/pages/Products";
+import UnauthorizedPage from "@/pages/Unauthorized";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 const router = createBrowserRouter([
   {
-    path: '/',
+    path: "/",
     element: <RootLayout />,
     errorElement: <NotFoundPage />,
     children: [
@@ -53,22 +51,22 @@ const router = createBrowserRouter([
         element: <HomePage />,
       },
       {
-        path: 'about',
+        path: "about",
         element: <AboutPage />,
       },
       {
-        path: 'contact',
+        path: "contact",
         element: <ContactPage />,
       },
       {
-        path: 'blog',
+        path: "blog",
         children: [
           {
             index: true,
             element: <BlogPage />,
           },
           {
-            path: ':slug',
+            path: ":slug",
             element: <BlogPostPage />,
           },
         ],
@@ -76,14 +74,14 @@ const router = createBrowserRouter([
 
       // Product Routes
       {
-        path: 'products',
+        path: "products",
         children: [
           {
             index: true,
             element: <ProductsPage />,
           },
           {
-            path: ':id',
+            path: ":id",
             element: <ProductDetailPage />,
           },
         ],
@@ -91,39 +89,39 @@ const router = createBrowserRouter([
 
       // Category Routes
       {
-        path: 'category/:category',
+        path: "category/:category",
         element: <CategoryPage />,
       },
 
       // Specific Category Pages
       {
-        path: 'keyboards',
+        path: "keyboards",
         element: <CategoryPage />,
       },
       {
-        path: 'switches',
+        path: "switches",
         element: <CategoryPage />,
       },
       {
-        path: 'keycaps',
+        path: "keycaps",
         element: <CategoryPage />,
       },
       {
-        path: 'accessories',
+        path: "accessories",
         element: <CategoryPage />,
       },
 
       // Shopping Cart & Checkout
       {
-        path: 'cart',
+        path: "cart",
         element: <CartPage />,
       },
       {
-        path: 'wishlist',
+        path: "wishlist",
         element: <WishlistPage />,
       },
       {
-        path: 'checkout',
+        path: "checkout",
         element: (
           <ProtectedRoute>
             <CheckoutPage />
@@ -131,7 +129,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: 'order-confirmation/:orderId',
+        path: "order-confirmation/:orderId",
         element: (
           <ProtectedRoute>
             <OrderConfirmationPage />
@@ -141,38 +139,36 @@ const router = createBrowserRouter([
 
       // User Account Routes
       {
-        path: 'account',
-        element: (
-            <AccountLayout />
-        ),
+        path: "account",
+        element: <AccountLayout />,
         children: [
           {
             index: true,
             element: <AccountDashboard />,
           },
           {
-            path: 'orders',
+            path: "orders",
             children: [
               {
                 index: true,
                 element: <AccountOrders />,
               },
               {
-                path: ':orderId',
+                path: ":orderId",
                 element: <AccountOrderDetail />,
               },
             ],
           },
           {
-            path: 'profile',
+            path: "profile",
             element: <AccountProfile />,
           },
           {
-            path: 'addresses',
+            path: "addresses",
             element: <AccountAddresses />,
           },
           {
-            path: 'settings',
+            path: "settings",
             element: <AccountSettings />,
           },
         ],
@@ -180,7 +176,7 @@ const router = createBrowserRouter([
 
       // Admin Routes
       {
-        path: 'admin',
+        path: "admin",
         element: (
           <AdminRoute>
             <AdminLayout />
@@ -192,49 +188,49 @@ const router = createBrowserRouter([
             element: <AdminDashboard />,
           },
           {
-            path: 'products',
+            path: "products",
             children: [
               {
                 index: true,
                 element: <AdminProducts />,
               },
               {
-                path: 'create',
+                path: "create",
                 element: <AdminProductCreate />,
               },
               {
-                path: 'edit/:productId',
+                path: "edit/:productId",
                 element: <AdminProductEdit />,
               },
             ],
           },
           {
-            path: 'orders',
+            path: "orders",
             children: [
               {
                 index: true,
                 element: <AdminOrders />,
               },
               {
-                path: ':orderId',
+                path: ":orderId",
                 element: <AdminOrderDetail />,
               },
             ],
           },
           {
-            path: 'users',
+            path: "users",
             element: <AdminUsers />,
           },
           {
-            path: 'inventory',
+            path: "inventory",
             element: <AdminInventory />,
           },
           {
-            path: 'analytics',
+            path: "analytics",
             element: <AdminAnalytics />,
           },
           {
-            path: 'settings',
+            path: "settings",
             element: <AdminSettings />,
           },
         ],
@@ -244,35 +240,35 @@ const router = createBrowserRouter([
 
   // Auth Routes (full-screen layouts, no wrapper needed)
   {
-    path: '/auth/login',
+    path: "/auth/login",
     element: <LoginPage />,
   },
   {
-    path: '/auth/register',
+    path: "/auth/register",
     element: <RegisterPage />,
   },
   {
-    path: '/auth/forgot-password',
+    path: "/auth/forgot-password",
     element: <ForgotPasswordPage />,
   },
   {
-    path: '/auth/reset-password/:token',
+    path: "/auth/reset-password/:token",
     element: <ResetPasswordPage />,
   },
 
   // Error Routes
   {
-    path: '/unauthorized',
+    path: "/unauthorized",
     element: <UnauthorizedPage />,
   },
   {
-    path: '*',
+    path: "*",
     element: <NotFoundPage />,
   },
-])
+]);
 
 export default function AppRouter() {
-  return <RouterProvider router={router} />
+  return <RouterProvider router={router} />;
 }
 
-export { router }
+export { router };

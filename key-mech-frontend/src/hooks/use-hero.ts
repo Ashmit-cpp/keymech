@@ -7,7 +7,10 @@ import {
 } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSpring, useMotionValue, useReducedMotion } from "motion/react";
-import { COLORWAYS } from "@/lib/constants";
+import { COLORWAYS, KEYCAP_TEXTURES } from "@/lib/constants";
+
+type KeycapTexture = (typeof KEYCAP_TEXTURES)[number];
+type KeycapTextureId = KeycapTexture["id"];
 
 interface KeyboardPos {
   x: number;
@@ -84,6 +87,11 @@ export function useHero(rootRef: RefObject<HTMLElement | null>) {
   const [viewportHeight, setViewportHeight] = useState(() =>
     typeof window !== "undefined" ? window.innerHeight : 800,
   );
+  const [isHeroKeyboardInView, setIsHeroKeyboardInView] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      typeof IntersectionObserver === "undefined",
+  );
 
   useEffect(() => {
     const readViewport = () => {
@@ -118,6 +126,23 @@ export function useHero(rootRef: RefObject<HTMLElement | null>) {
     };
   }, [rootRef]);
 
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el) return;
+
+    if (typeof IntersectionObserver === "undefined") return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsHeroKeyboardInView(Boolean(entry?.isIntersecting));
+      },
+      { threshold: 0.01 },
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [rootRef]);
+
   const isNarrow = layoutWidth < NARROW_BREAKPOINT;
   const isKeyboardInteractive = !isNarrow;
 
@@ -146,6 +171,9 @@ export function useHero(rootRef: RefObject<HTMLElement | null>) {
   const [activeColorway, setActiveColorway] = useState<(typeof COLORWAYS)[0]>(
     COLORWAYS[0],
   );
+  const [selectedTextureId, setSelectedTextureId] = useState<KeycapTextureId>(
+    KEYCAP_TEXTURES[0].id,
+  );
   const colorwayChanging = useRef(false);
 
   const applyColorway = useCallback((cw: (typeof COLORWAYS)[0]) => {
@@ -159,6 +187,10 @@ export function useHero(rootRef: RefObject<HTMLElement | null>) {
       );
       colorwayChanging.current = false;
     });
+  }, []);
+
+  const applyTexture = useCallback((texture: KeycapTexture) => {
+    setSelectedTextureId(texture.id);
   }, []);
 
   useEffect(() => {
@@ -292,10 +324,13 @@ export function useHero(rootRef: RefObject<HTMLElement | null>) {
     floatY,
     activeColorway,
     applyColorway,
+    selectedTextureId,
+    applyTexture,
     visibleSections,
     registerSection,
     entered,
     isNarrow,
     isKeyboardInteractive,
+    isHeroKeyboardInView,
   };
 }

@@ -81,6 +81,30 @@ export const COLORWAYS = [
   },
 ];
 
+export const KEYCAP_TEXTURES = [
+  {
+    id: "textured1",
+    name: "Textured 1",
+    path: "/t1.png",
+    knobColor: "#E44E21",
+    caseColor: "#161616",
+  },
+  {
+    id: "textured2",
+    name: "Textured 2",
+    path: "/t2.png",
+    knobColor: "#00FFFF",
+    caseColor: "#1D1D54",
+  },
+  {
+    id: "textured3",
+    name: "Textured 3",
+    path: "/t3.png",
+    knobColor: "#9FE2BF",
+    caseColor: "#13251E",
+  },
+] as const;
+
 export const ROWS = [
   [
     ["Esc", "base"],
