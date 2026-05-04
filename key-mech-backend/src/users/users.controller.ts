@@ -9,7 +9,13 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { UsersService } from './users.service.js';
 
 import { ParseUUIDPipe } from '@nestjs/common';
@@ -24,6 +30,7 @@ export class UsersController {
   @Post()
   @UsePipes(new ValidationPipe({ transform: true }))
   @ApiOperation({ summary: 'Create a new user' })
+  @ApiBody({ type: CreateUserDto })
   @ApiResponse({ status: 201, description: 'User created successfully' })
   create(@Body() dto: CreateUserDto) {
     return this.service.create(dto);
@@ -47,6 +54,8 @@ export class UsersController {
 
   @Put(':id')
   @UsePipes(new ValidationPipe({ transform: true }))
+  @ApiParam({ name: 'id', description: 'User UUID' })
+  @ApiBody({ type: UpdateUserDto })
   update(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: UpdateUserDto,
@@ -55,6 +64,7 @@ export class UsersController {
   }
 
   @Delete(':id')
+  @ApiParam({ name: 'id', description: 'User UUID' })
   remove(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.service.remove(id);
   }
