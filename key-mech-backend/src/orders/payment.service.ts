@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Razorpay from 'razorpay';
 import * as crypto from 'crypto';
@@ -8,21 +8,11 @@ export class PaymentService {
   private razorpay: Razorpay;
   private keyId: string;
 
-  constructor(private configService?: ConfigService) {
-    console.log('[PaymentService] typeof configService:', typeof configService);
-
-    const keyId =
-      this.configService?.get<string>('RAZORPAY_KEY_ID') ??
-      process.env.RAZORPAY_KEY_ID;
-    const keySecret =
-      this.configService?.get<string>('RAZORPAY_SECRET') ??
-      process.env.RAZORPAY_SECRET;
-
-    if (!keyId || !keySecret) {
-      throw new Error(
-        'Razorpay credentials not configured. Set RAZORPAY_KEY_ID and RAZORPAY_SECRET in .env',
-      );
-    }
+  constructor(
+    @Inject(ConfigService) private readonly configService: ConfigService,
+  ) {
+    const keyId = this.configService.getOrThrow<string>('RAZORPAY_KEY_ID');
+    const keySecret = this.configService.getOrThrow<string>('RAZORPAY_SECRET');
 
     this.keyId = keyId;
     this.razorpay = new Razorpay({
@@ -48,9 +38,10 @@ export class PaymentService {
 
       const order = await this.razorpay.orders.create(options);
       return order;
-    } catch (error) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
       throw new BadRequestException(
-        `Failed to create Razorpay order: ${error.message}`,
+        `Failed to create Razorpay order: ${message}`,
       );
     }
   }
@@ -62,11 +53,7 @@ export class PaymentService {
   ): boolean {
     try {
       const keySecret =
-        this.configService?.get<string>('RAZORPAY_SECRET') ??
-        process.env.RAZORPAY_SECRET;
-      if (!keySecret) {
-        throw new Error('RAZORPAY_SECRET not configured');
-      }
+        this.configService.getOrThrow<string>('RAZORPAY_SECRET');
       const text = `${orderId}|${paymentId}`;
       const generated_signature = crypto
         .createHmac('sha256', keySecret)
@@ -74,7 +61,7 @@ export class PaymentService {
         .digest('hex');
 
       return generated_signature === signature;
-    } catch (error) {
+    } catch {
       return false;
     }
   }

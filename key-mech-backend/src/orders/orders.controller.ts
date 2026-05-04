@@ -1,11 +1,4 @@
-import {
-  Controller,
-  Get,
-  Param,
-  Post,
-  UseGuards,
-  Body,
-} from '@nestjs/common';
+import { Controller, Get, Param, Post, Body } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -15,7 +8,6 @@ import {
 } from '@nestjs/swagger';
 import { OrdersService } from './orders.service.js';
 import { ParseUUIDPipe } from '@nestjs/common';
-import { PaymentService } from './payment.service.js';
 import { CreateRazorpayOrderDto } from './dto/create-razorpay-order.dto.js';
 import { VerifyPaymentDto } from './dto/verify-payment.dto.js';
 import { RazorpayOrderResponseDto } from './dto/razorpay-order-response.dto.js';
@@ -23,10 +15,7 @@ import { RazorpayOrderResponseDto } from './dto/razorpay-order-response.dto.js';
 @Controller('orders')
 @ApiTags('orders')
 export class OrdersController {
-  constructor(
-    private readonly service: OrdersService,
-    private readonly paymentService: PaymentService,
-  ) {}
+  constructor(private readonly service: OrdersService) {}
 
   @Post(':userId')
   @ApiOperation({ summary: 'Create a new order for a user' })

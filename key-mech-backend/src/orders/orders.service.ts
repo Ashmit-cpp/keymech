@@ -6,6 +6,18 @@ import {
 import { PrismaService } from '../prisma/prisma.service.js';
 import { PaymentService } from './payment.service.js';
 import { VerifyPaymentDto } from './dto/verify-payment.dto.js';
+import { Prisma } from '../../generated/prisma/client.js';
+
+type CartWithItems = Prisma.CartGetPayload<{
+  include: { items: { include: { product: true; variant: true } } };
+}>;
+
+interface PricedOrderItem {
+  productId: string;
+  variantId: string | null;
+  quantity: number;
+  price: number;
+}
 
 @Injectable()
 export class OrdersService {
@@ -14,7 +26,7 @@ export class OrdersService {
     private paymentService: PaymentService,
   ) {}
 
-  async createOrder(userId: string) {
+  private async getCartForCheckout(userId: string): Promise<CartWithItems> {
     const cart = await this.prisma.cart.findUnique({
       where: { userId },
       include: { items: { include: { product: true, variant: true } } },
@@ -23,23 +35,66 @@ export class OrdersService {
     if (!cart || !cart.items.length)
       throw new BadRequestException('Cart is empty');
 
-    // build items and total
-    const items = cart.items.map((ci) => {
+    return cart;
+  }
+
+  private buildPricedItems(cart: CartWithItems): PricedOrderItem[] {
+    return cart.items.map((ci) => {
       const basePrice = ci.product.price;
       const extra = ci.variant?.extraPrice ?? 0;
       const price = basePrice + extra;
       return {
-        cartItemId: ci.id,
         productId: ci.productId,
         variantId: ci.variantId,
         quantity: ci.quantity,
         price,
       };
     });
+  }
 
-    const total = items.reduce((s, it) => s + it.price * it.quantity, 0);
+  private getOrderTotal(items: PricedOrderItem[]) {
+    return items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  }
 
-    // Transaction: create order items, decrement inventory, clear cart
+  private async decrementInventory(
+    tx: Prisma.TransactionClient,
+    items: PricedOrderItem[],
+  ) {
+    for (const item of items) {
+      if (item.variantId) {
+        const inventory = await tx.inventory.findUnique({
+          where: { variantId: item.variantId },
+        });
+        if (!inventory) continue;
+        if (inventory.stock < item.quantity) {
+          throw new BadRequestException('Insufficient stock for a variant');
+        }
+        await tx.inventory.update({
+          where: { id: inventory.id },
+          data: { stock: inventory.stock - item.quantity },
+        });
+        continue;
+      }
+
+      const inventory = await tx.inventory.findUnique({
+        where: { productId: item.productId },
+      });
+      if (!inventory) continue;
+      if (inventory.stock < item.quantity) {
+        throw new BadRequestException('Insufficient stock for a product');
+      }
+      await tx.inventory.update({
+        where: { id: inventory.id },
+        data: { stock: inventory.stock - item.quantity },
+      });
+    }
+  }
+
+  async createOrder(userId: string) {
+    const cart = await this.getCartForCheckout(userId);
+    const items = this.buildPricedItems(cart);
+    const total = this.getOrderTotal(items);
+
     return this.prisma.$transaction(async (tx) => {
       const order = await tx.order.create({
         data: {
@@ -58,36 +113,7 @@ export class OrdersService {
         include: { items: true },
       });
 
-      // decrement inventory (basic)
-      for (const it of items) {
-        if (it.variantId) {
-          const inv = await tx.inventory.findUnique({
-            where: { variantId: it.variantId },
-          });
-          if (inv) {
-            if (inv.stock < it.quantity)
-              throw new BadRequestException('Insufficient stock for a variant');
-            await tx.inventory.update({
-              where: { id: inv.id },
-              data: { stock: inv.stock - it.quantity },
-            });
-          }
-        } else {
-          const inv = await tx.inventory.findUnique({
-            where: { productId: it.productId },
-          });
-          if (inv) {
-            if (inv.stock < it.quantity)
-              throw new BadRequestException('Insufficient stock for a product');
-            await tx.inventory.update({
-              where: { id: inv.id },
-              data: { stock: inv.stock - it.quantity },
-            });
-          }
-        }
-      }
-
-      // empty cart items
+      await this.decrementInventory(tx, items);
       await tx.cartItem.deleteMany({ where: { cartId: cart.id } });
 
       return order;
@@ -112,31 +138,14 @@ export class OrdersService {
   }
 
   async createRazorpayOrder(userId: string) {
-    // Get cart and calculate total
-    const cart = await this.prisma.cart.findUnique({
-      where: { userId },
-      include: { items: { include: { product: true, variant: true } } },
-    });
+    const cart = await this.getCartForCheckout(userId);
+    const totalAmount = this.getOrderTotal(this.buildPricedItems(cart));
 
-    if (!cart || !cart.items.length) {
-      throw new BadRequestException('Cart is empty');
-    }
-
-    // Calculate total amount
-    const totalAmount = cart.items.reduce((sum, item) => {
-      const basePrice = item.product.price;
-      const extraPrice = item.variant?.extraPrice ?? 0;
-      const price = basePrice + extraPrice;
-      return sum + price * item.quantity;
-    }, 0);
-
-    // Create Razorpay order
     const razorpayOrder = await this.paymentService.createRazorpayOrder(
       totalAmount,
       'INR',
     );
 
-    // Get the key_id to send to frontend
     const keyId = this.paymentService.getKeyId();
 
     return {
@@ -148,7 +157,6 @@ export class OrdersService {
   }
 
   async verifyAndCreateOrder(dto: VerifyPaymentDto) {
-    // Verify payment signature
     const isValid = this.paymentService.verifyPaymentSignature(
       dto.razorpay_order_id,
       dto.razorpay_payment_id,
@@ -159,33 +167,10 @@ export class OrdersService {
       throw new BadRequestException('Payment verification failed');
     }
 
-    // Get cart
-    const cart = await this.prisma.cart.findUnique({
-      where: { userId: dto.userId },
-      include: { items: { include: { product: true, variant: true } } },
-    });
+    const cart = await this.getCartForCheckout(dto.userId);
+    const items = this.buildPricedItems(cart);
+    const total = this.getOrderTotal(items);
 
-    if (!cart || !cart.items.length) {
-      throw new BadRequestException('Cart is empty');
-    }
-
-    // Build items and total
-    const items = cart.items.map((ci) => {
-      const basePrice = ci.product.price;
-      const extra = ci.variant?.extraPrice ?? 0;
-      const price = basePrice + extra;
-      return {
-        cartItemId: ci.id,
-        productId: ci.productId,
-        variantId: ci.variantId,
-        quantity: ci.quantity,
-        price,
-      };
-    });
-
-    const total = items.reduce((s, it) => s + it.price * it.quantity, 0);
-
-    // Transaction: create order items, decrement inventory, clear cart
     return this.prisma.$transaction(async (tx) => {
       const order = await tx.order.create({
         data: {
@@ -206,40 +191,7 @@ export class OrdersService {
         include: { items: true },
       });
 
-      // Decrement inventory
-      for (const it of items) {
-        if (it.variantId) {
-          const inv = await tx.inventory.findUnique({
-            where: { variantId: it.variantId },
-          });
-          if (inv) {
-            if (inv.stock < it.quantity)
-              throw new BadRequestException(
-                'Insufficient stock for a variant',
-              );
-            await tx.inventory.update({
-              where: { id: inv.id },
-              data: { stock: inv.stock - it.quantity },
-            });
-          }
-        } else {
-          const inv = await tx.inventory.findUnique({
-            where: { productId: it.productId },
-          });
-          if (inv) {
-            if (inv.stock < it.quantity)
-              throw new BadRequestException(
-                'Insufficient stock for a product',
-              );
-            await tx.inventory.update({
-              where: { id: inv.id },
-              data: { stock: inv.stock - it.quantity },
-            });
-          }
-        }
-      }
-
-      // Empty cart items
+      await this.decrementInventory(tx, items);
       await tx.cartItem.deleteMany({ where: { cartId: cart.id } });
 
       return order;
