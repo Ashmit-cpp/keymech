@@ -1,0 +1,12 @@
+{
+  "name": "keymech",
+  "private": true,
+  "packageManager": "pnpm@10.33.0",
+  "scripts": {
+    "lint": "pnpm --filter key-mech-backend lint && pnpm --filter key-mech-frontend lint",
+    "lint:fix": "pnpm --filter key-mech-backend lint:fix && pnpm --filter key-mech-frontend lint:fix",
+    "typecheck": "pnpm --filter key-mech-backend typecheck && pnpm --filter key-mech-frontend typecheck",
+    "test": "pnpm --filter key-mech-backend test",
+    "gen:api": "pnpm --filter key-mech-backend gen:openapi && pnpm --filter key-mech-frontend gen:api"
+  }
+}

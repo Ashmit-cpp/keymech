@@ -1,0 +1,3 @@
+packages:
+  - "key-mech-backend"
+  - "key-mech-frontend"

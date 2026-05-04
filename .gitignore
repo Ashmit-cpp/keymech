@@ -1,0 +1,17 @@
+.DS_Store
+.cursor/
+.vscode/
+
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+
+.env
+.env.*
+!.env.example
+
+key-mech-backend/generated/prisma/
+key-mech-backend/prisma/seed.js
+key-mech-backend/prisma/seed.js.map
+key-mech-backend/prisma/seed.d.ts

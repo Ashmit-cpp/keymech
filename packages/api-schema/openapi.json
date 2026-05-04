@@ -15,6 +15,20 @@
         ]
       }
     },
+    "/health": {
+      "get": {
+        "operationId": "HealthController_getHealth",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Health"
+        ]
+      }
+    },
     "/products": {
       "post": {
         "operationId": "ProductsController_create",
@@ -31,7 +45,14 @@
         },
         "responses": {
           "201": {
-            "description": "Product created successfully"
+            "description": "Product created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductResponseDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Bad request"
@@ -46,16 +67,16 @@
         "operationId": "ProductsController_findAll",
         "parameters": [
           {
-            "name": "search",
-            "required": true,
+            "name": "category",
+            "required": false,
             "in": "query",
             "schema": {
               "type": "string"
             }
           },
           {
-            "name": "category",
-            "required": true,
+            "name": "search",
+            "required": false,
             "in": "query",
             "schema": {
               "type": "string"
@@ -64,7 +85,17 @@
         ],
         "responses": {
           "200": {
-            "description": "List of products"
+            "description": "List of products",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProductResponseDto"
+                  }
+                }
+              }
+            }
           }
         },
         "summary": "Get all products",
@@ -82,14 +113,19 @@
             "required": true,
             "in": "path",
             "description": "Product UUID",
-            "schema": {
-              "type": "string"
-            }
+            "schema": {}
           }
         ],
         "responses": {
           "200": {
-            "description": "Product found"
+            "description": "Product found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductResponseDto"
+                }
+              }
+            }
           },
           "404": {
             "description": "Product not found"
@@ -108,9 +144,7 @@
             "required": true,
             "in": "path",
             "description": "Product UUID",
-            "schema": {
-              "type": "string"
-            }
+            "schema": {}
           }
         ],
         "requestBody": {
@@ -125,7 +159,14 @@
         },
         "responses": {
           "200": {
-            "description": "Product updated successfully"
+            "description": "Product updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductResponseDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Bad request"
@@ -147,9 +188,7 @@
             "required": true,
             "in": "path",
             "description": "Product UUID",
-            "schema": {
-              "type": "string"
-            }
+            "schema": {}
           }
         ],
         "responses": {
@@ -213,9 +252,7 @@
             "required": true,
             "in": "path",
             "description": "User UUID",
-            "schema": {
-              "type": "string"
-            }
+            "schema": {}
           }
         ],
         "responses": {
@@ -238,9 +275,8 @@
             "name": "id",
             "required": true,
             "in": "path",
-            "schema": {
-              "type": "string"
-            }
+            "description": "User UUID",
+            "schema": {}
           }
         ],
         "requestBody": {
@@ -269,9 +305,8 @@
             "name": "id",
             "required": true,
             "in": "path",
-            "schema": {
-              "type": "string"
-            }
+            "description": "User UUID",
+            "schema": {}
           }
         ],
         "responses": {
@@ -361,9 +396,7 @@
             "required": true,
             "in": "path",
             "description": "Cart item UUID",
-            "schema": {
-              "type": "string"
-            }
+            "schema": {}
           }
         ],
         "responses": {
@@ -428,10 +461,17 @@
         },
         "responses": {
           "200": {
-            "description": "Login success"
+            "description": "Login success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponseDto"
+                }
+              }
+            }
           }
         },
-        "summary": "Login and receive JWT; merges guest cart into user cart if present",
+        "summary": "Login and receive JWT",
         "tags": [
           "auth"
         ]
@@ -453,10 +493,39 @@
         },
         "responses": {
           "201": {
-            "description": "Registration success"
+            "description": "Registration success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponseDto"
+                }
+              }
+            }
           }
         },
-        "summary": "Register user and receive JWT; merges guest cart if present",
+        "summary": "Register user and receive JWT",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "operationId": "AuthController_me",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Current user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthUserDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get the current authenticated user",
         "tags": [
           "auth"
         ]
@@ -486,9 +555,7 @@
             "required": true,
             "in": "path",
             "description": "User UUID",
-            "schema": {
-              "type": "string"
-            }
+            "schema": {}
           }
         ],
         "responses": {
@@ -514,9 +581,7 @@
             "required": true,
             "in": "path",
             "description": "User UUID",
-            "schema": {
-              "type": "string"
-            }
+            "schema": {}
           }
         ],
         "responses": {
@@ -542,9 +607,7 @@
             "required": true,
             "in": "path",
             "description": "Order UUID",
-            "schema": {
-              "type": "string"
-            }
+            "schema": {}
           }
         ],
         "responses": {
@@ -707,9 +770,7 @@
             "required": true,
             "in": "path",
             "description": "Wishlist item UUID",
-            "schema": {
-              "type": "string"
-            }
+            "schema": {}
           }
         ],
         "responses": {
@@ -796,10 +857,238 @@
   ],
   "servers": [],
   "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      }
+    },
     "schemas": {
-      "CreateProductDto": {
+      "CreateKeyboardSpecDto": {
         "type": "object",
         "properties": {}
+      },
+      "CreateSwitchSpecDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "CreateKeycapSpecDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "CreateVariantDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "sku": {
+            "type": "string"
+          },
+          "extraPrice": {
+            "type": "number"
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "specs": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "CreateProductDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "price": {
+            "type": "number"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "KEYBOARD",
+              "SWITCH",
+              "KEYCAP",
+              "PLATE",
+              "PCB",
+              "STABILIZER",
+              "ACCESSORY"
+            ]
+          },
+          "status": {
+            "type": "string"
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "gallery": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "soundTests": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "explodedView": {
+            "type": "string"
+          },
+          "technicalSpec": {
+            "type": "string"
+          },
+          "keyboardSpec": {
+            "$ref": "#/components/schemas/CreateKeyboardSpecDto"
+          },
+          "switchSpec": {
+            "$ref": "#/components/schemas/CreateSwitchSpecDto"
+          },
+          "keycapSpec": {
+            "$ref": "#/components/schemas/CreateKeycapSpecDto"
+          },
+          "variants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreateVariantDto"
+            }
+          }
+        },
+        "required": [
+          "name",
+          "slug",
+          "price",
+          "category"
+        ]
+      },
+      "ProductVariantResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "productId": {
+            "type": "string"
+          },
+          "sku": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string"
+          },
+          "extraPrice": {
+            "type": "number"
+          },
+          "images": {
+            "type": "object",
+            "nullable": true
+          },
+          "specs": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "productId",
+          "name",
+          "extraPrice"
+        ]
+      },
+      "ProductResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "price": {
+            "type": "number"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "KEYBOARD",
+              "SWITCH",
+              "KEYCAP",
+              "PLATE",
+              "PCB",
+              "STABILIZER",
+              "ACCESSORY"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "nullable": true
+          },
+          "images": {
+            "type": "object",
+            "nullable": true
+          },
+          "gallery": {
+            "type": "object",
+            "nullable": true
+          },
+          "soundTests": {
+            "type": "object",
+            "nullable": true
+          },
+          "variants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductVariantResponseDto"
+            }
+          },
+          "keyboardSpec": {
+            "type": "object",
+            "nullable": true
+          },
+          "switchSpec": {
+            "type": "object",
+            "nullable": true
+          },
+          "keycapSpec": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "slug",
+          "price",
+          "category",
+          "variants"
+        ]
       },
       "UpdateProductDto": {
         "type": "object",
@@ -807,7 +1096,30 @@
       },
       "CreateUserDto": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "customer@example.com"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 6
+          },
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "USER",
+              "ADMIN"
+            ]
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
       },
       "UpdateUserDto": {
         "type": "object",
@@ -815,7 +1127,24 @@
       },
       "CreateCartItemDto": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "productId": {
+            "type": "string",
+            "description": "Product ID"
+          },
+          "variantId": {
+            "type": "string",
+            "description": "Variant ID"
+          },
+          "quantity": {
+            "type": "number",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "productId",
+          "quantity"
+        ]
       },
       "GuestCartItemDto": {
         "type": "object",
@@ -855,7 +1184,62 @@
       },
       "LoginDto": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "customer@example.com"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 6
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "AuthUserDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "USER",
+              "ADMIN"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "role"
+        ]
+      },
+      "AuthResponseDto": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string"
+          },
+          "user": {
+            "$ref": "#/components/schemas/AuthUserDto"
+          }
+        },
+        "required": [
+          "accessToken",
+          "user"
+        ]
       },
       "CreateRazorpayOrderDto": {
         "type": "object",
@@ -929,7 +1313,16 @@
       },
       "CreateWishlistItemDto": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "productId": {
+            "type": "string",
+            "description": "Product ID"
+          },
+          "variantId": {
+            "type": "string",
+            "description": "Variant ID"
+          }
+        }
       },
       "GuestWishlistItemDto": {
         "type": "object",
