@@ -10,10 +10,11 @@ import { ProductsModule } from './products/products.module.js';
 import { UsersModule } from './users/users.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { WishlistModule } from './wishlist/wishlist.module.js';
+import { validateEnv } from './config/env.validation.js';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({ isGlobal: true, validate: validateEnv }),
     PrismaModule,
     ProductsModule,
     UsersModule,
