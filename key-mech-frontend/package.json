@@ -7,6 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "tsc -b --pretty false",
     "preview": "vite preview",
     "gen:api": "orval --config orval.config.js",
     "gen:api:watch": "orval --config orval.config.js --watch"
