@@ -34,7 +34,10 @@ export class ProductsService {
                 sku: v.sku,
                 extraPrice: v.extraPrice ?? 0,
                 images: v.images ?? [],
-                specs: v.specs ?? null,
+                specs:
+                  v.specs === undefined
+                    ? undefined
+                    : (v.specs as Prisma.InputJsonValue),
               })),
             }
           : undefined,
@@ -55,8 +58,7 @@ export class ProductsService {
     const where: Prisma.ProductWhereInput = {};
 
     const categoryEnum =
-      category &&
-      Category[category.toUpperCase() as keyof typeof Category];
+      category && Category[category.toUpperCase() as keyof typeof Category];
     if (categoryEnum) {
       where.category = categoryEnum;
     }

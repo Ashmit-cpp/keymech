@@ -5,7 +5,10 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { KeycapProfile, KeycapMaterial } from '../../../generated/prisma/enums.js';
+import {
+  KeycapProfile,
+  KeycapMaterial,
+} from '../../../generated/prisma/enums.js';
 
 export class CreateKeycapSpecDto {
   @IsEnum(KeycapProfile)
