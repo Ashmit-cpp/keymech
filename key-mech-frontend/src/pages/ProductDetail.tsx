@@ -67,8 +67,8 @@ export default function ProductDetailPage() {
 
   const extractYouTubeVideoId = (url: string): string | null => {
     const patterns = [
-      /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/,
-      /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([^"&?\/\s]{11})/,
+      /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/,
+      /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([^"&?/\s]{11})/,
     ];
 
     for (const pattern of patterns) {
@@ -440,7 +440,7 @@ export default function ProductDetailPage() {
                     <Heart
                       className={`w-5 h-5 transition-all duration-200 ${
                         isCurrentItemInWishlist
-                          ? "fill-secondary scale-110"
+                          ? "fill-primary scale-110"
                           : "hover:scale-110 hover:text-muted"
                       }`}
                     />

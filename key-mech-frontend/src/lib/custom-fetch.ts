@@ -1,5 +1,10 @@
-const getBaseUrl = () =>
-  (import.meta as any).env?.VITE_API_URL?.replace(/\/+$/, "") ?? "";
+interface PersistedAuthStorage {
+  state?: {
+    token?: string | null;
+  };
+}
+
+const getBaseUrl = () => import.meta.env.VITE_API_URL?.replace(/\/+$/, "") ?? "";
 
 const joinUrl = (base: string, path: string) => {
   const p = path.startsWith("/") ? path : "/" + path;
@@ -10,7 +15,7 @@ const getToken = () => {
   try {
     const stored = localStorage.getItem('auth-storage');
     if (stored) {
-      const parsed = JSON.parse(stored);
+      const parsed = JSON.parse(stored) as PersistedAuthStorage;
       return parsed.state?.token || null;
     }
   } catch {
@@ -24,31 +29,39 @@ export const customFetch = async <T>(url: string, options?: RequestInit): Promis
   const token = getToken();
 
   try {
-  const response = await fetch(finalUrl, {
-    ...options,
-    signal: options?.signal,
-    headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(options?.headers || {}),
-    },
-  });
+    const response = await fetch(finalUrl, {
+      ...options,
+      signal: options?.signal,
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(options?.headers || {}),
+      },
+    });
 
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
+    const contentType = response.headers.get("content-type");
+    const data =
+      response.status === 204
+        ? undefined
+        : contentType?.includes("application/json")
+          ? await response.json()
+          : await response.text();
 
-  const jsonData = await response.json();
+    if (!response.ok) {
+      const message =
+        typeof data === "object" && data && "message" in data
+          ? String(data.message)
+          : `HTTP error! status: ${response.status}`;
+      throw new Error(message);
+    }
 
-  // Return the data in the format expected by orval-generated code
-  return {
-    data: jsonData,
-    status: response.status,
-    headers: response.headers,
-  } as T;
-  } catch (error: any) {
-    // Ignore aborts so canceled queries in dev (StrictMode) don't surface as errors
-    if (error?.name === "AbortError") {
+    return {
+      data,
+      status: response.status,
+      headers: response.headers,
+    } as T;
+  } catch (error: unknown) {
+    if (error instanceof DOMException && error.name === "AbortError") {
       return Promise.reject(error);
     }
     throw error;
