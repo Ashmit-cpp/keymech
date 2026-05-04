@@ -11,22 +11,33 @@ import {
   Req,
   Res,
   Headers,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiBearerAuth,
+  ApiBody,
+} from '@nestjs/swagger';
 import type { Request, Response } from 'express';
 import { randomUUID } from 'crypto';
 import { CartService } from './cart.service.js';
 import { CreateCartItemDto } from './dto/create-cart-item.dto.js';
 import { MergeGuestCartDto } from './dto/merge-guest-cart.dto.js';
+import { OptionalJwtAuthGuard } from '../auth/optional-jwt.guard.js';
+import { AuthenticatedUser } from '../auth/current-user.decorator.js';
 
 interface RequestWithUser extends Request {
-  user?: { userId: string; email: string };
+  user?: AuthenticatedUser;
 }
 
 @Controller('cart')
 @ApiTags('cart')
 @ApiBearerAuth()
+@UseGuards(OptionalJwtAuthGuard)
 export class CartController {
   constructor(private readonly service: CartService) {}
 
@@ -37,20 +48,16 @@ export class CartController {
   @Post('items')
   @UsePipes(new ValidationPipe({ transform: true }))
   @ApiOperation({ summary: 'Add an item to authenticated user cart' })
+  @ApiBody({ type: CreateCartItemDto })
   @ApiResponse({ status: 201, description: 'Item added to cart successfully' })
-  async addItem(
-    @Req() req: RequestWithUser,
-    @Res({ passthrough: true }) res: Response,
-    @Body() item: CreateCartItemDto,
-  ) {
+  async addItem(@Req() req: RequestWithUser, @Body() item: CreateCartItemDto) {
     const userId = this.getUserId(req);
 
     if (userId) {
-      console.log('[CART] Adding item to authenticated user cart:', userId);
       const cart = await this.service.getOrCreateCartByUserId(userId);
       return this.service.addItemByCartId(cart.id, item, userId);
     }
-    throw new Error('User is not authenticated');
+    throw new UnauthorizedException('User is not authenticated');
   }
 
   @Get()
@@ -66,9 +73,7 @@ export class CartController {
     if (userId) {
       try {
         return await this.service.getCartByUser(userId);
-      } catch (error) {
-        // If user cart doesn't exist, create one
-        console.log('[CART] User cart not found, creating new one');
+      } catch {
         return this.service.getOrCreateCartByUserId(userId);
       }
     }
@@ -91,35 +96,33 @@ export class CartController {
     const userId = this.getUserId(req);
 
     if (userId) {
-      console.log('[CART] Removing item from authenticated user cart:', userId);
       const cart = await this.service.getCartByUser(userId);
       return this.service.removeItem(cart.id, cartItemId);
     }
 
-    throw new Error('User is not authenticated');
+    throw new UnauthorizedException('User is not authenticated');
   }
 
   @Delete()
   @ApiOperation({ summary: 'Clear authenticated user cart' })
   @ApiResponse({ status: 200, description: 'Cart cleared successfully' })
-  async clearCart(
-    @Req() req: RequestWithUser,
-    @Res({ passthrough: true }) res: Response,
-  ) {
+  async clearCart(@Req() req: RequestWithUser) {
     const userId = this.getUserId(req);
 
     if (userId) {
-      console.log('[CART] Clearing authenticated user cart:', userId);
       const cart = await this.service.getCartByUser(userId);
       return this.service.clearCart(cart.id);
     }
 
-    throw new Error('User is not authenticated');
+    throw new UnauthorizedException('User is not authenticated');
   }
 
   @Post('merge')
   @UsePipes(new ValidationPipe({ transform: true }))
-  @ApiOperation({ summary: 'Merge guest cart items into authenticated user cart' })
+  @ApiOperation({
+    summary: 'Merge guest cart items into authenticated user cart',
+  })
+  @ApiBody({ type: MergeGuestCartDto })
   @ApiResponse({ status: 200, description: 'Guest cart merged successfully' })
   async mergeGuestCart(
     @Req() req: RequestWithUser,
@@ -128,10 +131,9 @@ export class CartController {
     const userId = this.getUserId(req);
 
     if (!userId) {
-      throw new Error('User is not authenticated');
+      throw new UnauthorizedException('User is not authenticated');
     }
 
-    console.log('[CART] Merging guest cart for user:', userId);
     return this.service.mergeGuestCartItems(userId, mergeDto.items);
   }
 }

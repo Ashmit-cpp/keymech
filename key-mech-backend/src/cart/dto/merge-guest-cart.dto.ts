@@ -1,26 +1,37 @@
-import { IsArray, IsInt, IsOptional, IsUUID, ValidateNested } from 'class-validator';
+import {
+  IsArray,
+  IsInt,
+  IsOptional,
+  IsUUID,
+  ValidateNested,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class GuestCartItemDto {
-  @ApiProperty({ description: 'Product ID' })
+  @ApiProperty({ description: 'Product ID', type: String })
   @IsUUID()
   productId!: string;
 
-  @ApiProperty({ description: 'Variant ID (optional)', required: false })
+  @ApiProperty({
+    description: 'Variant ID (optional)',
+    required: false,
+    type: String,
+  })
   @IsOptional()
   @IsUUID()
   variantId?: string;
 
-  @ApiProperty({ description: 'Quantity' })
+  @ApiProperty({ description: 'Quantity', type: Number })
   @IsInt()
   quantity!: number;
 }
 
 export class MergeGuestCartDto {
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Array of cart items from guest cart',
-    type: [GuestCartItemDto]
+    type: () => GuestCartItemDto,
+    isArray: true,
   })
   @IsArray()
   @ValidateNested({ each: true })
