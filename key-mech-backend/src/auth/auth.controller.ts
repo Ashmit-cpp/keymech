@@ -1,33 +1,58 @@
-import { Controller, Post, Req, Res, Body, UsePipes, ValidationPipe } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { JwtService } from '@nestjs/jwt';
-import type { Request, Response } from 'express';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  UseGuards,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
+import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service.js';
 import { LoginDto } from './dto/login.dto.js';
 import { CreateUserDto } from '../users/dto/create-user.dto.js';
+import { JwtAuthGuard } from './jwt-auth.guard.js';
+import { CurrentUser } from './current-user.decorator.js';
+import type { AuthenticatedUser } from './current-user.decorator.js';
+import { AuthResponseDto, AuthUserDto } from './dto/auth-response.dto.js';
 
 @Controller('auth')
 @ApiTags('auth')
 export class AuthController {
-  constructor(
-    private readonly service: AuthService,
-    private readonly jwtService: JwtService,
-  ) {}
+  constructor(private readonly service: AuthService) {}
 
   @Post('login')
   @UsePipes(new ValidationPipe({ transform: true }))
-  @ApiOperation({ summary: 'Login and receive JWT; merges guest cart into user cart if present' })
-  @ApiResponse({ status: 200, description: 'Login success' })
-  login(@Body() dto: LoginDto, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    return this.service.login(dto, req, res);
+  @ApiOperation({ summary: 'Login and receive JWT' })
+  @ApiBody({ type: LoginDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Login success',
+    type: AuthResponseDto,
+  })
+  login(@Body() dto: LoginDto) {
+    return this.service.login(dto);
   }
 
   @Post('register')
   @UsePipes(new ValidationPipe({ transform: true }))
-  @ApiOperation({ summary: 'Register user and receive JWT; merges guest cart if present' })
-  @ApiResponse({ status: 201, description: 'Registration success' })
-  register(@Body() dto: CreateUserDto, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    return this.service.register(dto, req, res);
+  @ApiOperation({ summary: 'Register user and receive JWT' })
+  @ApiBody({ type: CreateUserDto })
+  @ApiResponse({
+    status: 201,
+    description: 'Registration success',
+    type: AuthResponseDto,
+  })
+  register(@Body() dto: CreateUserDto) {
+    return this.service.register(dto);
+  }
+
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Get the current authenticated user' })
+  @ApiResponse({ status: 200, description: 'Current user', type: AuthUserDto })
+  me(@CurrentUser() user: AuthenticatedUser) {
+    return this.service.me(user.userId);
   }
 
   @Post('logout')
@@ -36,6 +61,4 @@ export class AuthController {
   logout() {
     return { message: 'Logged out successfully' };
   }
-
 }
-

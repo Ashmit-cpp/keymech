@@ -1,8 +1,8 @@
-import { Module, forwardRef } from '@nestjs/common';
+import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { UsersModule } from '../users/users.module.js';
-import { CartModule } from '../cart/cart.module.js';
 import { AuthService } from './auth.service.js';
 import { AuthController } from './auth.controller.js';
 import { JwtStrategy } from './jwt.strategy.js';
@@ -11,11 +11,12 @@ import { OptionalJwtAuthGuard } from './optional-jwt.guard.js';
 @Module({
   imports: [
     UsersModule,
-    forwardRef(() => CartModule),
+    ConfigModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
-      useFactory: () => ({
-        secret: process.env.JWT_SECRET,
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        secret: config.getOrThrow<string>('JWT_SECRET'),
         signOptions: { expiresIn: '7d' },
       }),
     }),
@@ -25,4 +26,3 @@ import { OptionalJwtAuthGuard } from './optional-jwt.guard.js';
   exports: [AuthService, OptionalJwtAuthGuard, JwtModule],
 })
 export class AuthModule {}
-
