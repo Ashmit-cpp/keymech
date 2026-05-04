@@ -2,6 +2,7 @@ import React from "react";
 import ProductCard from "@/components/ProductCard";
 import { useNavigate } from "react-router-dom";
 import { useProductsControllerFindAll } from "@/api/generated";
+import type { ProductResponseDto } from "@/api/generated";
 import { LoadingState } from "@/components/ui/loading-state";
 
 import {
@@ -11,22 +12,6 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-interface APIProduct {
-  id: string;
-  name: string;
-  slug: string;
-  description: string;
-  price: number;
-  category: string | null;
-  status: string | null;
-  images: string | null;
-  gallery: any;
-  variants: any[];
-  keyboardSpec: any;
-  switchSpec: any;
-  keycapSpec: any;
-}
-
 interface ProductSectionProps {
   title: string;
   subtitle?: string;
@@ -36,9 +21,9 @@ const ProductSection: React.FC<ProductSectionProps> = ({ title, subtitle }) => {
   const navigate = useNavigate();
   const { data: response, isLoading, error } = useProductsControllerFindAll({ search: "", category: "" });
 
-  const products: APIProduct[] = Array.isArray(response?.data) ? response.data : [];
+  const products: ProductResponseDto[] = Array.isArray(response?.data) ? response.data : [];
 
-  const handleProductClick = (product: APIProduct) => {
+  const handleProductClick = (product: ProductResponseDto) => {
     navigate(`/products/${product.id}`);
   };
 

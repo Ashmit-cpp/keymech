@@ -3,21 +3,19 @@ import { ShoppingCart, Eye } from "lucide-react";
 import { Card, CardContent, CardFooter } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
+import { getFirstImage, getSpecField, type ProductLike } from "@/lib/product-utils";
 
 interface ProductCardProps {
-  product: any; // direct API type
-  onClick: (product: any) => void;
+  product: ProductLike;
+  onClick: (product: ProductLike) => void;
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
-  let imageList: string[] = [];
-  try {
-    imageList = JSON.parse(product.images || "[]");
-  } catch {
-    imageList = [];
-  }
-
+  const firstImage = getFirstImage(product.images);
   const price = `₹${(product.price / 100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
+  const keyboardLayout = getSpecField(product.keyboardSpec, "layout");
+  const switchType = getSpecField(product.switchSpec, "switchType");
+  const keycapProfile = getSpecField(product.keycapSpec, "profile");
 
   return (
     <Card
@@ -26,7 +24,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
     >
       <div className="relative aspect-4/3 overflow-hidden bg-muted">
         <img
-          src={imageList[0] || "/placeholder.png"}
+          src={firstImage || "/placeholder.png"}
           alt={product.name}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
@@ -64,11 +62,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
           {product.name}
         </h3>
 
-        {(product.keyboardSpec || product.switchSpec || product.keycapSpec) && (
+        {(keyboardLayout || switchType || keycapProfile) && (
           <div className="flex items-center text-sm text-muted-foreground mb-3 mt-1">
-            {product.keyboardSpec && <span className="mr-3">{product.keyboardSpec.layout}</span>}
-            {product.switchSpec && <span className="mr-3">{product.switchSpec.switchType}</span>}
-            {product.keycapSpec && <span className="mr-3">{product.keycapSpec.profile}</span>}
+            {keyboardLayout && <span className="mr-3">{keyboardLayout}</span>}
+            {switchType && <span className="mr-3">{switchType}</span>}
+            {keycapProfile && <span className="mr-3">{keycapProfile}</span>}
           </div>
         )}
       </CardContent>
