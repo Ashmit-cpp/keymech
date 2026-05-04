@@ -1,55 +1,38 @@
-import { ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module.js';
 import cookieParser from 'cookie-parser';
-
-import * as fs from 'fs';
-import { join } from 'path';
+import { createOpenApiDocument } from './openapi.js';
+import type { Request, Response } from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const config = app.get(ConfigService);
+  const logger = new Logger('Bootstrap');
 
-  // Enable CORS first, before any other middleware
   app.enableCors({
-    origin: process.env.FRONTEND_URL,
+    origin: config.getOrThrow<string>('FRONTEND_ORIGIN'),
     credentials: true,
   });
 
   app.use(cookieParser());
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
 
-  if (process.env.NODE_ENV !== 'production') {
-    const config = new DocumentBuilder()
-      .setTitle('KeyMech API')
-      .setDescription('API documentation for KeyMech mechanical keyboard e-commerce platform')
-      .setVersion('1.0')
-      .addTag('products', 'Product management endpoints')
-      .addTag('users', 'User management endpoints')
-      .addTag('orders', 'Order management endpoints')
-      .addTag('cart', 'Shopping cart endpoints')
-      .addTag('auth', 'Authentication endpoints')
-      .addTag('wishlist', 'Wishlist management endpoints')
-      .build();
-
-    const document = SwaggerModule.createDocument(app, config);
-
+  if (config.get<string>('NODE_ENV') !== 'production') {
+    const document = createOpenApiDocument(app);
     SwaggerModule.setup('api', app, document);
 
-    app.use('/openapi.json', (req, res) => {
+    app.use('/openapi.json', (_req: Request, res: Response) => {
       res.send(document);
     });
-
-    fs.writeFileSync(
-      join(process.cwd(), '../packages/api-schema/openapi.json'),
-      JSON.stringify(document, null, 2),
-    );
   }
 
-  const port = process.env.PORT || 3006;
+  const port = Number(config.getOrThrow<string>('PORT'));
   await app.listen(port);
-  console.log(`🚀 Server running on http://localhost:${port}`);
-  console.log(`📚 API Documentation: http://localhost:${port}/api`);
-  console.log(`🔧 Environment: ${process.env.NODE_ENV || 'development'}`);
+  logger.log(`Server running on http://localhost:${port}`);
+  logger.log(`API Documentation: http://localhost:${port}/api`);
+  logger.log(`Environment: ${config.get<string>('NODE_ENV')}`);
 }
-bootstrap();
+void bootstrap();
