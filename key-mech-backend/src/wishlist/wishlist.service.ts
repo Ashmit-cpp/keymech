@@ -1,5 +1,8 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
-import { MergeGuestWishlistDto } from './dto/merge-guest-wishlist.dto.js';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { Prisma } from '../../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CreateWishlistItemDto } from './dto/create-wishlist-item.dto.js';
@@ -24,7 +27,9 @@ export class WishlistService {
   async addItem(userId: string, item: CreateWishlistItemDto) {
     // Validate that at least one of productId or variantId is provided
     if (!item.productId && !item.variantId) {
-      throw new BadRequestException('Either productId or variantId must be provided');
+      throw new BadRequestException(
+        'Either productId or variantId must be provided',
+      );
     }
 
     // Check if item already exists in wishlist
@@ -96,7 +101,11 @@ export class WishlistService {
     return { message: 'Wishlist cleared successfully' };
   }
 
-  async isInWishlist(userId: string, productId?: string, variantId?: string): Promise<boolean> {
+  async isInWishlist(
+    userId: string,
+    productId?: string,
+    variantId?: string,
+  ): Promise<boolean> {
     const count = await this.prisma.wishlist.count({
       where: {
         userId,
@@ -112,42 +121,27 @@ export class WishlistService {
     userId: string,
     guestItems: { productId?: string; variantId?: string }[],
   ) {
-    console.log('[WISHLIST] Starting mergeGuestWishlistItems:', { 
-      userId, 
-      itemCount: guestItems.length,
-      items: JSON.stringify(guestItems)
-    });
-
     if (!userId) {
-      console.error('[WISHLIST] UserId is required');
       throw new BadRequestException('UserId is required');
     }
 
     if (!guestItems || guestItems.length === 0) {
-      console.log('[WISHLIST] No items to merge');
       return { message: 'No items to merge', addedItems: 0 };
     }
 
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) {
-      console.error('[WISHLIST] User not found:', userId);
       throw new NotFoundException('User not found');
     }
 
-    // Get existing wishlist items
     const existingItems = await this.getWishlistByUserId(userId);
-    console.log('[WISHLIST] User wishlist:', `Found ${existingItems.length} items`);
+    const existingKeys = new Set(
+      existingItems.map(
+        (item) => `${item.productId ?? 'null'}:${item.variantId ?? 'null'}`,
+      ),
+    );
 
-    // Create a set of existing item keys for quick lookup
-    const existingKeys = new Set<string>();
-    existingItems.forEach((item) => {
-      const key = `${item.productId ?? 'null'}:${item.variantId ?? 'null'}`;
-      existingKeys.add(key);
-    });
-
-    // Filter guest items to only include those not already in the user's wishlist
     const newItems = guestItems.filter((item) => {
-      // Validate that at least one of productId or variantId is provided
       if (!item.productId && !item.variantId) {
         return false;
       }
@@ -156,60 +150,52 @@ export class WishlistService {
       return !existingKeys.has(key);
     });
 
-    console.log('[WISHLIST] New items to add:', newItems.length);
-
     if (newItems.length === 0) {
-      return { message: 'No new items to merge' };
+      return { message: 'No new items to merge', addedItems: 0 };
     }
 
-    // Verify that products/variants exist before adding
-    let addedCount = 0;
-    for (const item of newItems) {
-      let shouldSkip = false;
+    const productIds = [
+      ...new Set(
+        newItems
+          .map((item) => item.productId)
+          .filter((id): id is string => Boolean(id)),
+      ),
+    ];
+    const variantIds = [
+      ...new Set(
+        newItems
+          .map((item) => item.variantId)
+          .filter((id): id is string => Boolean(id)),
+      ),
+    ];
+    const [products, variants] = await Promise.all([
+      this.prisma.product.findMany({ where: { id: { in: productIds } } }),
+      this.prisma.productVariant.findMany({
+        where: { id: { in: variantIds } },
+      }),
+    ]);
+    const validProductIds = new Set(products.map((product) => product.id));
+    const validVariantIds = new Set(variants.map((variant) => variant.id));
+    const validItems = newItems.filter(
+      (item) =>
+        (!item.productId || validProductIds.has(item.productId)) &&
+        (!item.variantId || validVariantIds.has(item.variantId)),
+    );
 
-      // Validate productId if provided
-      if (item.productId) {
-        const product = await this.prisma.product.findUnique({
-          where: { id: item.productId },
-        });
-        if (!product) {
-          console.warn('[WISHLIST] Product not found during merge:', item.productId);
-          shouldSkip = true;
-        }
-      }
-
-      // Validate variantId if provided
-      if (item.variantId && !shouldSkip) {
-        const variant = await this.prisma.productVariant.findUnique({
-          where: { id: item.variantId },
-        });
-        if (!variant) {
-          console.warn('[WISHLIST] Product variant not found during merge:', item.variantId);
-          shouldSkip = true;
-        }
-      }
-
-      // Skip if validation failed
-      if (shouldSkip) {
-        continue;
-      }
-
-      // Add the item to the wishlist
-      try {
-        await this.prisma.wishlist.create({
-          data: {
-            userId,
-            productId: item.productId || null,
-            variantId: item.variantId || null,
-          },
-        });
-        addedCount++;
-      } catch (error) {
-        console.error('[WISHLIST] Error creating wishlist item:', error);
-      }
+    if (validItems.length > 0) {
+      await this.prisma.wishlist.createMany({
+        data: validItems.map((item) => ({
+          userId,
+          productId: item.productId || null,
+          variantId: item.variantId || null,
+        })),
+        skipDuplicates: true,
+      });
     }
 
-    console.log('[WISHLIST] Successfully merged guest wishlist items. Added:', addedCount);
-    return { message: 'Guest wishlist merged successfully', addedItems: addedCount };
+    return {
+      message: 'Guest wishlist merged successfully',
+      addedItems: validItems.length,
+    };
   }
 }

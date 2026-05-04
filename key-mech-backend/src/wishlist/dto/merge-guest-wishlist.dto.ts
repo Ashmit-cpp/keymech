@@ -3,12 +3,16 @@ import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class GuestWishlistItemDto {
-  @ApiProperty({ description: 'Product ID' })
+  @ApiProperty({ description: 'Product ID', type: String })
   @IsOptional()
   @IsUUID()
   productId?: string;
 
-  @ApiProperty({ description: 'Variant ID (optional)', required: false })
+  @ApiProperty({
+    description: 'Variant ID (optional)',
+    required: false,
+    type: String,
+  })
   @IsOptional()
   @IsUUID()
   variantId?: string;
@@ -17,7 +21,8 @@ export class GuestWishlistItemDto {
 export class MergeGuestWishlistDto {
   @ApiProperty({
     description: 'Array of wishlist items from guest wishlist',
-    type: [GuestWishlistItemDto]
+    type: () => GuestWishlistItemDto,
+    isArray: true,
   })
   @IsArray()
   @ValidateNested({ each: true })

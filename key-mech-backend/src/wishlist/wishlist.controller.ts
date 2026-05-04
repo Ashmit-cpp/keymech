@@ -5,54 +5,57 @@ import {
   Get,
   Param,
   Post,
+  UseGuards,
   UsePipes,
   ValidationPipe,
-  Req,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiBearerAuth,
+  ApiBody,
+} from '@nestjs/swagger';
 import { WishlistService } from './wishlist.service.js';
 import { CreateWishlistItemDto } from './dto/create-wishlist-item.dto.js';
 import { MergeGuestWishlistDto } from './dto/merge-guest-wishlist.dto.js';
-
-interface RequestWithUser {
-  user?: { userId: string; email: string };
-}
+import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
+import { CurrentUser } from '../auth/current-user.decorator.js';
+import type { AuthenticatedUser } from '../auth/current-user.decorator.js';
 
 @Controller('wishlist')
 @ApiTags('wishlist')
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 export class WishlistController {
   constructor(private readonly wishlistService: WishlistService) {}
-
-  private getUserId(req: RequestWithUser): string {
-    if (!req.user?.userId) {
-      throw new Error('User is not authenticated');
-    }
-    return req.user.userId;
-  }
 
   @Get()
   @ApiOperation({ summary: 'Get authenticated user wishlist' })
   @ApiResponse({ status: 200, description: 'Wishlist retrieved successfully' })
-  async getWishlist(@Req() req: RequestWithUser) {
-    const userId = this.getUserId(req);
-    console.log('[WISHLIST] Getting wishlist for user:', userId);
-    return this.wishlistService.getWishlistByUserId(userId);
+  async getWishlist(@CurrentUser() user: AuthenticatedUser) {
+    return this.wishlistService.getWishlistByUserId(user.userId);
   }
 
   @Post('items')
   @UsePipes(new ValidationPipe({ transform: true }))
   @ApiOperation({ summary: 'Add an item to authenticated user wishlist' })
-  @ApiResponse({ status: 201, description: 'Item added to wishlist successfully' })
-  @ApiResponse({ status: 400, description: 'Bad request - item already exists or invalid data' })
+  @ApiBody({ type: CreateWishlistItemDto })
+  @ApiResponse({
+    status: 201,
+    description: 'Item added to wishlist successfully',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request - item already exists or invalid data',
+  })
   @ApiResponse({ status: 404, description: 'Product or variant not found' })
   async addItem(
-    @Req() req: RequestWithUser,
+    @CurrentUser() user: AuthenticatedUser,
     @Body() item: CreateWishlistItemDto,
   ) {
-    const userId = this.getUserId(req);
-    console.log('[WISHLIST] Adding item to wishlist for user:', userId);
-    return this.wishlistService.addItem(userId, item);
+    return this.wishlistService.addItem(user.userId, item);
   }
 
   @Delete('items/:wishlistItemId')
@@ -61,44 +64,36 @@ export class WishlistController {
   @ApiResponse({ status: 200, description: 'Item removed successfully' })
   @ApiResponse({ status: 404, description: 'Wishlist item not found' })
   async removeItem(
-    @Req() req: RequestWithUser,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('wishlistItemId') wishlistItemId: string,
   ) {
-    const userId = this.getUserId(req);
-    console.log('[WISHLIST] Removing item from wishlist for user:', userId);
-    return this.wishlistService.removeItem(userId, wishlistItemId);
+    return this.wishlistService.removeItem(user.userId, wishlistItemId);
   }
 
   @Delete()
   @ApiOperation({ summary: 'Clear authenticated user wishlist' })
   @ApiResponse({ status: 200, description: 'Wishlist cleared successfully' })
-  async clearWishlist(@Req() req: RequestWithUser) {
-    const userId = this.getUserId(req);
-    console.log('[WISHLIST] Clearing wishlist for user:', userId);
-    return this.wishlistService.clearWishlist(userId);
+  async clearWishlist(@CurrentUser() user: AuthenticatedUser) {
+    return this.wishlistService.clearWishlist(user.userId);
   }
 
   @Post('merge')
   @UsePipes(new ValidationPipe({ transform: true }))
-  @ApiOperation({ summary: 'Merge guest wishlist items into authenticated user wishlist' })
-  @ApiResponse({ status: 200, description: 'Guest wishlist merged successfully' })
+  @ApiOperation({
+    summary: 'Merge guest wishlist items into authenticated user wishlist',
+  })
+  @ApiBody({ type: MergeGuestWishlistDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Guest wishlist merged successfully',
+  })
   async mergeGuestWishlist(
-    @Req() req: RequestWithUser,
+    @CurrentUser() user: AuthenticatedUser,
     @Body() mergeDto: MergeGuestWishlistDto,
   ) {
-    const userId = this.getUserId(req);
-
-    if (!userId) {
-      throw new Error('User is not authenticated');
-    }
-
-    console.log('[WISHLIST] Merging guest wishlist for user:', userId, 'Items:', mergeDto.items.length);
-    
-    try {
-      return await this.wishlistService.mergeGuestWishlistItems(userId, mergeDto.items);
-    } catch (error) {
-      console.error('[WISHLIST] Error merging guest wishlist:', error);
-      throw error;
-    }
+    return this.wishlistService.mergeGuestWishlistItems(
+      user.userId,
+      mergeDto.items,
+    );
   }
 }
