@@ -244,9 +244,92 @@ export interface AuthResponseDto {
   user: AuthUserDto;
 }
 
-export interface CreateRazorpayOrderDto {
-  /** User ID */
+export interface OrderProductResponseDto {
+  id: string;
+  name: string;
+  /** @nullable */
+  images?: string | null;
+}
+
+export interface OrderVariantResponseDto {
+  id: string;
+  name: string;
+  extraPrice: number;
+}
+
+/**
+ * @nullable
+ */
+export type OrderItemResponseDtoVariant = OrderVariantResponseDto | null;
+
+export interface OrderItemResponseDto {
+  id: string;
+  productId: string;
+  /** @nullable */
+  variantId?: string | null;
+  quantity: number;
+  /** Unit price in paise */
+  price: number;
+  product: OrderProductResponseDto;
+  /** @nullable */
+  variant?: OrderItemResponseDtoVariant;
+}
+
+export interface OrderUserResponseDto {
+  id: string;
+  email: string;
+  /** @nullable */
+  name?: string | null;
+}
+
+export type OrderResponseDtoStatus =
+  (typeof OrderResponseDtoStatus)[keyof typeof OrderResponseDtoStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const OrderResponseDtoStatus = {
+  PENDING: "PENDING",
+  PAID: "PAID",
+  SHIPPED: "SHIPPED",
+  CANCELLED: "CANCELLED",
+  COMPLETED: "COMPLETED",
+} as const;
+
+/**
+ * @nullable
+ */
+export type OrderResponseDtoUser = OrderUserResponseDto | null;
+
+export interface OrderResponseDto {
+  id: string;
   userId: string;
+  status: OrderResponseDtoStatus;
+  /** Total in paise */
+  totalAmount: number;
+  /** @nullable */
+  razorpayOrderId?: string | null;
+  /** @nullable */
+  razorpayPaymentId?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  items: OrderItemResponseDto[];
+  /** @nullable */
+  user?: OrderResponseDtoUser;
+}
+
+export type UpdateOrderStatusDtoStatus =
+  (typeof UpdateOrderStatusDtoStatus)[keyof typeof UpdateOrderStatusDtoStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const UpdateOrderStatusDtoStatus = {
+  PENDING: "PENDING",
+  PAID: "PAID",
+  SHIPPED: "SHIPPED",
+  CANCELLED: "CANCELLED",
+  COMPLETED: "COMPLETED",
+} as const;
+
+export interface UpdateOrderStatusDto {
+  status: UpdateOrderStatusDtoStatus;
 }
 
 export interface RazorpayOrderResponseDto {
@@ -261,8 +344,6 @@ export interface RazorpayOrderResponseDto {
 }
 
 export interface VerifyPaymentDto {
-  /** User ID */
-  userId: string;
   /** Razorpay order ID */
   razorpay_order_id: string;
   /** Razorpay payment ID */
@@ -3093,153 +3174,29 @@ export const useAuthControllerLogout = <TError = unknown, TContext = unknown>(
 };
 
 /**
- * @summary Create a new order for a user
+ * @summary Get orders for the current user
  */
-export type ordersControllerCreateResponse201 = {
-  data: void;
-  status: 201;
-};
-
-export type ordersControllerCreateResponse404 = {
-  data: void;
-  status: 404;
-};
-
-export type ordersControllerCreateResponseSuccess =
-  ordersControllerCreateResponse201 & {
-    headers: Headers;
-  };
-export type ordersControllerCreateResponseError =
-  ordersControllerCreateResponse404 & {
-    headers: Headers;
-  };
-
-export type ordersControllerCreateResponse =
-  | ordersControllerCreateResponseSuccess
-  | ordersControllerCreateResponseError;
-
-export const getOrdersControllerCreateUrl = (userId: unknown) => {
-  return `/orders/${userId}`;
-};
-
-export const ordersControllerCreate = async (
-  userId: unknown,
-  options?: RequestInit,
-): Promise<ordersControllerCreateResponse> => {
-  return customFetch<ordersControllerCreateResponse>(
-    getOrdersControllerCreateUrl(userId),
-    {
-      ...options,
-      method: "POST",
-    },
-  );
-};
-
-export const getOrdersControllerCreateMutationOptions = <
-  TError = void,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof ordersControllerCreate>>,
-    TError,
-    { userId: unknown },
-    TContext
-  >;
-  request?: SecondParameter<typeof customFetch>;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof ordersControllerCreate>>,
-  TError,
-  { userId: unknown },
-  TContext
-> => {
-  const mutationKey = ["ordersControllerCreate"];
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined };
-
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof ordersControllerCreate>>,
-    { userId: unknown }
-  > = (props) => {
-    const { userId } = props ?? {};
-
-    return ordersControllerCreate(userId, requestOptions);
-  };
-
-  return { mutationFn, ...mutationOptions };
-};
-
-export type OrdersControllerCreateMutationResult = NonNullable<
-  Awaited<ReturnType<typeof ordersControllerCreate>>
->;
-
-export type OrdersControllerCreateMutationError = void;
-
-/**
- * @summary Create a new order for a user
- */
-export const useOrdersControllerCreate = <TError = void, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof ordersControllerCreate>>,
-      TError,
-      { userId: unknown },
-      TContext
-    >;
-    request?: SecondParameter<typeof customFetch>;
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof ordersControllerCreate>>,
-  TError,
-  { userId: unknown },
-  TContext
-> => {
-  const mutationOptions = getOrdersControllerCreateMutationOptions(options);
-
-  return useMutation(mutationOptions, queryClient);
-};
-
-/**
- * @summary Get all orders for a user
- */
-export type ordersControllerFindForUserResponse200 = {
-  data: void;
+export type ordersControllerFindForCurrentUserResponse200 = {
+  data: OrderResponseDto[];
   status: 200;
 };
 
-export type ordersControllerFindForUserResponse404 = {
-  data: void;
-  status: 404;
-};
-
-export type ordersControllerFindForUserResponseSuccess =
-  ordersControllerFindForUserResponse200 & {
+export type ordersControllerFindForCurrentUserResponseSuccess =
+  ordersControllerFindForCurrentUserResponse200 & {
     headers: Headers;
   };
-export type ordersControllerFindForUserResponseError =
-  ordersControllerFindForUserResponse404 & {
-    headers: Headers;
-  };
+export type ordersControllerFindForCurrentUserResponse =
+  ordersControllerFindForCurrentUserResponseSuccess;
 
-export type ordersControllerFindForUserResponse =
-  | ordersControllerFindForUserResponseSuccess
-  | ordersControllerFindForUserResponseError;
-
-export const getOrdersControllerFindForUserUrl = (userId: unknown) => {
-  return `/orders/user/${userId}`;
+export const getOrdersControllerFindForCurrentUserUrl = () => {
+  return `/orders`;
 };
 
-export const ordersControllerFindForUser = async (
-  userId: unknown,
+export const ordersControllerFindForCurrentUser = async (
   options?: RequestInit,
-): Promise<ordersControllerFindForUserResponse> => {
-  return customFetch<ordersControllerFindForUserResponse>(
-    getOrdersControllerFindForUserUrl(userId),
+): Promise<ordersControllerFindForCurrentUserResponse> => {
+  return customFetch<ordersControllerFindForCurrentUserResponse>(
+    getOrdersControllerFindForCurrentUserUrl(),
     {
       ...options,
       method: "GET",
@@ -3247,71 +3204,62 @@ export const ordersControllerFindForUser = async (
   );
 };
 
-export const getOrdersControllerFindForUserQueryKey = (userId?: unknown) => {
-  return [`/orders/user/${userId}`] as const;
+export const getOrdersControllerFindForCurrentUserQueryKey = () => {
+  return [`/orders`] as const;
 };
 
-export const getOrdersControllerFindForUserQueryOptions = <
-  TData = Awaited<ReturnType<typeof ordersControllerFindForUser>>,
-  TError = void,
->(
-  userId: unknown,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof ordersControllerFindForUser>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customFetch>;
-  },
-) => {
+export const getOrdersControllerFindForCurrentUserQueryOptions = <
+  TData = Awaited<ReturnType<typeof ordersControllerFindForCurrentUser>>,
+  TError = unknown,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof ordersControllerFindForCurrentUser>>,
+      TError,
+      TData
+    >
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey =
-    queryOptions?.queryKey ?? getOrdersControllerFindForUserQueryKey(userId);
+    queryOptions?.queryKey ?? getOrdersControllerFindForCurrentUserQueryKey();
 
   const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof ordersControllerFindForUser>>
+    Awaited<ReturnType<typeof ordersControllerFindForCurrentUser>>
   > = ({ signal }) =>
-    ordersControllerFindForUser(userId, { signal, ...requestOptions });
+    ordersControllerFindForCurrentUser({ signal, ...requestOptions });
 
-  return {
-    queryKey,
-    queryFn,
-    enabled: !!userId,
-    ...queryOptions,
-  } as UseQueryOptions<
-    Awaited<ReturnType<typeof ordersControllerFindForUser>>,
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof ordersControllerFindForCurrentUser>>,
     TError,
     TData
   > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type OrdersControllerFindForUserQueryResult = NonNullable<
-  Awaited<ReturnType<typeof ordersControllerFindForUser>>
+export type OrdersControllerFindForCurrentUserQueryResult = NonNullable<
+  Awaited<ReturnType<typeof ordersControllerFindForCurrentUser>>
 >;
-export type OrdersControllerFindForUserQueryError = void;
+export type OrdersControllerFindForCurrentUserQueryError = unknown;
 
-export function useOrdersControllerFindForUser<
-  TData = Awaited<ReturnType<typeof ordersControllerFindForUser>>,
-  TError = void,
+export function useOrdersControllerFindForCurrentUser<
+  TData = Awaited<ReturnType<typeof ordersControllerFindForCurrentUser>>,
+  TError = unknown,
 >(
-  userId: unknown,
   options: {
     query: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof ordersControllerFindForUser>>,
+        Awaited<ReturnType<typeof ordersControllerFindForCurrentUser>>,
         TError,
         TData
       >
     > &
       Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof ordersControllerFindForUser>>,
+          Awaited<ReturnType<typeof ordersControllerFindForCurrentUser>>,
           TError,
-          Awaited<ReturnType<typeof ordersControllerFindForUser>>
+          Awaited<ReturnType<typeof ordersControllerFindForCurrentUser>>
         >,
         "initialData"
       >;
@@ -3321,24 +3269,23 @@ export function useOrdersControllerFindForUser<
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
-export function useOrdersControllerFindForUser<
-  TData = Awaited<ReturnType<typeof ordersControllerFindForUser>>,
-  TError = void,
+export function useOrdersControllerFindForCurrentUser<
+  TData = Awaited<ReturnType<typeof ordersControllerFindForCurrentUser>>,
+  TError = unknown,
 >(
-  userId: unknown,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof ordersControllerFindForUser>>,
+        Awaited<ReturnType<typeof ordersControllerFindForCurrentUser>>,
         TError,
         TData
       >
     > &
       Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof ordersControllerFindForUser>>,
+          Awaited<ReturnType<typeof ordersControllerFindForCurrentUser>>,
           TError,
-          Awaited<ReturnType<typeof ordersControllerFindForUser>>
+          Awaited<ReturnType<typeof ordersControllerFindForCurrentUser>>
         >,
         "initialData"
       >;
@@ -3348,15 +3295,14 @@ export function useOrdersControllerFindForUser<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
-export function useOrdersControllerFindForUser<
-  TData = Awaited<ReturnType<typeof ordersControllerFindForUser>>,
-  TError = void,
+export function useOrdersControllerFindForCurrentUser<
+  TData = Awaited<ReturnType<typeof ordersControllerFindForCurrentUser>>,
+  TError = unknown,
 >(
-  userId: unknown,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof ordersControllerFindForUser>>,
+        Awaited<ReturnType<typeof ordersControllerFindForCurrentUser>>,
         TError,
         TData
       >
@@ -3368,18 +3314,17 @@ export function useOrdersControllerFindForUser<
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 /**
- * @summary Get all orders for a user
+ * @summary Get orders for the current user
  */
 
-export function useOrdersControllerFindForUser<
-  TData = Awaited<ReturnType<typeof ordersControllerFindForUser>>,
-  TError = void,
+export function useOrdersControllerFindForCurrentUser<
+  TData = Awaited<ReturnType<typeof ordersControllerFindForCurrentUser>>,
+  TError = unknown,
 >(
-  userId: unknown,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof ordersControllerFindForUser>>,
+        Awaited<ReturnType<typeof ordersControllerFindForCurrentUser>>,
         TError,
         TData
       >
@@ -3390,10 +3335,8 @@ export function useOrdersControllerFindForUser<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
-  const queryOptions = getOrdersControllerFindForUserQueryOptions(
-    userId,
-    options,
-  );
+  const queryOptions =
+    getOrdersControllerFindForCurrentUserQueryOptions(options);
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
     TData,
@@ -3406,10 +3349,292 @@ export function useOrdersControllerFindForUser<
 }
 
 /**
- * @summary Get an order by ID
+ * @summary Get all orders for admins
+ */
+export type ordersControllerFindAllForAdminResponse200 = {
+  data: OrderResponseDto[];
+  status: 200;
+};
+
+export type ordersControllerFindAllForAdminResponseSuccess =
+  ordersControllerFindAllForAdminResponse200 & {
+    headers: Headers;
+  };
+export type ordersControllerFindAllForAdminResponse =
+  ordersControllerFindAllForAdminResponseSuccess;
+
+export const getOrdersControllerFindAllForAdminUrl = () => {
+  return `/orders/admin`;
+};
+
+export const ordersControllerFindAllForAdmin = async (
+  options?: RequestInit,
+): Promise<ordersControllerFindAllForAdminResponse> => {
+  return customFetch<ordersControllerFindAllForAdminResponse>(
+    getOrdersControllerFindAllForAdminUrl(),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getOrdersControllerFindAllForAdminQueryKey = () => {
+  return [`/orders/admin`] as const;
+};
+
+export const getOrdersControllerFindAllForAdminQueryOptions = <
+  TData = Awaited<ReturnType<typeof ordersControllerFindAllForAdmin>>,
+  TError = unknown,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof ordersControllerFindAllForAdmin>>,
+      TError,
+      TData
+    >
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getOrdersControllerFindAllForAdminQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof ordersControllerFindAllForAdmin>>
+  > = ({ signal }) =>
+    ordersControllerFindAllForAdmin({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof ordersControllerFindAllForAdmin>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type OrdersControllerFindAllForAdminQueryResult = NonNullable<
+  Awaited<ReturnType<typeof ordersControllerFindAllForAdmin>>
+>;
+export type OrdersControllerFindAllForAdminQueryError = unknown;
+
+export function useOrdersControllerFindAllForAdmin<
+  TData = Awaited<ReturnType<typeof ordersControllerFindAllForAdmin>>,
+  TError = unknown,
+>(
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof ordersControllerFindAllForAdmin>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof ordersControllerFindAllForAdmin>>,
+          TError,
+          Awaited<ReturnType<typeof ordersControllerFindAllForAdmin>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useOrdersControllerFindAllForAdmin<
+  TData = Awaited<ReturnType<typeof ordersControllerFindAllForAdmin>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof ordersControllerFindAllForAdmin>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof ordersControllerFindAllForAdmin>>,
+          TError,
+          Awaited<ReturnType<typeof ordersControllerFindAllForAdmin>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useOrdersControllerFindAllForAdmin<
+  TData = Awaited<ReturnType<typeof ordersControllerFindAllForAdmin>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof ordersControllerFindAllForAdmin>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Get all orders for admins
+ */
+
+export function useOrdersControllerFindAllForAdmin<
+  TData = Awaited<ReturnType<typeof ordersControllerFindAllForAdmin>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof ordersControllerFindAllForAdmin>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getOrdersControllerFindAllForAdminQueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+/**
+ * @summary Update an order status as admin
+ */
+export type ordersControllerUpdateStatusResponse200 = {
+  data: OrderResponseDto;
+  status: 200;
+};
+
+export type ordersControllerUpdateStatusResponseSuccess =
+  ordersControllerUpdateStatusResponse200 & {
+    headers: Headers;
+  };
+export type ordersControllerUpdateStatusResponse =
+  ordersControllerUpdateStatusResponseSuccess;
+
+export const getOrdersControllerUpdateStatusUrl = (id: unknown) => {
+  return `/orders/admin/${id}/status`;
+};
+
+export const ordersControllerUpdateStatus = async (
+  id: unknown,
+  updateOrderStatusDto: UpdateOrderStatusDto,
+  options?: RequestInit,
+): Promise<ordersControllerUpdateStatusResponse> => {
+  return customFetch<ordersControllerUpdateStatusResponse>(
+    getOrdersControllerUpdateStatusUrl(id),
+    {
+      ...options,
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", ...options?.headers },
+      body: JSON.stringify(updateOrderStatusDto),
+    },
+  );
+};
+
+export const getOrdersControllerUpdateStatusMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof ordersControllerUpdateStatus>>,
+    TError,
+    { id: unknown; data: UpdateOrderStatusDto },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof ordersControllerUpdateStatus>>,
+  TError,
+  { id: unknown; data: UpdateOrderStatusDto },
+  TContext
+> => {
+  const mutationKey = ["ordersControllerUpdateStatus"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof ordersControllerUpdateStatus>>,
+    { id: unknown; data: UpdateOrderStatusDto }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return ordersControllerUpdateStatus(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type OrdersControllerUpdateStatusMutationResult = NonNullable<
+  Awaited<ReturnType<typeof ordersControllerUpdateStatus>>
+>;
+export type OrdersControllerUpdateStatusMutationBody = UpdateOrderStatusDto;
+export type OrdersControllerUpdateStatusMutationError = unknown;
+
+/**
+ * @summary Update an order status as admin
+ */
+export const useOrdersControllerUpdateStatus = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof ordersControllerUpdateStatus>>,
+      TError,
+      { id: unknown; data: UpdateOrderStatusDto },
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof ordersControllerUpdateStatus>>,
+  TError,
+  { id: unknown; data: UpdateOrderStatusDto },
+  TContext
+> => {
+  const mutationOptions =
+    getOrdersControllerUpdateStatusMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+
+/**
+ * @summary Get an owned order by ID, or any order as admin
  */
 export type ordersControllerFindOneResponse200 = {
-  data: void;
+  data: OrderResponseDto;
   status: 200;
 };
 
@@ -3569,7 +3794,7 @@ export function useOrdersControllerFindOne<
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 /**
- * @summary Get an order by ID
+ * @summary Get an owned order by ID, or any order as admin
  */
 
 export function useOrdersControllerFindOne<
@@ -3634,7 +3859,6 @@ export const getOrdersControllerCreateRazorpayOrderUrl = () => {
 };
 
 export const ordersControllerCreateRazorpayOrder = async (
-  createRazorpayOrderDto: CreateRazorpayOrderDto,
   options?: RequestInit,
 ): Promise<ordersControllerCreateRazorpayOrderResponse> => {
   return customFetch<ordersControllerCreateRazorpayOrderResponse>(
@@ -3642,8 +3866,6 @@ export const ordersControllerCreateRazorpayOrder = async (
     {
       ...options,
       method: "POST",
-      headers: { "Content-Type": "application/json", ...options?.headers },
-      body: JSON.stringify(createRazorpayOrderDto),
     },
   );
 };
@@ -3655,14 +3877,14 @@ export const getOrdersControllerCreateRazorpayOrderMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof ordersControllerCreateRazorpayOrder>>,
     TError,
-    { data: CreateRazorpayOrderDto },
+    void,
     TContext
   >;
   request?: SecondParameter<typeof customFetch>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof ordersControllerCreateRazorpayOrder>>,
   TError,
-  { data: CreateRazorpayOrderDto },
+  void,
   TContext
 > => {
   const mutationKey = ["ordersControllerCreateRazorpayOrder"];
@@ -3676,11 +3898,9 @@ export const getOrdersControllerCreateRazorpayOrderMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof ordersControllerCreateRazorpayOrder>>,
-    { data: CreateRazorpayOrderDto }
-  > = (props) => {
-    const { data } = props ?? {};
-
-    return ordersControllerCreateRazorpayOrder(data, requestOptions);
+    void
+  > = () => {
+    return ordersControllerCreateRazorpayOrder(requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -3689,8 +3909,7 @@ export const getOrdersControllerCreateRazorpayOrderMutationOptions = <
 export type OrdersControllerCreateRazorpayOrderMutationResult = NonNullable<
   Awaited<ReturnType<typeof ordersControllerCreateRazorpayOrder>>
 >;
-export type OrdersControllerCreateRazorpayOrderMutationBody =
-  CreateRazorpayOrderDto;
+
 export type OrdersControllerCreateRazorpayOrderMutationError = void;
 
 /**
@@ -3704,7 +3923,7 @@ export const useOrdersControllerCreateRazorpayOrder = <
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof ordersControllerCreateRazorpayOrder>>,
       TError,
-      { data: CreateRazorpayOrderDto },
+      void,
       TContext
     >;
     request?: SecondParameter<typeof customFetch>;
@@ -3713,7 +3932,7 @@ export const useOrdersControllerCreateRazorpayOrder = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof ordersControllerCreateRazorpayOrder>>,
   TError,
-  { data: CreateRazorpayOrderDto },
+  void,
   TContext
 > => {
   const mutationOptions =
@@ -3726,7 +3945,7 @@ export const useOrdersControllerCreateRazorpayOrder = <
  * @summary Verify payment and create order
  */
 export type ordersControllerVerifyPaymentResponse201 = {
-  data: void;
+  data: OrderResponseDto;
   status: 201;
 };
 
