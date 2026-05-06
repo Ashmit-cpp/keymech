@@ -1,98 +1,144 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Key Mech — Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+REST API for **Key Mech**: products, cart, wishlist, auth (JWT), orders, and **Razorpay** payment creation/verification. Built with **NestJS 11** and **Prisma 7** on **PostgreSQL**.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+The React app in [`../key-mech-frontend`](../key-mech-frontend) consumes this API; OpenAPI for Orval lives in [`../packages/api-schema/openapi.json`](../packages/api-schema/openapi.json).
 
-## Description
+## Capabilities
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+| Area | Notes |
+|------|--------|
+| **Catalog** | Products module (public/admin-facing endpoints per routes) |
+| **Commerce** | Cart, wishlist, orders; Razorpay order + verify flow |
+| **Users & auth** | Registration, login, JWT (`passport-jwt`), role-aware guards |
+| **Ops** | Health check, non-production Swagger UI + raw Open JSON |
 
-## Project setup
+Global validation: `ValidationPipe` with `whitelist` and `transform`. CORS allows the configured frontend origin with credentials.
 
-```bash
-$ npm install
-```
+## Stack
 
-## Compile and run the project
+| Layer | Choices |
+|--------|---------|
+| Runtime | Node.js (ESM), NestJS 11, Express adapter |
+| Data | Prisma 7, `@prisma/adapter-pg`, PostgreSQL |
+| Auth | `@nestjs/jwt`, Passport JWT, bcrypt |
+| Payments | Official `razorpay` SDK |
+| Docs | `@nestjs/swagger`; schema export script for the monorepo |
+| Tooling | TypeScript 5.7, ESLint 9, Prettier, Jest 30 (ESM) |
 
-```bash
-# development
-$ npm run start
+Prisma Client is generated into [`generated/prisma`](./generated/prisma) (see `schema.prisma`). Use `pnpm exec prisma generate` after schema changes.
 
-# watch mode
-$ npm run start:dev
+## Requirements
 
-# production mode
-$ npm run start:prod
-```
+- **Node.js** — current LTS
+- **pnpm** — `packageManager` is pinned in `package.json` (e.g. `pnpm@10.33.0`)
+- **PostgreSQL** — version compatible with Prisma’s PostgreSQL provider
 
-## Run tests
+## Getting started
+
+From the monorepo:
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+cd key-mech-backend
+pnpm install
+cp .env.example .env
 ```
+
+Edit `.env`: set **`DATABASE_URL`**, **`JWT_SECRET`**, and **Razorpay test keys**. Set **`FRONTEND_ORIGIN`** to your SPA origin (default in validation is `http://localhost:5173`). **`PORT`** defaults to `3006` if omitted.
+
+Apply schema and generate the client:
+
+```bash
+pnpm exec prisma migrate dev
+pnpm exec prisma generate
+```
+
+Optional seed (see [`prisma/seed.ts`](./prisma/seed.ts)):
+
+```bash
+pnpm exec prisma db seed
+```
+
+Start in watch mode:
+
+```bash
+pnpm start:dev
+```
+
+- **HTTP** — `http://localhost:<PORT>` (default port **3006**)
+- **Swagger UI** — `/api` when `NODE_ENV` is not `production`
+- **OpenAPI JSON** — `/openapi.json` in those same environments
+
+Point the frontend’s `VITE_API_URL` at this same origin (including port).
+
+## Environment variables
+
+Validated at startup via [`src/config/env.validation.ts`](src/config/env.validation.ts).
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `DATABASE_URL` | Yes | PostgreSQL connection string |
+| `JWT_SECRET` | Yes | Secret for signing JWTs |
+| `RAZORPAY_KEY_ID` | Yes | Razorpay key id (e.g. test `rzp_test_…`) |
+| `RAZORPAY_SECRET` | Yes | Razorpay key secret |
+| `FRONTEND_ORIGIN` | No | CORS allowlist; default `http://localhost:5173` |
+| `PORT` | No | Listen port; default `3006` |
+| `NODE_ENV` | No | Default `development`; when `production`, Swagger/OpenAPI routes are not mounted |
+
+JWT expiry is configured in code (`auth` module `signOptions`), not via env.
+
+## Scripts
+
+| Command | Description |
+|---------|-------------|
+| `pnpm start:dev` | Nest watch mode |
+| `pnpm start:debug` | Watch mode with debugger |
+| `pnpm start` | Single run (no watch) |
+| `pnpm start:prod` | Run compiled app (`node dist/src/main`) |
+| `pnpm build` | `nest build` |
+| `pnpm typecheck` | `tsc --noEmit` |
+| `pnpm lint` / `pnpm lint:fix` | ESLint |
+| `pnpm format` | Prettier write |
+| `pnpm test` | Unit tests (Jest, ESM) |
+| `pnpm test:watch` | Jest watch |
+| `pnpm test:cov` | Coverage |
+| `pnpm test:e2e` | E2E config under `test/` |
+| `pnpm gen:openapi` | Write `../packages/api-schema/openapi.json` (needs bootstrappable env; see script) |
+
+After **`pnpm gen:openapi`**, regenerate the frontend client with `pnpm gen:api` in `key-mech-frontend`.
+
+## OpenAPI and the frontend
+
+[`scripts/generate-openapi.ts`](scripts/generate-openapi.ts) boots Nest (with `SKIP_DATABASE_CONNECT` for the script) and writes the merged document to **`../packages/api-schema/openapi.json`**. Keep that path in sync with Orval in the frontend.
+
+## Project layout
+
+| Path | Role |
+|------|------|
+| `src/auth/` | JWT strategy, auth module |
+| `src/users/` | User domain |
+| `src/products/` | Catalog |
+| `src/cart/` | Cart |
+| `src/wishlist/` | Wishlist |
+| `src/orders/` | Orders + Razorpay |
+| `src/prisma/` | Prisma module / service |
+| `src/config/` | Env validation |
+| `src/openapi.ts` | Swagger document factory |
+| `prisma/` | `schema.prisma`, migrations, seed |
 
 ## Deployment
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+- Build with `pnpm build` and run `pnpm start:prod` (or your process manager).
+- Set production env vars, especially **`DATABASE_URL`**, **`JWT_SECRET`**, Razorpay **live** keys, **`FRONTEND_ORIGIN`**, and **`PORT`** / `NODE_ENV=production`.
+- Ensure PostgreSQL is reachable and migrations are applied (`prisma migrate deploy` in CI or release step).
+- CORS is locked to **`FRONTEND_ORIGIN`**; add the real SPA URL there.
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## Troubleshooting
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+| Symptom | What to check |
+|---------|----------------|
+| Boot fails on env | All required keys in `.env`; names match validation (`FRONTEND_ORIGIN`, not `FRONTEND_URL`) |
+| CORS from browser | `FRONTEND_ORIGIN` must exactly match the SPA origin (scheme + host + port) |
+| Prisma errors | `DATABASE_URL`, migrations applied, `prisma generate` run after pull |
+| Payments in dev | Razorpay test keys in `.env`; dashboard in test mode |
+| Swagger 404 | Only available when `NODE_ENV` ≠ `production` |
