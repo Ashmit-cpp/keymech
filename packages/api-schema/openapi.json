@@ -546,53 +546,106 @@
         ]
       }
     },
-    "/orders/{userId}": {
-      "post": {
-        "operationId": "OrdersController_create",
-        "parameters": [
-          {
-            "name": "userId",
-            "required": true,
-            "in": "path",
-            "description": "User UUID",
-            "schema": {}
-          }
-        ],
+    "/orders": {
+      "get": {
+        "operationId": "OrdersController_findForCurrentUser",
+        "parameters": [],
         "responses": {
-          "201": {
-            "description": "Order created successfully"
-          },
-          "404": {
-            "description": "User not found"
+          "200": {
+            "description": "List of current user orders",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OrderResponseDto"
+                  }
+                }
+              }
+            }
           }
         },
-        "summary": "Create a new order for a user",
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get orders for the current user",
         "tags": [
           "orders"
         ]
       }
     },
-    "/orders/user/{userId}": {
+    "/orders/admin": {
       "get": {
-        "operationId": "OrdersController_findForUser",
+        "operationId": "OrdersController_findAllForAdmin",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List of all orders",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OrderResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get all orders for admins",
+        "tags": [
+          "orders"
+        ]
+      }
+    },
+    "/orders/admin/{id}/status": {
+      "patch": {
+        "operationId": "OrdersController_updateStatus",
         "parameters": [
           {
-            "name": "userId",
+            "name": "id",
             "required": true,
             "in": "path",
-            "description": "User UUID",
+            "description": "Order UUID",
             "schema": {}
           }
         ],
-        "responses": {
-          "200": {
-            "description": "List of user orders"
-          },
-          "404": {
-            "description": "User not found"
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateOrderStatusDto"
+              }
+            }
           }
         },
-        "summary": "Get all orders for a user",
+        "responses": {
+          "200": {
+            "description": "Order status updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update an order status as admin",
         "tags": [
           "orders"
         ]
@@ -612,13 +665,25 @@
         ],
         "responses": {
           "200": {
-            "description": "Order found"
+            "description": "Order found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderResponseDto"
+                }
+              }
+            }
           },
           "404": {
             "description": "Order not found"
           }
         },
-        "summary": "Get an order by ID",
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get an owned order by ID, or any order as admin",
         "tags": [
           "orders"
         ]
@@ -628,16 +693,6 @@
       "post": {
         "operationId": "OrdersController_createRazorpayOrder",
         "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateRazorpayOrderDto"
-              }
-            }
-          }
-        },
         "responses": {
           "201": {
             "description": "Razorpay order created successfully",
@@ -653,6 +708,11 @@
             "description": "Bad request"
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Create a Razorpay order for payment",
         "tags": [
           "orders"
@@ -675,12 +735,24 @@
         },
         "responses": {
           "201": {
-            "description": "Payment verified and order created"
+            "description": "Payment verified and order created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderResponseDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Payment verification failed"
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Verify payment and create order",
         "tags": [
           "orders"
@@ -1241,16 +1313,183 @@
           "user"
         ]
       },
-      "CreateRazorpayOrderDto": {
+      "OrderProductResponseDto": {
         "type": "object",
         "properties": {
-          "userId": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "images": {
             "type": "string",
-            "description": "User ID"
+            "nullable": true
           }
         },
         "required": [
-          "userId"
+          "id",
+          "name"
+        ]
+      },
+      "OrderVariantResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "extraPrice": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "extraPrice"
+        ]
+      },
+      "OrderItemResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "productId": {
+            "type": "string"
+          },
+          "variantId": {
+            "type": "string",
+            "nullable": true
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "price": {
+            "type": "number",
+            "description": "Unit price in paise"
+          },
+          "product": {
+            "$ref": "#/components/schemas/OrderProductResponseDto"
+          },
+          "variant": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/OrderVariantResponseDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "productId",
+          "quantity",
+          "price",
+          "product"
+        ]
+      },
+      "OrderUserResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "email"
+        ]
+      },
+      "OrderResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "PAID",
+              "SHIPPED",
+              "CANCELLED",
+              "COMPLETED"
+            ]
+          },
+          "totalAmount": {
+            "type": "number",
+            "description": "Total in paise"
+          },
+          "razorpayOrderId": {
+            "type": "string",
+            "nullable": true
+          },
+          "razorpayPaymentId": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderItemResponseDto"
+            }
+          },
+          "user": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/OrderUserResponseDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "userId",
+          "status",
+          "totalAmount",
+          "createdAt",
+          "updatedAt",
+          "items"
+        ]
+      },
+      "UpdateOrderStatusDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "PAID",
+              "SHIPPED",
+              "CANCELLED",
+              "COMPLETED"
+            ]
+          }
+        },
+        "required": [
+          "status"
         ]
       },
       "RazorpayOrderResponseDto": {
@@ -1287,10 +1526,6 @@
       "VerifyPaymentDto": {
         "type": "object",
         "properties": {
-          "userId": {
-            "type": "string",
-            "description": "User ID"
-          },
           "razorpay_order_id": {
             "type": "string",
             "description": "Razorpay order ID"
@@ -1305,7 +1540,6 @@
           }
         },
         "required": [
-          "userId",
           "razorpay_order_id",
           "razorpay_payment_id",
           "razorpay_signature"
