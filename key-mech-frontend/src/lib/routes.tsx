@@ -140,7 +140,11 @@ const router = createBrowserRouter([
       // User Account Routes
       {
         path: "account",
-        element: <AccountLayout />,
+        element: (
+          <ProtectedRoute>
+            <AccountLayout />
+          </ProtectedRoute>
+        ),
         children: [
           {
             index: true,

@@ -1,9 +1,11 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { authControllerMe } from '@/api/generated';
+import { useAuthStore } from '@/stores/auth-store';
 
 interface User {
   id: string;
   email: string;
-  name?: string;
+  name?: string | null;
   role?: string;
 }
 
@@ -18,58 +20,52 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const user = useAuthStore((state) => state.user);
+  const token = useAuthStore((state) => state.token);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const setAuth = useAuthStore((state) => state.setAuth);
+  const clearAuth = useAuthStore((state) => state.clearAuth);
 
   useEffect(() => {
-    // Check if user is authenticated by checking for access_token cookie
-    // Since we're using httpOnly cookies, we can't directly read the cookie in JS
-    // We'll verify authentication by making a request to a protected endpoint
-    checkAuth();
-  }, []);
+    let isCurrent = true;
 
-  async function checkAuth() {
-    try {
-      // Try to get cart (which is now auth-aware)
-      // If successful and has userId, we're authenticated
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/cart`, {
-        credentials: 'include',
-      });
-      
-      if (response.ok) {
-        const cart = await response.json();
-        if (cart.userId) {
-          // User is authenticated, fetch user details
-          // For now, we'll just set a minimal user object
-          // In a real app, you'd have a /auth/me endpoint
-          setUser({ 
-            id: cart.userId, 
-            email: '', // Would come from /auth/me endpoint
-          });
-        }
+    async function checkAuth() {
+      if (!token) {
+        if (isCurrent) setIsLoading(false);
+        return;
       }
-    } catch (error) {
-      console.error('Auth check failed:', error);
-    } finally {
-      setIsLoading(false);
+
+      try {
+        const response = await authControllerMe();
+        if (isCurrent) setAuth(response.data, token);
+      } catch {
+        if (isCurrent) clearAuth();
+      } finally {
+        if (isCurrent) setIsLoading(false);
+      }
     }
-  }
+
+    void checkAuth();
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [clearAuth, setAuth, token]);
 
   function login(userData: User) {
-    setUser(userData);
-    // Note: Cart refetch is handled in login/register mutations
+    if (token) setAuth(userData, token);
   }
 
   function logout() {
-    setUser(null);
-    // Note: Cart refetch is handled in logout mutation
+    clearAuth();
   }
 
   return (
     <AuthContext.Provider
       value={{
         user,
-        isAuthenticated: !!user,
+        isAuthenticated,
         isLoading,
         login,
         logout,
@@ -87,4 +83,3 @@ export function useAuth() {
   }
   return context;
 }
-
