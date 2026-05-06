@@ -1,52 +1,97 @@
-import { Controller, Get, Param, Post, Body } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Patch,
+  Post,
+  UseGuards,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiParam,
   ApiBody,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { OrdersService } from './orders.service.js';
-import { ParseUUIDPipe } from '@nestjs/common';
-import { CreateRazorpayOrderDto } from './dto/create-razorpay-order.dto.js';
 import { VerifyPaymentDto } from './dto/verify-payment.dto.js';
 import { RazorpayOrderResponseDto } from './dto/razorpay-order-response.dto.js';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
+import { CurrentUser } from '../auth/current-user.decorator.js';
+import type { AuthenticatedUser } from '../auth/current-user.decorator.js';
+import { OrderResponseDto } from './dto/order-response.dto.js';
+import { UpdateOrderStatusDto } from './dto/update-order-status.dto.js';
 
 @Controller('orders')
 @ApiTags('orders')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 export class OrdersController {
   constructor(private readonly service: OrdersService) {}
 
-  @Post(':userId')
-  @ApiOperation({ summary: 'Create a new order for a user' })
-  @ApiParam({ name: 'userId', description: 'User UUID' })
-  @ApiResponse({ status: 201, description: 'Order created successfully' })
-  @ApiResponse({ status: 404, description: 'User not found' })
-  create(@Param('userId', new ParseUUIDPipe()) userId: string) {
-    return this.service.createOrder(userId);
+  @Get()
+  @ApiOperation({ summary: 'Get orders for the current user' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of current user orders',
+    type: [OrderResponseDto],
+  })
+  findForCurrentUser(@CurrentUser() user: AuthenticatedUser) {
+    return this.service.findOrdersForUser(user.userId);
   }
 
-  @Get('user/:userId')
-  @ApiOperation({ summary: 'Get all orders for a user' })
-  @ApiParam({ name: 'userId', description: 'User UUID' })
-  @ApiResponse({ status: 200, description: 'List of user orders' })
-  @ApiResponse({ status: 404, description: 'User not found' })
-  findForUser(@Param('userId', new ParseUUIDPipe()) userId: string) {
-    return this.service.findOrdersForUser(userId);
+  @Get('admin')
+  @ApiOperation({ summary: 'Get all orders for admins' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of all orders',
+    type: [OrderResponseDto],
+  })
+  findAllForAdmin(@CurrentUser() user: AuthenticatedUser) {
+    return this.service.findAllForAdmin(user);
+  }
+
+  @Patch('admin/:id/status')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  @ApiOperation({ summary: 'Update an order status as admin' })
+  @ApiParam({ name: 'id', description: 'Order UUID' })
+  @ApiBody({ type: UpdateOrderStatusDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Order status updated',
+    type: OrderResponseDto,
+  })
+  updateStatus(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() dto: UpdateOrderStatusDto,
+  ) {
+    return this.service.updateStatusForAdmin(user, id, dto.status);
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get an order by ID' })
+  @ApiOperation({ summary: 'Get an owned order by ID, or any order as admin' })
   @ApiParam({ name: 'id', description: 'Order UUID' })
-  @ApiResponse({ status: 200, description: 'Order found' })
+  @ApiResponse({
+    status: 200,
+    description: 'Order found',
+    type: OrderResponseDto,
+  })
   @ApiResponse({ status: 404, description: 'Order not found' })
-  findOne(@Param('id', new ParseUUIDPipe()) id: string) {
-    return this.service.findOne(id);
+  findOne(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ) {
+    return this.service.findOneForUser(user, id);
   }
 
   @Post('payment/create-razorpay-order')
   @ApiOperation({ summary: 'Create a Razorpay order for payment' })
-  @ApiBody({ type: CreateRazorpayOrderDto })
   @ApiResponse({
     status: 201,
     description: 'Razorpay order created successfully',
@@ -54,20 +99,25 @@ export class OrdersController {
   })
   @ApiResponse({ status: 400, description: 'Bad request' })
   async createRazorpayOrder(
-    @Body() dto: CreateRazorpayOrderDto,
+    @CurrentUser() user: AuthenticatedUser,
   ): Promise<RazorpayOrderResponseDto> {
-    return this.service.createRazorpayOrder(dto.userId);
+    return this.service.createRazorpayOrder(user.userId);
   }
 
   @Post('payment/verify')
+  @UsePipes(new ValidationPipe({ transform: true }))
   @ApiOperation({ summary: 'Verify payment and create order' })
   @ApiBody({ type: VerifyPaymentDto })
   @ApiResponse({
     status: 201,
     description: 'Payment verified and order created',
+    type: OrderResponseDto,
   })
   @ApiResponse({ status: 400, description: 'Payment verification failed' })
-  async verifyPayment(@Body() dto: VerifyPaymentDto) {
-    return this.service.verifyAndCreateOrder(dto);
+  async verifyPayment(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: VerifyPaymentDto,
+  ) {
+    return this.service.verifyAndCreateOrder(user.userId, dto);
   }
 }
