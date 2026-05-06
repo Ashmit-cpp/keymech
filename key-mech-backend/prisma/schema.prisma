@@ -94,9 +94,10 @@ model Order {
   userId             String
   status             OrderStatus @default(PENDING)
   totalAmount        Int
-  razorpayOrderId    String?
-  razorpayPaymentId  String?
+  razorpayOrderId    String?     @unique
+  razorpayPaymentId  String?     @unique
   createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
   user               User        @relation(fields: [userId], references: [id])
   items              OrderItem[]
 }
