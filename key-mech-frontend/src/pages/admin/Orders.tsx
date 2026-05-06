@@ -1,4 +1,63 @@
+import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+import { Eye } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { LoadingState } from "@/components/ui/loading-state";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  OrderResponseDtoStatus,
+  useOrdersControllerFindAllForAdmin,
+} from "@/api/generated";
+import {
+  formatINR,
+  formatOrderDate,
+  getOrderPreview,
+  getOrderStatusClassName,
+  getOrderStatusLabel,
+} from "@/lib/orders";
+
 export default function AdminOrders() {
+  const [query, setQuery] = useState("");
+  const [status, setStatus] = useState<string>("ALL");
+  const { data, isLoading, error } = useOrdersControllerFindAllForAdmin();
+
+  const filteredOrders = useMemo(() => {
+    const orders = data?.data ?? [];
+    const needle = query.trim().toLowerCase();
+    return orders.filter((order) => {
+      const customer = `${order.user?.name ?? ""} ${order.user?.email ?? ""}`;
+      const matchesQuery =
+        !needle ||
+        order.id.toLowerCase().includes(needle) ||
+        customer.toLowerCase().includes(needle) ||
+        getOrderPreview(order).toLowerCase().includes(needle);
+      const matchesStatus = status === "ALL" || order.status === status;
+      return matchesQuery && matchesStatus;
+    });
+  }, [data?.data, query, status]);
+
+  if (isLoading) return <LoadingState label="Loading orders..." />;
+
+  if (error) {
+    return <p className="text-destructive">Unable to load admin orders.</p>;
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -6,93 +65,82 @@ export default function AdminOrders() {
         <p className="text-muted-foreground">Manage customer orders</p>
       </div>
 
-      <div className="border rounded-lg">
-        <div className="p-4 border-b">
-          <div className="flex items-center space-x-4">
-            <input
-              type="text"
-              placeholder="Search orders..."
-              className="flex-1 px-3 py-2 border rounded-md"
-            />
-            <select className="px-3 py-2 border rounded-md">
-              <option>All Status</option>
-              <option>Pending</option>
-              <option>Processing</option>
-              <option>Shipped</option>
-              <option>Delivered</option>
-              <option>Cancelled</option>
-            </select>
-          </div>
+      <div className="space-y-4 rounded-lg border p-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <Input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search orders, customers, or products..."
+            className="sm:max-w-md"
+          />
+          <Select value={status} onValueChange={setStatus}>
+            <SelectTrigger className="w-full sm:w-52">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">All statuses</SelectItem>
+              {Object.values(OrderResponseDtoStatus).map((value) => (
+                <SelectItem key={value} value={value}>
+                  {getOrderStatusLabel(value)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-muted/50">
-              <tr>
-                <th className="text-left p-4">Order ID</th>
-                <th className="text-left p-4">Customer</th>
-                <th className="text-left p-4">Date</th>
-                <th className="text-left p-4">Total</th>
-                <th className="text-left p-4">Status</th>
-                <th className="text-left p-4">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="border-b">
-                <td className="p-4 font-medium">#1234</td>
-                <td className="p-4">John Doe</td>
-                <td className="p-4">Jan 15, 2024</td>
-                <td className="p-4">$129.99</td>
-                <td className="p-4">
-                  <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm">
-                    Processing
-                  </span>
-                </td>
-                <td className="p-4">
-                  <div className="flex space-x-2">
-                    <button className="text-primary hover:underline text-sm">View</button>
-                    <button className="text-orange-500 hover:underline text-sm">Update</button>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Order</TableHead>
+              <TableHead>Customer</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead>Total</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredOrders.map((order) => (
+              <TableRow key={order.id}>
+                <TableCell>
+                  <div className="font-medium">#{order.id}</div>
+                  <div className="max-w-[220px] truncate text-xs text-muted-foreground">
+                    {getOrderPreview(order)}
                   </div>
-                </td>
-              </tr>
-              <tr className="border-b">
-                <td className="p-4 font-medium">#1233</td>
-                <td className="p-4">Jane Smith</td>
-                <td className="p-4">Jan 14, 2024</td>
-                <td className="p-4">$89.99</td>
-                <td className="p-4">
-                  <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-sm">
-                    Shipped
-                  </span>
-                </td>
-                <td className="p-4">
-                  <div className="flex space-x-2">
-                    <button className="text-primary hover:underline text-sm">View</button>
-                    <button className="text-orange-500 hover:underline text-sm">Update</button>
+                </TableCell>
+                <TableCell>
+                  <div>{order.user?.name || "Customer"}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {order.user?.email || "No email"}
                   </div>
-                </td>
-              </tr>
-              <tr className="border-b">
-                <td className="p-4 font-medium">#1232</td>
-                <td className="p-4">Bob Johnson</td>
-                <td className="p-4">Jan 13, 2024</td>
-                <td className="p-4">$199.99</td>
-                <td className="p-4">
-                  <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-sm">
-                    Delivered
-                  </span>
-                </td>
-                <td className="p-4">
-                  <div className="flex space-x-2">
-                    <button className="text-primary hover:underline text-sm">View</button>
-                    <button className="text-orange-500 hover:underline text-sm">Update</button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+                </TableCell>
+                <TableCell>{formatOrderDate(order.createdAt)}</TableCell>
+                <TableCell>{formatINR(order.totalAmount)}</TableCell>
+                <TableCell>
+                  <Badge className={getOrderStatusClassName(order.status)}>
+                    {getOrderStatusLabel(order.status)}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-right">
+                  <Button variant="outline" size="sm" asChild>
+                    <Link to={`/admin/orders/${order.id}`}>
+                      <Eye className="h-4 w-4" />
+                      View
+                    </Link>
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+            {!filteredOrders.length && (
+              <TableRow>
+                <TableCell colSpan={6} className="py-10 text-center text-muted-foreground">
+                  No orders match the current filters.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
       </div>
     </div>
-  )
+  );
 }

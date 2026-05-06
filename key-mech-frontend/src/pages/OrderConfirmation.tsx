@@ -1,34 +1,51 @@
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from "react-router-dom";
+import { CheckCircle2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { LoadingState } from "@/components/ui/loading-state";
+import { OrderDetailView } from "@/components/orders/order-detail-view";
+import { useOrdersControllerFindOne } from "@/api/generated";
 
 export default function OrderConfirmationPage() {
-  const { orderId } = useParams()
+  const { orderId } = useParams();
+  const { data, isLoading, error } = useOrdersControllerFindOne(orderId, {
+    query: { enabled: Boolean(orderId) },
+  });
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-24">
+        <LoadingState label="Loading order..." />
+      </div>
+    );
+  }
+
+  if (error || !data?.data) {
+    return (
+      <div className="container mx-auto px-4 py-24">
+        <p className="text-destructive">Unable to load this order.</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-2xl mx-auto text-center">
-        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-          <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-          </svg>
-        </div>
-        <h1 className="text-3xl font-bold mb-4">Order Confirmed!</h1>
-        <p className="text-lg text-muted-foreground mb-6">
-          Thank you for your order. We've sent a confirmation email to your inbox.
+    <div className="container mx-auto space-y-8 px-4 py-24">
+      <div className="mx-auto max-w-2xl text-center">
+        <CheckCircle2 className="mx-auto mb-4 h-14 w-14 text-emerald-600" />
+        <h1 className="text-3xl font-bold">Order Confirmed</h1>
+        <p className="mt-2 text-muted-foreground">
+          Your payment was verified and your order is ready for processing.
         </p>
-        <div className="bg-muted p-6 rounded-lg mb-6">
-          <h2 className="text-xl font-semibold mb-2">Order Details</h2>
-          <p className="text-muted-foreground">Order ID: {orderId}</p>
-          <p className="text-muted-foreground">Estimated delivery: 3-5 business days</p>
-        </div>
-        <div className="space-x-4">
-          <button className="bg-primary text-primary-foreground px-6 py-2 rounded">
-            Continue Shopping
-          </button>
-          <button className="border px-6 py-2 rounded">
-            View Order Details
-          </button>
+        <div className="mt-6 flex flex-wrap justify-center gap-3">
+          <Button asChild>
+            <Link to="/products">Continue Shopping</Link>
+          </Button>
+          <Button variant="outline" asChild>
+            <Link to={`/account/orders/${data.data.id}`}>View Order Details</Link>
+          </Button>
         </div>
       </div>
+
+      <OrderDetailView order={data.data} />
     </div>
-  )
+  );
 }

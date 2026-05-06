@@ -1,6 +1,4 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -9,43 +7,21 @@ import {
   useCartControllerAddItem,
   useCartControllerRemoveItem,
   getCartControllerGetCartQueryKey,
-  useOrdersControllerCreateRazorpayOrder,
-  useOrdersControllerVerifyPayment,
 } from "@/api/generated";
 import { LoadingState } from "@/components/ui/loading-state";
 import { toast } from "sonner";
 import { useAuthStore } from "@/stores/auth-store";
 import { useGuestCartStore } from "@/stores/cart-store";
-
-// Declare Razorpay type for TypeScript
-declare global {
-  interface Window {
-    Razorpay: any;
-  }
-}
-
-const parseFirstImage = (images?: string | null): string | null => {
-  if (!images) return null;
-  try {
-    const parsed = JSON.parse(images);
-    if (Array.isArray(parsed) && parsed[0]) return parsed[0] as string;
-  } catch {
-    return null;
-  }
-  return null;
-};
+import { useRazorpayCheckout } from "@/hooks/use-razorpay-checkout";
+import { formatINR, parseFirstImage } from "@/lib/orders";
 
 export default function CartPage() {
-  const [isCheckoutLoading, setCheckoutLoading] = useState(false);
-  const [isRazorpayLoaded, setRazorpayLoaded] = useState(false);
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   const guestCartItems = useGuestCartStore((state) => state.items);
   const updateGuestQuantity = useGuestCartStore((state) => state.updateQuantity);
   const removeGuestItem = useGuestCartStore((state) => state.removeItem);
-  const createRazorpayOrder = useOrdersControllerCreateRazorpayOrder();
-  const verifyPayment = useOrdersControllerVerifyPayment();
+  const checkout = useRazorpayCheckout();
   
   // Only fetch user cart if authenticated
   const { data, isLoading, error } = useCartControllerGetCart({
@@ -55,30 +31,6 @@ export default function CartPage() {
       retryDelay: 500,
     },
   });
-
-  // Load Razorpay script dynamically
-  useEffect(() => {
-    if (isRazorpayLoaded || typeof window === "undefined") return;
-
-    const script = document.createElement("script");
-    script.src = "https://checkout.razorpay.com/v1/checkout.js";
-    script.async = true;
-    script.onload = () => setRazorpayLoaded(true);
-    script.onerror = () => {
-      console.error("Failed to load Razorpay script");
-    };
-    document.body.appendChild(script);
-
-    return () => {
-      // Cleanup script on unmount
-      const existingScript = document.querySelector(
-        'script[src="https://checkout.razorpay.com/v1/checkout.js"]'
-      );
-      if (existingScript) {
-        document.body.removeChild(existingScript);
-      }
-    };
-  }, [isRazorpayLoaded]);
 
   const addMutation = useCartControllerAddItem({
     mutation: {
@@ -205,7 +157,7 @@ export default function CartPage() {
           ) : isAuthenticated ? (
             items.map((item: any) => {
               const priceCents = (item.variant?.extraPrice ?? 0) + (item.product?.price ?? 0);
-              const price = `₹${(priceCents / 100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
+              const price = formatINR(priceCents);
               const firstImage = parseFirstImage(item.product?.images);
               return (
                 <Card key={item.id}>
@@ -244,7 +196,7 @@ export default function CartPage() {
           ) : (
             guestItems.map((item) => {
               const priceCents = (item.variant?.extraPrice ?? 0) + (item.product?.price ?? 0);
-              const price = `₹${(priceCents / 100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
+              const price = formatINR(priceCents);
               const firstImage = parseFirstImage(item.product?.images);
               return (
                 <Card key={`${item.productId}-${item.variantId || 'none'}`}>
@@ -305,15 +257,15 @@ export default function CartPage() {
               <Separator />
               <div className="flex justify-between">
                 <span>Subtotal</span>
-                <span>₹{(subtotal / 100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</span>
+                <span>{formatINR(subtotal)}</span>
               </div>
               <div className="flex justify-between">
                 <span>Shipping</span>
-                <span>₹0.00</span>
+                <span>{formatINR(0)}</span>
               </div>
               <div className="flex justify-between font-semibold">
                 <span>Total</span>
-                <span>₹{(subtotal / 100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</span>
+                <span>{formatINR(subtotal)}</span>
               </div>
             </CardContent>
             <CardFooter>
@@ -323,120 +275,11 @@ export default function CartPage() {
                     !hasItems ||
                     !isAuthenticated ||
                     isMutating ||
-                    isCheckoutLoading ||
-                    createRazorpayOrder.status === "pending" ||
-                    verifyPayment.status === "pending"
+                    checkout.isPending
                   }
-                  onClick={async () => {
-                    if (isCheckoutLoading) return;
-                    if (!isAuthenticated) {
-                      toast.info("Please sign in to checkout", {
-                        description: "You need to be signed in to complete your order",
-                      });
-                      navigate("/auth/login");
-                      return;
-                    }
-                    if (!subtotal) {
-                      toast.info("Your cart is empty.");
-                      return;
-                    }
-
-                    if (!isRazorpayLoaded || !window.Razorpay) {
-                      toast.error("Payment system is loading. Please wait a moment and try again.");
-                      return;
-                    }
-
-                    try {
-                      setCheckoutLoading(true);
-                      if (!user?.id) {
-                        toast.error("Unable to create order. Please re-login.");
-                        navigate("/auth/login");
-                        return;
-                      }
-
-                      // Create Razorpay order on backend (includes keyId)
-                      const orderResponse = await createRazorpayOrder.mutateAsync({
-                        data: { userId: user.id },
-                      });
-
-                      // Extract data from response
-                      const razorpayOrder = orderResponse.data;
-                      if (!razorpayOrder?.keyId || !razorpayOrder?.orderId) {
-                        toast.error("Payment initialization failed. Missing order details.");
-                        setCheckoutLoading(false);
-                        return;
-                      }
-
-                      // Open Razorpay payment modal with key from backend
-                      const rzp = new window.Razorpay({
-                        key: razorpayOrder.keyId,
-                        amount: razorpayOrder.amount,
-                        currency: razorpayOrder.currency,
-                        order_id: razorpayOrder.orderId,
-                        name: "KeyMech",
-                        description: "Order payment for mechanical keyboards",
-                        image: "/favicon.ico",
-                        handler: async (response: any) => {
-                          try {
-                            // Verify payment on backend
-                            await verifyPayment.mutateAsync({
-                              data: {
-                                userId: user.id,
-                                razorpay_order_id: response.razorpay_order_id,
-                                razorpay_payment_id: response.razorpay_payment_id,
-                                razorpay_signature: response.razorpay_signature,
-                              },
-                            });
-
-                            toast.success("Payment successful!", {
-                              description: `Payment ID: ${response.razorpay_payment_id}`,
-                            });
-
-                            // Invalidate cart query to refresh
-                            queryClient.invalidateQueries({ 
-                              queryKey: getCartControllerGetCartQueryKey() 
-                            });
-
-                            // Navigate to orders page
-                            navigate("/orders");
-                          } catch (verifyErr: any) {
-                            toast.error("Payment verification failed", {
-                              description: verifyErr?.message || "Please contact support",
-                            });
-                            setCheckoutLoading(false);
-                          }
-                        },
-                        modal: {
-                          ondismiss: () => {
-                            toast.info("Payment cancelled");
-                            setCheckoutLoading(false);
-                          },
-                        },
-                        theme: { 
-                          color: "#0ea5e9",
-                          backdrop_color: "rgba(0, 0, 0, 0.5)"
-                        },
-                        prefill: {
-                          name: user?.name || "",
-                          email: user?.email || "",
-                        },
-                      });
-                      
-                      rzp.on("payment.failed", (response: any) => {
-                        toast.error("Payment failed", {
-                          description: response.error?.description || "Please try again",
-                        });
-                        setCheckoutLoading(false);
-                      });
-
-                      rzp.open();
-                    } catch (err: any) {
-                      toast.error(err?.message || "Payment initialization failed");
-                      setCheckoutLoading(false);
-                    }
-                  }}
+                  onClick={() => checkout.startCheckout({ hasItems, subtotal })}
                 >
-                  {isCheckoutLoading 
+                  {checkout.isPending
                     ? "Preparing checkout..." 
                     : !isAuthenticated 
                     ? "Sign in to Checkout" 
