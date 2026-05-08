@@ -31,8 +31,8 @@ interface KeyboardBlueprint {
 
 const BLUEPRINTS: Record<string, KeyboardBlueprint> = {
   hero: { xRef: 0, y: 15, rx: 62, ry: 0, rz: 0 },
-  build: { xRef: 300, y: 30, rx: 90, ry: 0, rz: 0 },
-  inside: { xRef: 340, y: 40, rx: 45, ry: 20, rz: 10 },
+  build: { xRef: 40, y: 30, rx: 90, ry: 0, rz: 0 },
+  inside: { xRef: 40, y: 40, rx: 45, ry: 20, rz: 10 },
 };
 
 interface MobilePortraitBlueprint {
@@ -43,9 +43,9 @@ interface MobilePortraitBlueprint {
 }
 
 const MOBILE_BLUEPRINTS: Record<string, MobilePortraitBlueprint> = {
-  hero: { yVh: -0.2, rx: 62, ry: 0, rz: 0 },
+  hero: { yVh: -0.08, rx: 62, ry: 0, rz: 0 },
   build: { yVh: 0, rx: 4, ry: 0, rz: 0 },
-  inside: { yVh: -0.2, rx: 40, ry: 16, rz: -12 },
+  inside: { yVh: -0.3, rx: 40, ry: 16, rz: -12 },
 };
 
 const DESIGN_WIDTH = 1280;

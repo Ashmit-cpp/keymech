@@ -1,5 +1,6 @@
 import { Keyboard, type KeyboardRefs } from "@/components/3d-keyboard";
 import { COLORWAYS, KEYCAP_TEXTURES } from "@/lib/constants";
+import type { GarageKeycapTheme } from "@/lib/garage-theme";
 import { useGSAP } from "@gsap/react";
 import {
   Center,
@@ -222,6 +223,7 @@ export interface SceneProps {
   rotateY: MotionValue<number>;
   rotateZ: MotionValue<number>;
   activeColorway?: Colorway;
+  garageKeycapTheme?: GarageKeycapTheme;
   selectedTextureId?: KeycapTextureId;
   isHeroKeyboardInView: boolean;
 }
@@ -231,6 +233,7 @@ export function Scene({
   rotateY,
   rotateZ,
   activeColorway,
+  garageKeycapTheme,
   selectedTextureId = KEYCAP_TEXTURES[0].id,
   isHeroKeyboardInView,
 }: SceneProps) {
@@ -273,6 +276,9 @@ export function Scene({
   const currentCaseColor =
     KEYCAP_TEXTURES.find((texture) => texture.id === currentTextureId)
       ?.caseColor ?? KEYCAP_TEXTURES[0].caseColor;
+  const keycapAtlasUsesUv2 =
+    KEYCAP_TEXTURES.find((texture) => texture.id === currentTextureId)
+      ?.atlasUsesUv2 ?? true;
 
   const setKeyboardAnimationRef = useCallback((refs: KeyboardRefs | null) => {
     keyboardAnimationRef.current = refs;
@@ -412,6 +418,8 @@ export function Scene({
               ref={setKeyboardAnimationRef}
               scale={10}
               activeColorway={activeColorway}
+              garageKeycapTheme={garageKeycapTheme}
+              keycapAtlasUsesUv2={keycapAtlasUsesUv2}
               keycapMaterial={keycapMaterials[currentTextureId]}
               knobColor={currentKnobColor}
               caseColor={currentCaseColor}
@@ -422,7 +430,7 @@ export function Scene({
 
       <Environment
         files={["/hdr/blue-studio.hdr"]}
-        environmentIntensity={0.2}
+        environmentIntensity={0.3}
       />
 
       <spotLight

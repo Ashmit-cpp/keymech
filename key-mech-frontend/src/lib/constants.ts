@@ -81,13 +81,19 @@ export const COLORWAYS = [
   },
 ];
 
+/**
+ * Keycap atlases: MeshStandardMaterial.map samples TEXCOORD_0 (`uv`), but our PNG atlases are laid out
+ * for TEXCOORD_1 (`uv2`) on keycap meshes—see `keycapGeometryForTexturedAtlas` in 3d-keyboard.
+ * Set `atlasUsesUv2: false` only if a texture is authored for the first UV channel.
+ */
 export const KEYCAP_TEXTURES = [
   {
     id: "textured1",
     name: "Textured 1",
-    path: "/t1.png",
-    knobColor: "#E44E21",
+    path: "/t6.png",
+    knobColor: "red",
     caseColor: "#161616",
+    atlasUsesUv2: true,
   },
   {
     id: "textured2",
@@ -95,6 +101,7 @@ export const KEYCAP_TEXTURES = [
     path: "/t2.png",
     knobColor: "#00FFFF",
     caseColor: "#1D1D54",
+    atlasUsesUv2: true,
   },
   {
     id: "textured3",
@@ -102,6 +109,7 @@ export const KEYCAP_TEXTURES = [
     path: "/t3.png",
     knobColor: "#9FE2BF",
     caseColor: "#13251E",
+    atlasUsesUv2: true,
   },
 ] as const;
 
