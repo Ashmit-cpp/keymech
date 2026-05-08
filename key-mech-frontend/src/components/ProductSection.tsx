@@ -38,7 +38,7 @@ const ProductSection: React.FC<ProductSectionProps> = ({ title, subtitle }) => {
   };
 
   return (
-    <section className="relative z-10 overflow-visible border-t border-border bg-background pt-5 px-12">
+    <section className="relative z-10 overflow-visible border-t border-border bg-background pt-5 px-2 md:px-6 lg:px-12">
       <section className="relative overflow-visible bg-transparent py-12">
         <div className="container relative z-10 mx-auto px-4">
           <div className="mb-10 flex items-end justify-between gap-6">

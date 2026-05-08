@@ -114,8 +114,8 @@ export default function Navbar() {
     <nav
     className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
       scrolled
-        ? "bg-[#f0efed]/95 shadow-sm backdrop-blur-sm border-b border-black/10"
-        : "bg-[#f0efed]/80 border-b border-black/8 backdrop-blur-none"
+        ? "bg-card/80 shadow-sm backdrop-blur-sm border-b border-black/10"
+        : "bg-card/10 border-b border-black/8 backdrop-blur-none saturate-100"
     }`}
   >
     <div className="mx-auto flex h-16 w-full max-w-[1720px] items-center justify-between px-8 lg:px-12">
