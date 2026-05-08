@@ -7,20 +7,22 @@ interface BuildSectionProps {
   dataSection?: number;
 }
 
-const leftFeatures = [
+const rightFeatures = [
   "8 programmable macro keys",
   "Optimized gaming mode",
-  "Advanced anti-ghosting technology",
   "Dynamic RGB engine",
   "20 onboard profiles",
+  "USB-C connectivity",
+
 ];
 
-const rightFeatures = [
-  "USB-C connectivity",
+const leftFeatures = [
   "Expanded customization options",
   "Personalized lighting effects",
   "User-defined key bindings",
   "Real-time battery monitoring",
+  "Advanced anti-ghosting technology",
+
 ];
 
 export default function BuildSection({
@@ -28,16 +30,24 @@ export default function BuildSection({
   dataSection,
 }: BuildSectionProps) {
   return (
-    <div className="relative z-20 w-full origin-center scale-90 md:scale-100">
+    <div className="relative z-20 w-full origin-center">
       <KeyboardAsideSection align="left">
-        <div className="relative z-10 flex h-full w-full flex-col items-start justify-center pl-10 text-left text-foreground -translate-y-8">
-          <p className="mb-4 text-xs font-medium tracking-widest text-muted-foreground uppercase">
-            Why Specter 75
+        <div className="relative z-10 flex h-full w-full flex-col items-start justify-center text-left text-foreground">
+          <div className="mb-6 flex gap-2" aria-hidden>
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="h-3 w-5 -skew-x-32 bg-primary" />
+            ))}
+          </div>
+
+          <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+            [Why Specter 75]
           </p>
 
-          <h2 className="mb-16 max-w-[520px] text-2xl font-bold leading-tight tracking-tight text-foreground md:text-[2.5rem]">
-            Engineered with premium features to deliver exceptional keyboard
-            performance.
+          <h2 className="mb-14 max-w-[520px] font-serif text-[2.6rem] font-bold uppercase leading-[0.9] tracking-[-0.035em] text-foreground md:text-[4.25rem]">
+            Built for focus.
+            <span className="block text-primary">Designed to </span>
+            <span>endure</span>
+            <span className="text-primary">.</span>
           </h2>
 
           <div className="grid w-full max-w-[560px] grid-cols-1 gap-x-14 gap-y-10 md:grid-cols-2">
@@ -55,7 +65,7 @@ export default function BuildSection({
                   }}
                   className="flex h-[52px] items-center border-b border-border"
                 >
-                  <span className="text-xs font-medium tracking-wide text-muted-foreground">
+                  <span className="text-xs font-semibold uppercase tracking-widest text-foreground/75">
                     {feature}
                   </span>
                 </motion.div>
@@ -80,7 +90,7 @@ export default function BuildSection({
                   }}
                   className="flex h-[52px] items-center border-b border-border"
                 >
-                  <span className="text-xs font-medium tracking-wide text-muted-foreground">
+                  <span className="text-xs font-semibold uppercase tracking-widest text-foreground/75">
                     {feature}
                   </span>
                 </motion.div>

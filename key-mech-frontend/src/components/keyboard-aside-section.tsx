@@ -24,15 +24,15 @@ export function KeyboardAsideSection({
         exit={{ opacity: 0 }}
         viewport={{ margin: "50% 0px 50% 0px", once: false }}
         transition={{ duration: 0.8, ease: "easeInOut" }}
-        className={` mx-auto flex w-full max-w-7xl min-h-[50vh] md:min-h-[90vh] flex-col p-10 md:flex-row ${
+        className={`flex w-full min-h-[58vh] flex-col px-6 py-16 md:min-h-[90vh] md:px-10 lg:px-12 md:flex-row ${
           align === "left" ? "md:flex-row" : "md:flex-row-reverse"
         }`}
       >
-        <div className="flex min-w-0 flex-1 flex-col justify-start gap-8 pt-[30vh] md:justify-center md:pt-0">
+        <div className="flex min-w-0 flex-1 flex-col justify-start gap-8 pt-[28vh] md:w-[42%] md:flex-none md:justify-center md:pt-0">
           {children}
         </div>
         <div
-          className="hidden shrink-0 md:block md:w-[50%] md:min-w-[400px] md:max-w-3xl"
+          className="hidden shrink-0 md:block md:flex-1"
           aria-hidden
         />
       </motion.div>
