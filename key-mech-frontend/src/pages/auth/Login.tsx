@@ -136,31 +136,14 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-linear-to-br from-background via-background to-muted/30">
       <div className="min-h-screen flex">
-        {/* Left Side - Branding */}
-        <div className="hidden lg:flex lg:flex-1 lg:flex-col lg:justify-center lg:items-center p-8 bg-linear-to-br from-primary/5 via-primary/10 to-primary/5">
-          <div className="max-w-md space-y-8">
-            {/* Brand Header */}
-            <div className="text-center space-y-6">
-              <div className="flex justify-center">
-                <div className="relative">
-                  <div className="p-6 rounded-3xl bg-primary/10 border border-primary/20 shadow-xl">
-                    <Keyboard className="h-16 w-16 text-primary" />
-                  </div>
-                  <div className="absolute -top-2 -right-2 w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                    <div className="w-3 h-3 bg-foreground rounded-full animate-pulse" />
-                  </div>
-                </div>
-              </div>
-              <div className="space-y-4">
-                <h1 className="text-4xl font-bold tracking-tight bg-linear-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
-                  Welcome back
-                </h1>
-                <p className="text-muted-foreground text-xl leading-relaxed">
-                  Continue your mechanical keyboard journey with KeyMech
-                </p>
-              </div>
-            </div>
-          </div>
+        
+        {/* Left Side - Image */}
+        <div className="hidden lg:block lg:flex-1 relative">
+          <img
+            src="/signin.png"
+            alt="Sign In"
+            className="absolute inset-0 w-full h-full object-cover"
+          />
         </div>
 
         {/* Right Side - Form */}
