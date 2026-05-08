@@ -8,7 +8,9 @@ import {
   useTransform,
 } from "motion/react";
 import { Scene } from "@/components/scene";
+import { cn } from "@/lib/utils";
 import { COLORWAYS, KEYCAP_TEXTURES } from "@/lib/constants";
+import type { GarageKeycapTheme } from "@/lib/garage-theme";
 
 type Colorway = (typeof COLORWAYS)[number];
 type KeycapTextureId = (typeof KEYCAP_TEXTURES)[number]["id"];
@@ -31,9 +33,13 @@ interface GltfKeyboardViewerProps {
   baseRotateY?: MotionValue<number> | number;
   baseRotateZ?: MotionValue<number> | number;
   activeColorway?: Colorway;
+  /** When set, keycaps use grouped garage colors while keeping the hero texture map. */
+  garageKeycapTheme?: GarageKeycapTheme;
   selectedTextureId?: KeycapTextureId;
   isInteractive?: boolean;
   isHeroKeyboardInView?: boolean;
+  /** Use full width of parent instead of viewport (e.g. Garage embedded preview). */
+  embedded?: boolean;
 }
 
 function GltfKeyboardViewer({
@@ -41,9 +47,11 @@ function GltfKeyboardViewer({
   baseRotateY = -8,
   baseRotateZ = 0,
   activeColorway,
+  garageKeycapTheme,
   selectedTextureId = KEYCAP_TEXTURES[0].id,
   isInteractive = true,
   isHeroKeyboardInView = false,
+  embedded = false,
 }: GltfKeyboardViewerProps) {
   const [isDragging, setIsDragging] = useState(false);
   const isDraggingRef = useRef(false);
@@ -77,6 +85,11 @@ function GltfKeyboardViewer({
 
   const interactive = isInteractive && !prefersReducedMotion;
 
+  const previewAriaLabel =
+    interactive && isInteractive
+      ? "Specter 75 keyboard 3D preview — drag or swipe to rotate"
+      : "Specter 75 keyboard 3D preview";
+
   const handlePointerDown = (e: React.PointerEvent) => {
     if (!interactive) return;
     isDraggingRef.current = true;
@@ -108,7 +121,12 @@ function GltfKeyboardViewer({
   return (
     <div
       ref={stageRef}
-      className="relative z-[1] flex max-w-[min(920px,100vw)] justify-center w-screen"
+      className={cn(
+        "relative z-[1] flex justify-center",
+        embedded
+          ? "w-full max-w-full"
+          : "w-screen max-w-[min(920px,100vw)]",
+      )}
       style={{
         cursor: interactive ? (isDragging ? "grabbing" : "grab") : "default",
         pointerEvents: "auto",
@@ -123,9 +141,14 @@ function GltfKeyboardViewer({
         className="pointer-events-none absolute -bottom-[8%] left-1/2 z-0 h-[55%] w-[min(920px,110%)] -translate-x-1/2 "
       />
       <div
-        className="relative z-[1] h-[min(460px,62vw)] w-full min-h-[300px] sm:min-h-[340px]"
+        className={cn(
+          "relative z-[1] w-full max-w-full",
+          embedded
+            ? "aspect-16/10 min-h-[240px] max-h-[min(460px,55dvh)]"
+            : "h-[min(460px,62vw)] min-h-[300px] sm:min-h-[340px]",
+        )}
         role="img"
-        aria-label="Specter 75 keyboard 3D preview — drag to rotate"
+        aria-label={previewAriaLabel}
       >
         <Canvas
           className="h-full w-full"
@@ -155,6 +178,7 @@ function GltfKeyboardViewer({
               rotateY={finalRotateY}
               rotateZ={mvRz}
               activeColorway={activeColorway}
+              garageKeycapTheme={garageKeycapTheme}
               selectedTextureId={selectedTextureId}
               isHeroKeyboardInView={isHeroKeyboardInView}
             />
