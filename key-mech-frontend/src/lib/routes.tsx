@@ -31,6 +31,7 @@ import CartPage from "@/pages/Cart";
 import CategoryPage from "@/pages/Category";
 import CheckoutPage from "@/pages/Checkout";
 import ContactPage from "@/pages/Contact";
+import GaragePage from "@/pages/Garage";
 import HomePage from "@/pages/Home";
 import NotFoundPage from "@/pages/NotFound";
 import OrderConfirmationPage from "@/pages/OrderConfirmation";
@@ -57,6 +58,10 @@ const router = createBrowserRouter([
       {
         path: "contact",
         element: <ContactPage />,
+      },
+      {
+        path: "garage",
+        element: <GaragePage />,
       },
       {
         path: "blog",
