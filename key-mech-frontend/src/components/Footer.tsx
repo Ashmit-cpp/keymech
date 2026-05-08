@@ -11,9 +11,6 @@ const Footer: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
             <div className="space-y-4">
                 <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center rotate-3">
-                        <span className="text-primary-foreground font-bold text-lg">K</span>
-                    </div>
                     <span className="text-xl font-bold tracking-tight text-foreground">KeyMech</span>
                 </div>
                 <p className="text-muted-foreground text-sm leading-relaxed">

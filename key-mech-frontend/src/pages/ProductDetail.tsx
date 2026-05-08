@@ -413,6 +413,7 @@ export default function ProductDetailPage() {
                 <Button
                   size="lg"
                   className="w-1/2"
+                  variant="landing"
                   disabled={
                     product.status !== "IN_STOCK" || addToCart.isPending
                   }
@@ -427,8 +428,9 @@ export default function ProductDetailPage() {
 
                 <div className="flex gap-2">
                   <Button
-                    variant={isCurrentItemInWishlist ? "default" : "outline"}
+                    variant={"outline"}
                     size="lg"
+                    
                     className={`px-4 transition-all duration-200 ease-in-out ${
                       isCurrentItemInWishlist
                         ? "bg-muted hover:bg-muted text-secondary shadow-md hover:shadow-lg"
