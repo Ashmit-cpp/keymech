@@ -1,0 +1,1445 @@
+{
+  "products": [
+    {
+      "name": "Keychron Q2 Max Barebone Kit",
+      "slug": "keychron-q2-max-barebone-kit",
+      "description": "65% full-metal barebone keyboard kit with gasket mount, hot-swap PCB, PC plate, south-facing RGB, QMK/VIA support, and tri-mode connectivity.",
+      "price": 1742900,
+      "category": "KEYBOARD",
+      "status": "IN_STOCK",
+      "images": [
+        "https://www.keychron.com/cdn/shop/files/Keychron-Q2-Max-QMK-VIA-Wireless-Custom-Mechanical-Keyboard-65_-Layout-Aluminum-Black-Fully-Assembled-Knob-for-Mac-Windows-Linux-Gateron-Jupiter-Red.jpg?v=1754098803&width=1000"
+      ],
+      "technicalSpec": "{\"supportedLayouts\":[\"65\",\"P65\"],\"source\":\"Keychron Q2 Max specs\"}",
+      "keyboardSpec": {
+        "create": {
+          "layout": "P65",
+          "mountingStyle": "GASKET",
+          "caseMaterial": "ALUMINUM",
+          "rgbOrientation": "SOUTH",
+          "hotSwap": true,
+          "switchCompatibility": "BOTH",
+          "connectivity": [
+            "WIRED",
+            "BLUETOOTH",
+            "TWO_POINT_FOUR_GHZ"
+          ],
+          "plateMaterial": "PC",
+          "plateMountIncluded": true,
+          "stabilizerType": "SCREW_IN",
+          "weightGrams": 1528,
+          "firmware": "QMK/VIA",
+          "isoAnsi": "ANSI",
+          "notes": "65% aluminum Q Max platform, PC plate, screw-in PCB stabilizers, south-facing RGB."
+        }
+      },
+      "variants": {
+        "create": [
+          {
+            "name": "Barebone Knob / Carbon Black",
+            "sku": "KM-Q2MAX-BB-BLK",
+            "extraPrice": 0,
+            "specs": {
+              "layout": "65",
+              "supportedLayouts": [
+                "65",
+                "P65"
+              ],
+              "color": "Carbon Black",
+              "format": "barebone"
+            }
+          },
+          {
+            "name": "Barebone Knob / Shell White",
+            "sku": "KM-Q2MAX-BB-WHT",
+            "extraPrice": 0,
+            "specs": {
+              "layout": "65",
+              "supportedLayouts": [
+                "65",
+                "P65"
+              ],
+              "color": "Shell White",
+              "format": "barebone"
+            }
+          }
+        ]
+      },
+      "inventory": {
+        "create": {
+          "stock": 18
+        }
+      }
+    },
+    {
+      "name": "Keychron Q1 Max Barebone Kit",
+      "slug": "keychron-q1-max-barebone-kit",
+      "description": "75% full-metal barebone keyboard kit with gasket mount, PC plate, screw-in PCB stabilizers, south-facing RGB, QMK/VIA, and 2.4 GHz/Bluetooth/wired connectivity.",
+      "price": 1576900,
+      "category": "KEYBOARD",
+      "status": "IN_STOCK",
+      "images": [
+        "https://www.keychron.com/cdn/shop/files/Keychron-Q1-Max-QMK-VIA-Wireless-Custom-Mechanical-Keyboard-75_-Layout-Aluminum-Black-Fully-Assembled-Knob-for-Mac-Windows-Linux-Gateron-Jupiter-Red.jpg?v=1753685590&width=1000"
+      ],
+      "technicalSpec": "{\"supportedLayouts\":[\"75\",\"P75\"],\"source\":\"Keychron Q1 Max specs\"}",
+      "keyboardSpec": {
+        "create": {
+          "layout": "P75",
+          "mountingStyle": "GASKET",
+          "caseMaterial": "ALUMINUM",
+          "rgbOrientation": "SOUTH",
+          "hotSwap": true,
+          "switchCompatibility": "BOTH",
+          "connectivity": [
+            "WIRED",
+            "BLUETOOTH",
+            "TWO_POINT_FOUR_GHZ"
+          ],
+          "plateMaterial": "PC",
+          "plateMountIncluded": true,
+          "stabilizerType": "SCREW_IN",
+          "weightGrams": 1724,
+          "firmware": "QMK/VIA",
+          "isoAnsi": "ANSI",
+          "notes": "75% aluminum Q Max platform, PC plate, screw-in PCB stabilizers, south-facing RGB."
+        }
+      },
+      "variants": {
+        "create": [
+          {
+            "name": "Barebone Knob / Carbon Black",
+            "sku": "KM-Q1MAX-BB-BLK",
+            "extraPrice": 0,
+            "specs": {
+              "layout": "75",
+              "supportedLayouts": [
+                "75",
+                "P75"
+              ],
+              "color": "Carbon Black",
+              "format": "barebone"
+            }
+          },
+          {
+            "name": "Barebone Knob / Shell White",
+            "sku": "KM-Q1MAX-BB-WHT",
+            "extraPrice": 0,
+            "specs": {
+              "layout": "75",
+              "supportedLayouts": [
+                "75",
+                "P75"
+              ],
+              "color": "Shell White",
+              "format": "barebone"
+            }
+          },
+          {
+            "name": "Fully Assembled Knob / Purple",
+            "sku": "KM-Q1MAX-FA-PUR",
+            "extraPrice": 166000,
+            "specs": {
+              "layout": "75",
+              "supportedLayouts": [
+                "75",
+                "P75"
+              ],
+              "color": "Purple",
+              "format": "assembled"
+            }
+          }
+        ]
+      },
+      "inventory": {
+        "create": {
+          "stock": 24
+        }
+      }
+    },
+    {
+      "name": "Keychron Q3 Max Barebone Kit",
+      "slug": "keychron-q3-max-barebone-kit",
+      "description": "TKL full-metal barebone keyboard kit with gasket mount, hot-swap PCB, PC plate, screw-in PCB stabilizers, south-facing RGB, QMK/VIA, and tri-mode connectivity.",
+      "price": 1825900,
+      "category": "KEYBOARD",
+      "status": "IN_STOCK",
+      "images": [
+        "https://www.keychron.com/cdn/shop/files/Keychron-Q3-Max-QMK-VIA-Wireless-Custom-Mechanical-Keyboard-80-percent-Layout-Aluminum-Black-for-Mac-Windows-Linux-Barebone-Knob.jpg?v=1753756038&width=1000"
+      ],
+      "technicalSpec": "{\"supportedLayouts\":[\"TKL\"],\"source\":\"Keychron Q3 Max specs\"}",
+      "keyboardSpec": {
+        "create": {
+          "layout": "TKL",
+          "mountingStyle": "GASKET",
+          "caseMaterial": "ALUMINUM",
+          "rgbOrientation": "SOUTH",
+          "hotSwap": true,
+          "switchCompatibility": "BOTH",
+          "connectivity": [
+            "WIRED",
+            "BLUETOOTH",
+            "TWO_POINT_FOUR_GHZ"
+          ],
+          "plateMaterial": "PC",
+          "plateMountIncluded": true,
+          "stabilizerType": "SCREW_IN",
+          "weightGrams": 1770,
+          "firmware": "QMK/VIA",
+          "isoAnsi": "ANSI",
+          "notes": "80%/TKL aluminum Q Max platform, PC plate, screw-in PCB stabilizers, south-facing RGB."
+        }
+      },
+      "variants": {
+        "create": [
+          {
+            "name": "Barebone Knob / Carbon Black",
+            "sku": "KM-Q3MAX-BB-BLK",
+            "extraPrice": 0,
+            "specs": {
+              "layout": "TKL",
+              "supportedLayouts": [
+                "TKL"
+              ],
+              "color": "Carbon Black",
+              "format": "barebone"
+            }
+          },
+          {
+            "name": "Fully Assembled Knob / Carbon Black",
+            "sku": "KM-Q3MAX-FA-BLK",
+            "extraPrice": 166000,
+            "specs": {
+              "layout": "TKL",
+              "supportedLayouts": [
+                "TKL"
+              ],
+              "color": "Carbon Black",
+              "format": "assembled"
+            }
+          }
+        ]
+      },
+      "inventory": {
+        "create": {
+          "stock": 16
+        }
+      }
+    },
+    {
+      "name": "Keychron V1 Max Barebone Kit",
+      "slug": "keychron-v1-max-barebone-kit",
+      "description": "Affordable 75% gasket-mount barebone kit with ABS case, hot-swap PCB, PC plate, south-facing RGB, screw-in PCB stabilizers, QMK/VIA, and tri-mode connectivity.",
+      "price": 788400,
+      "category": "KEYBOARD",
+      "status": "IN_STOCK",
+      "images": [
+        "https://www.keychron.com/cdn/shop/files/Keychron-V1-Max-QMK-VIA-Wireless-Custom-Mechanical-Keyboard-75-Percent-Layout-for-Mac-Windows-Linux-Barebone.jpg?v=1760933054&width=1000"
+      ],
+      "technicalSpec": "{\"supportedLayouts\":[\"75\",\"P75\"],\"source\":\"Keychron V1 Max specs\"}",
+      "keyboardSpec": {
+        "create": {
+          "layout": "P75",
+          "mountingStyle": "GASKET",
+          "caseMaterial": "ABS",
+          "rgbOrientation": "SOUTH",
+          "hotSwap": true,
+          "switchCompatibility": "BOTH",
+          "connectivity": [
+            "WIRED",
+            "BLUETOOTH",
+            "TWO_POINT_FOUR_GHZ"
+          ],
+          "plateMaterial": "PC",
+          "plateMountIncluded": true,
+          "stabilizerType": "SCREW_IN",
+          "weightGrams": 770,
+          "firmware": "QMK/VIA",
+          "isoAnsi": "ANSI",
+          "notes": "75% V Max platform, ABS case, PC plate, screw-in PCB stabilizers, south-facing RGB."
+        }
+      },
+      "variants": {
+        "create": [
+          {
+            "name": "Barebone Knob / Carbon Black",
+            "sku": "KM-V1MAX-BB-BLK",
+            "extraPrice": 0,
+            "specs": {
+              "layout": "75",
+              "supportedLayouts": [
+                "75",
+                "P75"
+              ],
+              "color": "Carbon Black",
+              "format": "barebone"
+            }
+          }
+        ]
+      },
+      "inventory": {
+        "create": {
+          "stock": 40
+        }
+      }
+    },
+    {
+      "name": "Keychron V3 Max Barebone Kit",
+      "slug": "keychron-v3-max-barebone-kit",
+      "description": "Affordable TKL gasket-mount barebone kit with ABS case, hot-swap PCB, PC plate, south-facing RGB, screw-in PCB stabilizers, QMK/VIA, and tri-mode connectivity.",
+      "price": 788400,
+      "category": "KEYBOARD",
+      "status": "IN_STOCK",
+      "images": [
+        "https://www.keychron.com/cdn/shop/files/Keychron-V3-Max-QMK-VIA-Wireless-Custom-Mechanical-Keyboard-TKL-Layout-Fully-Assembled-Knob-for-Mac-Windows-Barebone.jpg?v=1763454806&width=1000"
+      ],
+      "technicalSpec": "{\"supportedLayouts\":[\"TKL\"],\"source\":\"Keychron V3 Max specs\"}",
+      "keyboardSpec": {
+        "create": {
+          "layout": "TKL",
+          "mountingStyle": "GASKET",
+          "caseMaterial": "ABS",
+          "rgbOrientation": "SOUTH",
+          "hotSwap": true,
+          "switchCompatibility": "BOTH",
+          "connectivity": [
+            "WIRED",
+            "BLUETOOTH",
+            "TWO_POINT_FOUR_GHZ"
+          ],
+          "plateMaterial": "PC",
+          "plateMountIncluded": true,
+          "stabilizerType": "SCREW_IN",
+          "weightGrams": 895,
+          "firmware": "QMK/VIA",
+          "isoAnsi": "ANSI",
+          "notes": "80%/TKL V Max platform, ABS case, PC plate, screw-in PCB stabilizers, south-facing RGB."
+        }
+      },
+      "variants": {
+        "create": [
+          {
+            "name": "Barebone Knob / Carbon Black",
+            "sku": "KM-V3MAX-BB-BLK",
+            "extraPrice": 0,
+            "specs": {
+              "layout": "TKL",
+              "supportedLayouts": [
+                "TKL"
+              ],
+              "color": "Carbon Black",
+              "format": "barebone"
+            }
+          }
+        ]
+      },
+      "inventory": {
+        "create": {
+          "stock": 34
+        }
+      }
+    },
+    {
+      "name": "CannonKeys Instant65 Hotswap PCB",
+      "slug": "cannonkeys-instant65-hotswap-pcb",
+      "description": "65% USB-C hot-swap PCB with QMK/VIA compatibility, pre-flashed firmware, per-key LEDs, and RGB underglow.",
+      "price": 539500,
+      "category": "PCB",
+      "status": "OUT_OF_STOCK",
+      "images": [
+        "https://cannonkeys.com/cdn/shop/files/instant65-warm-top_e250c938-2230-45d7-9082-cc472cebe590.jpg?v=1709145380&width=1200"
+      ],
+      "technicalSpec": "{\"supportedLayouts\":[\"65\",\"P65\"],\"formFactor\":\"65%\",\"usb\":\"USB-C\",\"firmware\":\"QMK/VIA\",\"hotswap\":true}",
+      "variants": {
+        "create": [
+          {
+            "name": "Warm White LED",
+            "sku": "CK-INSTANT65-WW",
+            "extraPrice": 0,
+            "specs": {
+              "layout": "65",
+              "supportedLayouts": [
+                "65",
+                "P65"
+              ],
+              "led": "Warm White",
+              "hotswap": true,
+              "firmware": "QMK/VIA"
+            }
+          },
+          {
+            "name": "Cool White LED",
+            "sku": "CK-INSTANT65-CW",
+            "extraPrice": 0,
+            "specs": {
+              "layout": "65",
+              "supportedLayouts": [
+                "65",
+                "P65"
+              ],
+              "led": "Cool White",
+              "hotswap": true,
+              "firmware": "QMK/VIA"
+            }
+          }
+        ]
+      },
+      "inventory": {
+        "create": {
+          "stock": 0
+        }
+      }
+    },
+    {
+      "name": "KBDfans DZ65 RGB V3 Hot-Swap PCB",
+      "slug": "kbdfans-dz65-rgb-v3-hot-swap-pcb",
+      "description": "65% hot-swap PCB with USB-C, per-key RGB, VIA/QMK support, and compatibility with Tofu65, 65% low-profile, and 65% wooden cases.",
+      "price": 481400,
+      "category": "PCB",
+      "status": "OUT_OF_STOCK",
+      "images": [
+        "https://kbdfans.com/cdn/shop/files/PCB0030-1_1200x1200.jpg?v=1717549728"
+      ],
+      "technicalSpec": "{\"supportedLayouts\":[\"65\",\"P65\"],\"formFactor\":\"65%\",\"usb\":\"USB-C\",\"firmware\":\"QMK/VIA\",\"hotswap\":true,\"rgb\":\"per-key\"}",
+      "variants": {
+        "create": [
+          {
+            "name": "65% ANSI Hot-Swap RGB",
+            "sku": "KBDFANS-DZ65-RGB-V3-HS",
+            "extraPrice": 0,
+            "specs": {
+              "layout": "65",
+              "supportedLayouts": [
+                "65",
+                "P65"
+              ],
+              "hotswap": true,
+              "firmware": "QMK/VIA",
+              "rgb": "Per-key RGB"
+            }
+          }
+        ]
+      },
+      "inventory": {
+        "create": {
+          "stock": 0
+        }
+      }
+    },
+    {
+      "name": "Garage VIA Hotswap PCB Kit",
+      "slug": "garage-via-hotswap-pcb-kit",
+      "description": "Configurator-ready hot-swap PCB kit normalized around 65%, 75%, and TKL ANSI layouts with USB-C, VIA-compatible firmware metadata, and south-facing switch support.",
+      "price": 649900,
+      "category": "PCB",
+      "status": "IN_STOCK",
+      "images": [
+        "https://cannonkeys.com/cdn/shop/files/instant65-warm-top_e250c938-2230-45d7-9082-cc472cebe590.jpg?v=1709145380&width=1200"
+      ],
+      "technicalSpec": "{\"supportedLayouts\":[\"65\",\"P65\",\"75\",\"P75\",\"TKL\"],\"firmware\":\"VIA\",\"hotswap\":true,\"usb\":\"USB-C\"}",
+      "variants": {
+        "create": [
+          {
+            "name": "65% ANSI Hotswap",
+            "sku": "GARAGE-PCB-65-HS",
+            "extraPrice": 0,
+            "specs": {
+              "layout": "65",
+              "supportedLayouts": [
+                "65",
+                "P65"
+              ],
+              "hotswap": true,
+              "stabilizers": "PCB screw-in"
+            }
+          },
+          {
+            "name": "75% ANSI Hotswap",
+            "sku": "GARAGE-PCB-75-HS",
+            "extraPrice": 80000,
+            "specs": {
+              "layout": "75",
+              "supportedLayouts": [
+                "75",
+                "P75"
+              ],
+              "hotswap": true,
+              "stabilizers": "PCB screw-in"
+            }
+          },
+          {
+            "name": "TKL ANSI Hotswap",
+            "sku": "GARAGE-PCB-TKL-HS",
+            "extraPrice": 120000,
+            "specs": {
+              "layout": "TKL",
+              "supportedLayouts": [
+                "TKL"
+              ],
+              "hotswap": true,
+              "stabilizers": "PCB screw-in"
+            }
+          }
+        ]
+      },
+      "inventory": {
+        "create": {
+          "stock": 60
+        }
+      }
+    },
+    {
+      "name": "Garage PC Plate Kit",
+      "slug": "garage-pc-plate-kit",
+      "description": "Polycarbonate plate kit for softer flex and a lower-pitched build feel across 65%, 75%, and TKL Garage layouts.",
+      "price": 229900,
+      "category": "PLATE",
+      "status": "IN_STOCK",
+      "images": [
+        "https://kbdfans.com/cdn/shop/products/FR4_e9aa9a90-30e2-40df-85c3-b81fe27d621f.jpg?v=1719556930&width=1200"
+      ],
+      "technicalSpec": "{\"supportedLayouts\":[\"65\",\"P65\",\"75\",\"P75\",\"TKL\"],\"material\":\"PC\",\"mount\":\"gasket-compatible\"}",
+      "variants": {
+        "create": [
+          {
+            "name": "65% PC Plate",
+            "sku": "GARAGE-PLATE-65-PC",
+            "extraPrice": 0,
+            "specs": {
+              "layout": "65",
+              "supportedLayouts": [
+                "65",
+                "P65"
+              ],
+              "material": "PC"
+            }
+          },
+          {
+            "name": "75% PC Plate",
+            "sku": "GARAGE-PLATE-75-PC",
+            "extraPrice": 30000,
+            "specs": {
+              "layout": "75",
+              "supportedLayouts": [
+                "75",
+                "P75"
+              ],
+              "material": "PC"
+            }
+          },
+          {
+            "name": "TKL PC Plate",
+            "sku": "GARAGE-PLATE-TKL-PC",
+            "extraPrice": 70000,
+            "specs": {
+              "layout": "TKL",
+              "supportedLayouts": [
+                "TKL"
+              ],
+              "material": "PC"
+            }
+          }
+        ]
+      },
+      "inventory": {
+        "create": {
+          "stock": 72
+        }
+      }
+    },
+    {
+      "name": "Garage FR4 Plate Kit",
+      "slug": "garage-fr4-plate-kit",
+      "description": "FR4 plate kit for a balanced, slightly clacky build across 65%, 75%, and TKL Garage layouts.",
+      "price": 189900,
+      "category": "PLATE",
+      "status": "IN_STOCK",
+      "images": [
+        "https://kbdfans.com/cdn/shop/products/FR4_e9aa9a90-30e2-40df-85c3-b81fe27d621f.jpg?v=1719556930&width=1200"
+      ],
+      "technicalSpec": "{\"supportedLayouts\":[\"65\",\"P65\",\"75\",\"P75\",\"TKL\"],\"material\":\"FR4\",\"mount\":\"gasket-compatible\"}",
+      "variants": {
+        "create": [
+          {
+            "name": "65% FR4 Plate",
+            "sku": "GARAGE-PLATE-65-FR4",
+            "extraPrice": 0,
+            "specs": {
+              "layout": "65",
+              "supportedLayouts": [
+                "65",
+                "P65"
+              ],
+              "material": "FR4"
+            }
+          },
+          {
+            "name": "75% FR4 Plate",
+            "sku": "GARAGE-PLATE-75-FR4",
+            "extraPrice": 30000,
+            "specs": {
+              "layout": "75",
+              "supportedLayouts": [
+                "75",
+                "P75"
+              ],
+              "material": "FR4"
+            }
+          },
+          {
+            "name": "TKL FR4 Plate",
+            "sku": "GARAGE-PLATE-TKL-FR4",
+            "extraPrice": 70000,
+            "specs": {
+              "layout": "TKL",
+              "supportedLayouts": [
+                "TKL"
+              ],
+              "material": "FR4"
+            }
+          }
+        ]
+      },
+      "inventory": {
+        "create": {
+          "stock": 72
+        }
+      }
+    },
+    {
+      "name": "Gateron KS-3 Milky Yellow Pro Switch Set",
+      "slug": "gateron-ks-3-milky-yellow-pro-switch-set",
+      "description": "Factory pre-lubed 5-pin linear switch set with milky nylon PA66 housing, POM MX stem, 50 gf operating force, 2.0 mm pre-travel, and 4.0 mm max total travel.",
+      "price": 248900,
+      "category": "SWITCH",
+      "status": "IN_STOCK",
+      "images": [
+        "https://www.keychron.com/cdn/shop/products/Gateron-KS-3-Milky-Yellow-Pro-Switch-Set.jpg?v=1664419753&width=1000"
+      ],
+      "switchSpec": {
+        "create": {
+          "switchType": "LINEAR",
+          "stemMaterial": "POM",
+          "topHousing": "Nylon PA66",
+          "bottomHousing": "Nylon PA66",
+          "springWeight": 50,
+          "preTravel": 2,
+          "totalTravel": 4,
+          "lubed": true,
+          "soundProfile": "Smooth, quiet, mild thock",
+          "pins": "5-pin"
+        }
+      },
+      "variants": {
+        "create": [
+          {
+            "name": "45 Switches",
+            "sku": "GAT-KS3-MY-PRO-45",
+            "extraPrice": 0,
+            "specs": {
+              "count": 45,
+              "recommendedLayouts": [
+                "65"
+              ]
+            }
+          },
+          {
+            "name": "110 Switches",
+            "sku": "GAT-KS3-MY-PRO-110",
+            "extraPrice": 124500,
+            "specs": {
+              "count": 110,
+              "recommendedLayouts": [
+                "65",
+                "75",
+                "TKL"
+              ]
+            }
+          }
+        ]
+      },
+      "inventory": {
+        "create": {
+          "stock": 120
+        }
+      }
+    },
+    {
+      "name": "Cherry MX2A RGB Black Switch Set",
+      "slug": "cherry-mx2a-rgb-black-switch-set",
+      "description": "Cherry MX2A RGB Black linear switch set for MX hot-swap builds, available in 45-switch and 110-switch packs.",
+      "price": 157600,
+      "category": "SWITCH",
+      "status": "IN_STOCK",
+      "images": [
+        "https://www.keychron.com/cdn/shop/files/Cherry-MX2A-RGB-Red-Switch-Set.jpg?v=1708684851&width=1000"
+      ],
+      "switchSpec": {
+        "create": {
+          "switchType": "LINEAR",
+          "stemMaterial": "POM",
+          "topHousing": "Nylon",
+          "bottomHousing": "Nylon",
+          "springWeight": 60,
+          "preTravel": 2,
+          "totalTravel": 4,
+          "lubed": false,
+          "soundProfile": "Classic linear, firm, clean",
+          "pins": "5-pin"
+        }
+      },
+      "variants": {
+        "create": [
+          {
+            "name": "45 Switches",
+            "sku": "CHERRY-MX2A-BLK-45",
+            "extraPrice": 0,
+            "specs": {
+              "count": 45,
+              "recommendedLayouts": [
+                "65"
+              ]
+            }
+          },
+          {
+            "name": "110 Switches",
+            "sku": "CHERRY-MX2A-BLK-110",
+            "extraPrice": 157600,
+            "specs": {
+              "count": 110,
+              "recommendedLayouts": [
+                "65",
+                "75",
+                "TKL"
+              ]
+            }
+          }
+        ]
+      },
+      "inventory": {
+        "create": {
+          "stock": 80
+        }
+      }
+    },
+    {
+      "name": "Keychron Double Shot PBT OSA Full Keycap Set",
+      "slug": "keychron-double-shot-pbt-osa-full-keycap-set",
+      "description": "141-key OSA-profile double-shot PBT keycap set for normal-profile MX switches, covering Keychron Q/Q Max/V/V Max families and matching Garage 65%, 75%, and TKL layouts.",
+      "price": 282100,
+      "category": "KEYCAP",
+      "status": "IN_STOCK",
+      "images": [
+        "https://www.keychron.com/cdn/shop/products/Double-Shot-PBT-OSA-Full-Set-Keycap-Set-Retro.jpg?v=1764241546&width=1000"
+      ],
+      "technicalSpec": "{\"supportedLayouts\":[\"65\",\"P65\",\"75\",\"P75\",\"TKL\"],\"keys\":141,\"profile\":\"OSA\",\"switchStem\":\"MX\"}",
+      "keycapSpec": {
+        "create": {
+          "profile": "OEM",
+          "material": "PBT",
+          "thickness": 1.5,
+          "legends": "Double-shot",
+          "rowSupport": true,
+          "notes": "OSA profile is OEM-height with spherical angled tops; mapped to OEM enum for schema compatibility."
+        }
+      },
+      "variants": {
+        "create": [
+          {
+            "name": "Retro / 141 Keys",
+            "sku": "KC-OSA-PBT-RETRO-141",
+            "extraPrice": 0,
+            "specs": {
+              "supportedLayouts": [
+                "65",
+                "P65",
+                "75",
+                "P75",
+                "TKL"
+              ],
+              "keys": 141,
+              "profile": "OSA",
+              "colorway": "Retro"
+            }
+          },
+          {
+            "name": "White On Black / 141 Keys",
+            "sku": "KC-OSA-PBT-WOB-141",
+            "extraPrice": 0,
+            "specs": {
+              "supportedLayouts": [
+                "65",
+                "P65",
+                "75",
+                "P75",
+                "TKL"
+              ],
+              "keys": 141,
+              "profile": "OSA",
+              "colorway": "White On Black"
+            }
+          }
+        ]
+      },
+      "inventory": {
+        "create": {
+          "stock": 45
+        }
+      }
+    },
+    {
+      "name": "Keychron Cherry Profile Double-Shot PBT Full Keycap Set",
+      "slug": "keychron-cherry-profile-double-shot-pbt-full-keycap-set",
+      "description": "143-key Cherry-profile double-shot PBT full keycap set with 1.5 mm thickness. Best fit for TKL and larger ANSI boards in this Garage catalog.",
+      "price": 282100,
+      "category": "KEYCAP",
+      "status": "IN_STOCK",
+      "images": [
+        "https://www.keychron.com/cdn/shop/files/Cherry-Profile-Double---Shot-PBT-Full-Set-Keycaps-Dolch-Red.jpg?v=1694168950&width=1000"
+      ],
+      "technicalSpec": "{\"supportedLayouts\":[\"TKL\"],\"keys\":143,\"profile\":\"Cherry\",\"switchStem\":\"MX\"}",
+      "keycapSpec": {
+        "create": {
+          "profile": "CHERRY",
+          "material": "PBT",
+          "thickness": 1.5,
+          "legends": "Double-shot",
+          "rowSupport": true,
+          "notes": "Full 143-key Cherry profile set; Garage marks it TKL-only to avoid overpromising compact 65/75 coverage."
+        }
+      },
+      "variants": {
+        "create": [
+          {
+            "name": "Dolch Red / 143 Keys",
+            "sku": "KC-CHERRY-PBT-DOLCH-143",
+            "extraPrice": 0,
+            "specs": {
+              "supportedLayouts": [
+                "TKL"
+              ],
+              "keys": 143,
+              "profile": "Cherry",
+              "colorway": "Dolch Red"
+            }
+          },
+          {
+            "name": "Blue Black Yellow / 143 Keys",
+            "sku": "KC-CHERRY-PBT-BBY-143",
+            "extraPrice": 0,
+            "specs": {
+              "supportedLayouts": [
+                "TKL"
+              ],
+              "keys": 143,
+              "profile": "Cherry",
+              "colorway": "Blue Black Yellow"
+            }
+          }
+        ]
+      },
+      "inventory": {
+        "create": {
+          "stock": 30
+        }
+      }
+    },
+    {
+      "name": "Keychron Gold Plated PCB Mounted Stabilizer Set",
+      "slug": "keychron-gold-plated-pcb-mounted-stabilizer-set",
+      "description": "PCB-mounted screw-in stabilizer set with gold-plated wires for Garage 65%, 75%, and TKL builds.",
+      "price": 82900,
+      "category": "STABILIZER",
+      "status": "IN_STOCK",
+      "images": [
+        "https://www.keychron.com/cdn/shop/products/Keychron-Gold-Plated-PCB-Mounted-Screw-In-Stabilizer-Set_1.jpg?v=1657776815&width=1000"
+      ],
+      "technicalSpec": "{\"supportedLayouts\":[\"65\",\"P65\",\"75\",\"P75\",\"TKL\"],\"mount\":\"PCB screw-in\",\"wire\":\"gold-plated\"}",
+      "variants": {
+        "create": [
+          {
+            "name": "10 pcs Gold Plated Screw-In",
+            "sku": "KC-STAB-GOLD-SCREWIN-10",
+            "extraPrice": 0,
+            "specs": {
+              "supportedLayouts": [
+                "65",
+                "P65",
+                "75",
+                "P75",
+                "TKL"
+              ],
+              "mount": "PCB screw-in",
+              "count": 10
+            }
+          }
+        ]
+      },
+      "inventory": {
+        "create": {
+          "stock": 100
+        }
+      }
+    },
+    {
+      "name": "Durock V2 Screw-In Stabilizer Set",
+      "slug": "durock-v2-screw-in-stabilizer-set",
+      "description": "PCB-mounted screw-in stabilizers with nylon housings, pre-clipped stems, drop-wire prevention mold, and gold-plated steel wires.",
+      "price": 99500,
+      "category": "STABILIZER",
+      "status": "OUT_OF_STOCK",
+      "images": [
+        "https://divinikey.com/cdn/shop/products/durock-v2-stabilizers-screw-in-319036.jpg?crop=center&height=1200&v=1634950960&width=1200"
+      ],
+      "technicalSpec": "{\"supportedLayouts\":[\"65\",\"P65\",\"75\",\"P75\",\"TKL\"],\"mount\":\"PCB screw-in\",\"wire\":\"gold-plated steel\",\"housing\":\"Nylon PA plastic\"}",
+      "variants": {
+        "create": [
+          {
+            "name": "Smokey Clear / 2U",
+            "sku": "DUROCK-V2-STAB-SMOKE-2U",
+            "extraPrice": 0,
+            "specs": {
+              "supportedLayouts": [
+                "65",
+                "P65",
+                "75",
+                "P75",
+                "TKL"
+              ],
+              "mount": "PCB screw-in",
+              "size": "2U"
+            }
+          },
+          {
+            "name": "Clear / 6.25U",
+            "sku": "DUROCK-V2-STAB-CLEAR-625U",
+            "extraPrice": 25000,
+            "specs": {
+              "supportedLayouts": [
+                "65",
+                "P65",
+                "75",
+                "P75",
+                "TKL"
+              ],
+              "mount": "PCB screw-in",
+              "size": "6.25U"
+            }
+          },
+          {
+            "name": "Black / 7U",
+            "sku": "DUROCK-V2-STAB-BLACK-7U",
+            "extraPrice": 30000,
+            "specs": {
+              "supportedLayouts": [
+                "TKL"
+              ],
+              "mount": "PCB screw-in",
+              "size": "7U"
+            }
+          }
+        ]
+      },
+      "inventory": {
+        "create": {
+          "stock": 0
+        }
+      }
+    },
+    {
+      "name": "Keychron Coiled Aviator Cable 8K",
+      "slug": "keychron-coiled-aviator-cable-8k",
+      "description": "USB-C coiled aviator cable for wired keyboard builds, available with straight or angled connectors and multiple colorways.",
+      "price": 165900,
+      "category": "ACCESSORY",
+      "status": "IN_STOCK",
+      "images": [
+        "https://www.keychron.com/cdn/shop/files/Keychron-custom-coiled-aviator-USB-Type-C-cable-8K-version-with-straight-connector-for-keyboards-black-color.jpg?crop=center&height=1200&v=1761186074&width=1200"
+      ],
+      "technicalSpec": "{\"connector\":\"USB-C\",\"style\":\"coiled aviator\",\"supportedLayouts\":[\"65\",\"P65\",\"75\",\"P75\",\"TKL\"]}",
+      "variants": {
+        "create": [
+          {
+            "name": "Black / Straight",
+            "sku": "KC-CABLE-8K-BLK-STRAIGHT",
+            "extraPrice": 0,
+            "specs": {
+              "connector": "Straight",
+              "color": "Black"
+            }
+          },
+          {
+            "name": "Gray / Angled",
+            "sku": "KC-CABLE-8K-GRAY-ANGLED",
+            "extraPrice": 0,
+            "specs": {
+              "connector": "Angled",
+              "color": "Gray"
+            }
+          }
+        ]
+      },
+      "inventory": {
+        "create": {
+          "stock": 42
+        }
+      }
+    },
+    {
+      "name": "Gateron Switch and Keycap Puller",
+      "slug": "gateron-switch-and-keycap-puller",
+      "description": "Dual-purpose Gateron tool for safely removing MX switches and keycaps during Garage build assembly and maintenance.",
+      "price": 107800,
+      "category": "ACCESSORY",
+      "status": "IN_STOCK",
+      "images": [
+        "https://www.keychron.com/cdn/shop/files/Switch-and-Keycap-Puller-Black.jpg?crop=center&height=1200&v=1725074702&width=1200"
+      ],
+      "technicalSpec": "{\"toolType\":\"switch and keycap puller\",\"switchStem\":\"MX\",\"supportedLayouts\":[\"65\",\"P65\",\"75\",\"P75\",\"TKL\"]}",
+      "variants": {
+        "create": [
+          {
+            "name": "Black / Gateron",
+            "sku": "GAT-SWITCH-KEYCAP-PULLER-BLK",
+            "extraPrice": 0,
+            "specs": {
+              "tool": "Switch and keycap puller",
+              "color": "Black"
+            }
+          }
+        ]
+      },
+      "inventory": {
+        "create": {
+          "stock": 64
+        }
+      }
+    },
+    {
+      "name": "KBDfans 65% Aluminum Plate",
+      "slug": "kbdfans-65-aluminum-plate",
+      "description": "CNC aluminum plate for 65% MX-style builds, adding a firmer typing feel and crisp acoustic profile.",
+      "price": 248900,
+      "category": "PLATE",
+      "status": "IN_STOCK",
+      "images": [
+        "https://divinikey.com/cdn/shop/products/kbdfans-65-aluminum-plate-448165.jpg?crop=center&height=1200&v=1609988382&width=1200"
+      ],
+      "technicalSpec": "{\"supportedLayouts\":[\"65\",\"P65\"],\"material\":\"Aluminum\",\"thickness\":\"1.5 mm\",\"switchStem\":\"MX\"}",
+      "variants": {
+        "create": [
+          {
+            "name": "65% Aluminum",
+            "sku": "KBDFANS-65-ALU-PLATE",
+            "extraPrice": 0,
+            "specs": {
+              "layout": "65",
+              "supportedLayouts": [
+                "65",
+                "P65"
+              ],
+              "material": "Aluminum"
+            }
+          }
+        ]
+      },
+      "inventory": {
+        "create": {
+          "stock": 28
+        }
+      }
+    },
+    {
+      "name": "KBDfans KBD75 Brass Plate",
+      "slug": "kbdfans-kbd75-brass-plate",
+      "description": "75% brass plate for KBD75-style builds, selected for a heavier, brighter, and more rigid typing character.",
+      "price": 365200,
+      "category": "PLATE",
+      "status": "IN_STOCK",
+      "images": [
+        "https://mechanicalkeyboards.com/cdn/shop/files/3888_628fe75fcb7fa_KBD75-V1-V2-75-Brass-Plate.jpg?crop=center&height=630&v=1707258861&width=1200"
+      ],
+      "technicalSpec": "{\"supportedLayouts\":[\"75\",\"P75\"],\"material\":\"Brass\",\"finish\":\"PVD\",\"switchStem\":\"MX\"}",
+      "variants": {
+        "create": [
+          {
+            "name": "75% Brass",
+            "sku": "KBDFANS-KBD75-BRASS-PLATE",
+            "extraPrice": 0,
+            "specs": {
+              "layout": "75",
+              "supportedLayouts": [
+                "75",
+                "P75"
+              ],
+              "material": "Brass"
+            }
+          }
+        ]
+      },
+      "inventory": {
+        "create": {
+          "stock": 18
+        }
+      }
+    },
+    {
+      "name": "KBD67 MKII POM Plate",
+      "slug": "kbd67-mkii-pom-plate",
+      "description": "65% POM plate for softer flex, muted sound, and a smoother bottom-out feel in compact MX builds.",
+      "price": 290500,
+      "category": "PLATE",
+      "status": "IN_STOCK",
+      "images": [
+        "https://www.greendoorgeeks.com/cdn/shop/products/KBD67MKII_Black_Thumb_7861a627-9961-4b8b-9b9e-91fc5d0f29f9_1200x1200.jpg?v=1625371910"
+      ],
+      "technicalSpec": "{\"supportedLayouts\":[\"65\",\"P65\"],\"material\":\"POM\",\"thickness\":\"1.5-1.6 mm\",\"switchStem\":\"MX\"}",
+      "variants": {
+        "create": [
+          {
+            "name": "Black POM",
+            "sku": "KBD67-MKII-POM-BLACK",
+            "extraPrice": 0,
+            "specs": {
+              "layout": "65",
+              "supportedLayouts": [
+                "65",
+                "P65"
+              ],
+              "material": "POM",
+              "color": "Black"
+            }
+          },
+          {
+            "name": "White POM",
+            "sku": "KBD67-MKII-POM-WHITE",
+            "extraPrice": 0,
+            "specs": {
+              "layout": "65",
+              "supportedLayouts": [
+                "65",
+                "P65"
+              ],
+              "material": "POM",
+              "color": "White"
+            }
+          }
+        ]
+      },
+      "inventory": {
+        "create": {
+          "stock": 22
+        }
+      }
+    },
+    {
+      "name": "TX AP Screw-In Stabilizers",
+      "slug": "tx-ap-screw-in-stabilizers",
+      "description": "TX AP PCB screw-in stabilizer set for standard MX builds, offered in 1.6T and 1.2T PCB thickness options.",
+      "price": 149400,
+      "category": "STABILIZER",
+      "status": "IN_STOCK",
+      "images": [
+        "https://divinikey.com/cdn/shop/products/tx-ap-screw-in-stabilizers-948335.webp?v=1698385202&width=1200"
+      ],
+      "technicalSpec": "{\"supportedLayouts\":[\"65\",\"P65\",\"75\",\"P75\",\"TKL\"],\"mount\":\"PCB screw-in\",\"pcbThickness\":[\"1.6T\",\"1.2T\"]}",
+      "variants": {
+        "create": [
+          {
+            "name": "Black / Base / 1.6T",
+            "sku": "TX-AP-SCREWIN-BLK-BASE-16T",
+            "extraPrice": 0,
+            "specs": {
+              "supportedLayouts": [
+                "65",
+                "P65",
+                "75",
+                "P75",
+                "TKL"
+              ],
+              "mount": "PCB screw-in",
+              "pcbThickness": "1.6T"
+            }
+          },
+          {
+            "name": "White / Base / 1.2T",
+            "sku": "TX-AP-SCREWIN-WHT-BASE-12T",
+            "extraPrice": 0,
+            "specs": {
+              "supportedLayouts": [
+                "65",
+                "P65",
+                "75",
+                "P75",
+                "TKL"
+              ],
+              "mount": "PCB screw-in",
+              "pcbThickness": "1.2T"
+            }
+          }
+        ]
+      },
+      "inventory": {
+        "create": {
+          "stock": 48
+        }
+      }
+    },
+    {
+      "name": "TX AP Long Pole Screw-In Stabilizers",
+      "slug": "tx-ap-long-pole-screw-in-stabilizers",
+      "description": "TX AP long-pole PCB screw-in stabilizers tuned for long-pole switches and compact-to-TKL MX builds.",
+      "price": 149400,
+      "category": "STABILIZER",
+      "status": "IN_STOCK",
+      "images": [
+        "https://divinikey.com/cdn/shop/products/tx-ap-long-pole-screw-in-stabilizers-698466.webp?v=1698385202&width=1200"
+      ],
+      "technicalSpec": "{\"supportedLayouts\":[\"65\",\"P65\",\"75\",\"P75\",\"TKL\"],\"mount\":\"PCB screw-in\",\"switchStyle\":\"long-pole MX\"}",
+      "variants": {
+        "create": [
+          {
+            "name": "Black / Base / 1.6T",
+            "sku": "TX-AP-LP-SCREWIN-BLK-BASE-16T",
+            "extraPrice": 0,
+            "specs": {
+              "supportedLayouts": [
+                "65",
+                "P65",
+                "75",
+                "P75",
+                "TKL"
+              ],
+              "mount": "PCB screw-in",
+              "pcbThickness": "1.6T",
+              "switchStyle": "Long-pole"
+            }
+          }
+        ]
+      },
+      "inventory": {
+        "create": {
+          "stock": 36
+        }
+      }
+    },
+    {
+      "name": "Swagkeys Knight V4 Stabilizers",
+      "slug": "swagkeys-knight-v4-stabilizers",
+      "description": "Swagkeys Knight V4 stabilizer set for custom MX builds, with multiple housing colors for clean visual matching.",
+      "price": 124500,
+      "category": "STABILIZER",
+      "status": "IN_STOCK",
+      "images": [
+        "https://divinikey.com/cdn/shop/files/swagkeys-knight-v4-stabilizers-4078900.webp?v=1754579917&width=1200"
+      ],
+      "technicalSpec": "{\"supportedLayouts\":[\"65\",\"P65\",\"75\",\"P75\",\"TKL\"],\"mount\":\"PCB screw-in\",\"colors\":[\"Clear\",\"Black\"]}",
+      "variants": {
+        "create": [
+          {
+            "name": "Clear",
+            "sku": "SWAGKEYS-KNIGHT-V4-CLEAR",
+            "extraPrice": 0,
+            "specs": {
+              "supportedLayouts": [
+                "65",
+                "P65",
+                "75",
+                "P75",
+                "TKL"
+              ],
+              "mount": "PCB screw-in",
+              "color": "Clear"
+            }
+          },
+          {
+            "name": "Black",
+            "sku": "SWAGKEYS-KNIGHT-V4-BLACK",
+            "extraPrice": 0,
+            "specs": {
+              "supportedLayouts": [
+                "65",
+                "P65",
+                "75",
+                "P75",
+                "TKL"
+              ],
+              "mount": "PCB screw-in",
+              "color": "Black"
+            }
+          }
+        ]
+      },
+      "inventory": {
+        "create": {
+          "stock": 44
+        }
+      }
+    },
+    {
+      "name": "Krytox GPL 205 Grade 0 Lubricant",
+      "slug": "krytox-gpl-205-grade-0-lubricant",
+      "description": "Thick PTFE-based switch and stabilizer lubricant commonly used for linear switches, stabilizer housings, and wire contact points.",
+      "price": 99500,
+      "category": "ACCESSORY",
+      "status": "IN_STOCK",
+      "images": [
+        "https://divinikey.com/cdn/shop/files/omnitype-lube-pen-7202755.webp?v=1768094648&width=1200"
+      ],
+      "technicalSpec": "{\"toolType\":\"lubricant\",\"useCases\":[\"switches\",\"stabilizers\"],\"viscosity\":\"Grade 0\"}",
+      "variants": {
+        "create": [
+          {
+            "name": "5 ml Jar",
+            "sku": "KRYTOX-205G0-5ML",
+            "extraPrice": 0,
+            "specs": {
+              "size": "5 ml",
+              "useCase": "Switches and stabilizers"
+            }
+          },
+          {
+            "name": "10 ml Jar",
+            "sku": "KRYTOX-205G0-10ML",
+            "extraPrice": 60000,
+            "specs": {
+              "size": "10 ml",
+              "useCase": "Switches and stabilizers"
+            }
+          }
+        ]
+      },
+      "inventory": {
+        "create": {
+          "stock": 75
+        }
+      }
+    },
+    {
+      "name": "KBDfans Switch Films",
+      "slug": "kbdfans-switch-films",
+      "description": "Switch films for reducing top-housing wobble and tightening the sound of MX-style mechanical switches.",
+      "price": 58000,
+      "category": "ACCESSORY",
+      "status": "IN_STOCK",
+      "images": [
+        "https://divinikey.com/cdn/shop/products/kbdfans-switch-films-433297.jpg?crop=center&height=1200&v=1603529941&width=1200"
+      ],
+      "technicalSpec": "{\"toolType\":\"switch film\",\"switchStem\":\"MX\",\"supportedLayouts\":[\"65\",\"P65\",\"75\",\"P75\",\"TKL\"]}",
+      "variants": {
+        "create": [
+          {
+            "name": "120 Pack",
+            "sku": "KBDFANS-SWITCH-FILMS-120",
+            "extraPrice": 0,
+            "specs": {
+              "count": 120,
+              "switchStem": "MX"
+            }
+          }
+        ]
+      },
+      "inventory": {
+        "create": {
+          "stock": 90
+        }
+      }
+    },
+    {
+      "name": "Keychron Wooden Palm Rest",
+      "slug": "keychron-wooden-palm-rest",
+      "description": "Wooden palm rest accessory sized across compact and TKL layouts to improve wrist angle for longer typing sessions.",
+      "price": 207500,
+      "category": "ACCESSORY",
+      "status": "IN_STOCK",
+      "images": [
+        "https://www.keychron.com/cdn/shop/products/keychron-q1-wooden-palm-rest.jpg?crop=center&height=1200&v=1641952751&width=1200"
+      ],
+      "technicalSpec": "{\"toolType\":\"palm rest\",\"material\":\"wood\",\"supportedLayouts\":[\"65\",\"P65\",\"75\",\"P75\",\"TKL\"]}",
+      "variants": {
+        "create": [
+          {
+            "name": "Q1/V1 75%",
+            "sku": "KC-WOOD-PALM-75",
+            "extraPrice": 0,
+            "specs": {
+              "supportedLayouts": [
+                "75",
+                "P75"
+              ],
+              "material": "Wood"
+            }
+          },
+          {
+            "name": "Q3/V3 TKL",
+            "sku": "KC-WOOD-PALM-TKL",
+            "extraPrice": 50000,
+            "specs": {
+              "supportedLayouts": [
+                "TKL"
+              ],
+              "material": "Wood"
+            }
+          }
+        ]
+      },
+      "inventory": {
+        "create": {
+          "stock": 34
+        }
+      }
+    },
+    {
+      "name": "Keychron Keyboard Carrying Case",
+      "slug": "keychron-keyboard-carrying-case",
+      "description": "Protective carrying case for transporting compact and TKL mechanical keyboards without scratching the case or keycaps.",
+      "price": 248900,
+      "category": "ACCESSORY",
+      "status": "IN_STOCK",
+      "images": [
+        "https://www.keychron.com/cdn/shop/products/keychron-keyboard-carrying-case.jpg?crop=center&height=1200&v=1608634257&width=1200"
+      ],
+      "technicalSpec": "{\"toolType\":\"carrying case\",\"supportedLayouts\":[\"65\",\"P65\",\"75\",\"P75\",\"TKL\"]}",
+      "variants": {
+        "create": [
+          {
+            "name": "65% Case",
+            "sku": "KC-CARRYING-CASE-65",
+            "extraPrice": 0,
+            "specs": {
+              "supportedLayouts": [
+                "65",
+                "P65"
+              ]
+            }
+          },
+          {
+            "name": "75% Case",
+            "sku": "KC-CARRYING-CASE-75",
+            "extraPrice": 30000,
+            "specs": {
+              "supportedLayouts": [
+                "75",
+                "P75"
+              ]
+            }
+          },
+          {
+            "name": "TKL Case",
+            "sku": "KC-CARRYING-CASE-TKL",
+            "extraPrice": 60000,
+            "specs": {
+              "supportedLayouts": [
+                "TKL"
+              ]
+            }
+          }
+        ]
+      },
+      "inventory": {
+        "create": {
+          "stock": 40
+        }
+      }
+    }
+  ]
+}
