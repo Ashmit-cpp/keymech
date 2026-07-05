@@ -335,7 +335,14 @@
         },
         "responses": {
           "201": {
-            "description": "Item added to cart successfully"
+            "description": "Item added to cart successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CartResponseDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -349,13 +356,57 @@
         ]
       }
     },
+    "/cart/garage-builds": {
+      "post": {
+        "operationId": "CartController_addGarageBuild",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddGarageBuildToCartDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Garage build bundle added to cart successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CartResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Add a Garage build bundle to authenticated user cart",
+        "tags": [
+          "cart"
+        ]
+      }
+    },
     "/cart": {
       "get": {
         "operationId": "CartController_getCart",
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Cart retrieved successfully"
+            "description": "Cart retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CartResponseDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -373,7 +424,14 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Cart cleared successfully"
+            "description": "Cart cleared successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CartResponseDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -401,7 +459,14 @@
         ],
         "responses": {
           "200": {
-            "description": "Item removed successfully"
+            "description": "Item removed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CartResponseDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -431,7 +496,14 @@
         },
         "responses": {
           "200": {
-            "description": "Guest cart merged successfully"
+            "description": "Guest cart merged successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CartResponseDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -543,6 +615,177 @@
         "summary": "Sign out",
         "tags": [
           "auth"
+        ]
+      }
+    },
+    "/garage/builds": {
+      "post": {
+        "operationId": "GarageController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateGarageBuildDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Garage build created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GarageBuildResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a saved Garage build",
+        "tags": [
+          "garage"
+        ]
+      }
+    },
+    "/garage/builds/me": {
+      "get": {
+        "operationId": "GarageController_findMe",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Current user Garage builds",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GarageBuildResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get Garage builds for the current user",
+        "tags": [
+          "garage"
+        ]
+      }
+    },
+    "/garage/builds/{id}": {
+      "get": {
+        "operationId": "GarageController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Garage build UUID",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Garage build found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GarageBuildResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a public Garage build or an owned private build",
+        "tags": [
+          "garage"
+        ]
+      },
+      "patch": {
+        "operationId": "GarageController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Garage build UUID",
+            "schema": {}
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateGarageBuildDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Garage build updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GarageBuildResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update an owned Garage build",
+        "tags": [
+          "garage"
+        ]
+      },
+      "delete": {
+        "operationId": "GarageController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Garage build UUID",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Garage build deleted"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete an owned Garage build",
+        "tags": [
+          "garage"
         ]
       }
     },
@@ -919,6 +1162,10 @@
       "description": "Shopping cart endpoints"
     },
     {
+      "name": "garage",
+      "description": "Garage keyboard build endpoints"
+    },
+    {
       "name": "auth",
       "description": "Authentication endpoints"
     },
@@ -1218,6 +1465,112 @@
           "quantity"
         ]
       },
+      "CartItemResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "PRODUCT",
+              "GARAGE_BUILD"
+            ]
+          },
+          "productId": {
+            "type": "string",
+            "nullable": true
+          },
+          "variantId": {
+            "type": "string",
+            "nullable": true
+          },
+          "garageBuildId": {
+            "type": "string",
+            "nullable": true
+          },
+          "buildSnapshot": {
+            "type": "object",
+            "nullable": true
+          },
+          "unitPrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "product": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProductResponseDto"
+              }
+            ]
+          },
+          "variant": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProductVariantResponseDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "quantity"
+        ]
+      },
+      "CartResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CartItemResponseDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "createdAt",
+          "updatedAt",
+          "items"
+        ]
+      },
+      "AddGarageBuildToCartDto": {
+        "type": "object",
+        "properties": {
+          "garageBuildId": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "garageBuildId",
+          "quantity"
+        ]
+      },
       "GuestCartItemDto": {
         "type": "object",
         "properties": {
@@ -1313,6 +1666,162 @@
           "user"
         ]
       },
+      "GarageComponentSelectionDto": {
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "string"
+          },
+          "variantId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "productId"
+        ]
+      },
+      "GarageSelectionsDto": {
+        "type": "object",
+        "properties": {
+          "case": {
+            "$ref": "#/components/schemas/GarageComponentSelectionDto"
+          },
+          "pcb": {
+            "$ref": "#/components/schemas/GarageComponentSelectionDto"
+          },
+          "plate": {
+            "$ref": "#/components/schemas/GarageComponentSelectionDto"
+          },
+          "switches": {
+            "$ref": "#/components/schemas/GarageComponentSelectionDto"
+          },
+          "keycaps": {
+            "$ref": "#/components/schemas/GarageComponentSelectionDto"
+          },
+          "stabilizers": {
+            "$ref": "#/components/schemas/GarageComponentSelectionDto"
+          }
+        },
+        "required": [
+          "case",
+          "pcb",
+          "plate",
+          "switches",
+          "keycaps",
+          "stabilizers"
+        ]
+      },
+      "CreateGarageBuildDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "isPublic": {
+            "type": "boolean",
+            "default": false
+          },
+          "layout": {
+            "type": "string",
+            "enum": [
+              "65",
+              "75",
+              "TKL"
+            ]
+          },
+          "selections": {
+            "$ref": "#/components/schemas/GarageSelectionsDto"
+          },
+          "theme": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "name",
+          "layout",
+          "selections",
+          "theme"
+        ]
+      },
+      "GarageBuildResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "isPublic": {
+            "type": "boolean"
+          },
+          "layout": {
+            "type": "string",
+            "enum": [
+              "65",
+              "75",
+              "TKL"
+            ]
+          },
+          "selections": {
+            "type": "object"
+          },
+          "theme": {
+            "type": "object"
+          },
+          "totalPrice": {
+            "type": "number"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "userId",
+          "name",
+          "isPublic",
+          "layout",
+          "selections",
+          "theme",
+          "totalPrice",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "UpdateGarageBuildDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "isPublic": {
+            "type": "boolean"
+          },
+          "layout": {
+            "type": "string",
+            "enum": [
+              "65",
+              "75",
+              "TKL"
+            ]
+          },
+          "selections": {
+            "$ref": "#/components/schemas/GarageSelectionsDto"
+          },
+          "theme": {
+            "type": "object"
+          }
+        }
+      },
       "OrderProductResponseDto": {
         "type": "object",
         "properties": {
@@ -1357,22 +1866,43 @@
           "id": {
             "type": "string"
           },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "PRODUCT",
+              "GARAGE_BUILD"
+            ]
+          },
           "productId": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "variantId": {
             "type": "string",
             "nullable": true
           },
+          "garageBuildId": {
+            "type": "string",
+            "nullable": true
+          },
+          "buildSnapshot": {
+            "type": "object",
+            "nullable": true
+          },
           "quantity": {
             "type": "number"
           },
-          "price": {
+          "unitPrice": {
             "type": "number",
             "description": "Unit price in paise"
           },
           "product": {
-            "$ref": "#/components/schemas/OrderProductResponseDto"
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/OrderProductResponseDto"
+              }
+            ]
           },
           "variant": {
             "nullable": true,
@@ -1385,10 +1915,9 @@
         },
         "required": [
           "id",
-          "productId",
+          "kind",
           "quantity",
-          "price",
-          "product"
+          "unitPrice"
         ]
       },
       "OrderUserResponseDto": {
