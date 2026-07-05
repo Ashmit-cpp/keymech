@@ -13,6 +13,7 @@ export function createOpenApiDocument(app: INestApplication) {
     .addTag('users', 'User management endpoints')
     .addTag('orders', 'Order management endpoints')
     .addTag('cart', 'Shopping cart endpoints')
+    .addTag('garage', 'Garage keyboard build endpoints')
     .addTag('auth', 'Authentication endpoints')
     .addTag('wishlist', 'Wishlist management endpoints')
     .build();

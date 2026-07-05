@@ -1,5 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { OrderStatus } from '../../../generated/prisma/enums.js';
+import {
+  CommerceItemKind,
+  OrderStatus,
+} from '../../../generated/prisma/enums.js';
 
 export class OrderProductResponseDto {
   @ApiProperty({ type: String })
@@ -38,20 +41,33 @@ export class OrderItemResponseDto {
   @ApiProperty({ type: String })
   id!: string;
 
-  @ApiProperty({ type: String })
-  productId!: string;
+  @ApiProperty({ enum: CommerceItemKind })
+  kind!: CommerceItemKind;
+
+  @ApiProperty({ type: String, nullable: true, required: false })
+  productId?: string | null;
 
   @ApiProperty({ type: String, nullable: true, required: false })
   variantId?: string | null;
+
+  @ApiProperty({ type: String, nullable: true, required: false })
+  garageBuildId?: string | null;
+
+  @ApiProperty({ type: Object, nullable: true, required: false })
+  buildSnapshot?: unknown;
 
   @ApiProperty({ type: Number })
   quantity!: number;
 
   @ApiProperty({ type: Number, description: 'Unit price in paise' })
-  price!: number;
+  unitPrice!: number;
 
-  @ApiProperty({ type: () => OrderProductResponseDto })
-  product!: OrderProductResponseDto;
+  @ApiProperty({
+    type: () => OrderProductResponseDto,
+    nullable: true,
+    required: false,
+  })
+  product?: OrderProductResponseDto | null;
 
   @ApiProperty({
     type: () => OrderVariantResponseDto,

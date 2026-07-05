@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma } from '../../generated/prisma/client.js';
-import { OrderStatus } from '../../generated/prisma/enums.js';
+import { CommerceItemKind, OrderStatus } from '../../generated/prisma/enums.js';
 import type { AuthenticatedUser } from '../auth/current-user.decorator.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { RazorpayOrderResponseDto } from './dto/razorpay-order-response.dto.js';
@@ -22,6 +22,7 @@ const orderInclude = {
     include: {
       product: { select: { id: true, name: true, images: true } },
       variant: { select: { id: true, name: true, extraPrice: true } },
+      garageBuild: { select: { id: true, name: true, layout: true } },
     },
   },
 } satisfies Prisma.OrderInclude;
@@ -31,10 +32,13 @@ type OrderWithDetails = Prisma.OrderGetPayload<{
 }>;
 
 interface PricedOrderItem {
-  productId: string;
+  kind: CommerceItemKind;
+  productId: string | null;
   variantId: string | null;
+  garageBuildId: string | null;
+  buildSnapshot: Prisma.JsonValue | null;
   quantity: number;
-  price: number;
+  unitPrice: number;
 }
 
 @Injectable()
@@ -50,8 +54,10 @@ export class OrdersService {
     }
   }
 
-  private serializeImages(images: Prisma.JsonValue | null): string | null {
-    if (images === null) return null;
+  private serializeImages(
+    images: Prisma.JsonValue | null | undefined,
+  ): string | null {
+    if (images === null || images === undefined) return null;
     if (typeof images === 'string') return images;
     return JSON.stringify(images);
   }
@@ -69,15 +75,20 @@ export class OrdersService {
       user: order.user,
       items: order.items.map((item) => ({
         id: item.id,
+        kind: item.kind,
         productId: item.productId,
         variantId: item.variantId,
+        garageBuildId: item.garageBuildId,
+        buildSnapshot: item.buildSnapshot,
         quantity: item.quantity,
-        price: item.price,
-        product: {
-          id: item.product.id,
-          name: item.product.name,
-          images: this.serializeImages(item.product.images),
-        },
+        unitPrice: item.unitPrice,
+        product: item.product
+          ? {
+              id: item.product.id,
+              name: item.product.name,
+              images: this.serializeImages(item.product.images),
+            }
+          : null,
         variant: item.variant,
       })),
     };
@@ -98,19 +109,46 @@ export class OrdersService {
 
   buildPricedItems(cart: CartWithItems): PricedOrderItem[] {
     return cart.items.map((cartItem) => {
-      const price =
+      if (cartItem.kind === CommerceItemKind.GARAGE_BUILD) {
+        if (
+          !cartItem.garageBuildId ||
+          !cartItem.buildSnapshot ||
+          cartItem.unitPrice === null
+        ) {
+          throw new BadRequestException('Garage build cart item is incomplete');
+        }
+
+        return {
+          kind: CommerceItemKind.GARAGE_BUILD,
+          productId: null,
+          variantId: null,
+          garageBuildId: cartItem.garageBuildId,
+          buildSnapshot: cartItem.buildSnapshot,
+          quantity: cartItem.quantity,
+          unitPrice: cartItem.unitPrice,
+        };
+      }
+
+      if (!cartItem.productId || !cartItem.product) {
+        throw new BadRequestException('Product cart item is incomplete');
+      }
+
+      const unitPrice =
         cartItem.product.price + (cartItem.variant?.extraPrice ?? 0);
       return {
+        kind: CommerceItemKind.PRODUCT,
         productId: cartItem.productId,
         variantId: cartItem.variantId,
+        garageBuildId: null,
+        buildSnapshot: null,
         quantity: cartItem.quantity,
-        price,
+        unitPrice,
       };
     });
   }
 
   getOrderTotal(items: PricedOrderItem[]) {
-    return items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    return items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
   }
 
   private async decrementInventory(
@@ -118,6 +156,10 @@ export class OrdersService {
     items: PricedOrderItem[],
   ) {
     for (const item of items) {
+      if (item.kind !== CommerceItemKind.PRODUCT || !item.productId) {
+        continue;
+      }
+
       if (item.variantId) {
         const inventory = await tx.inventory.findUnique({
           where: { variantId: item.variantId },
@@ -166,10 +208,16 @@ export class OrdersService {
           razorpayPaymentId: payment?.razorpayPaymentId,
           items: {
             create: items.map((item) => ({
+              kind: item.kind,
               productId: item.productId,
               variantId: item.variantId,
+              garageBuildId: item.garageBuildId,
+              buildSnapshot:
+                item.buildSnapshot === null
+                  ? undefined
+                  : (item.buildSnapshot as Prisma.InputJsonValue),
               quantity: item.quantity,
-              price: item.price,
+              unitPrice: item.unitPrice,
             })),
           },
         },

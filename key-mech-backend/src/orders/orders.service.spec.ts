@@ -1,5 +1,5 @@
 import { ForbiddenException } from '@nestjs/common';
-import { OrderStatus } from '../../generated/prisma/enums.js';
+import { CommerceItemKind, OrderStatus } from '../../generated/prisma/enums.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { OrdersService } from './orders.service.js';
 import { PaymentService } from './payment.service.js';
@@ -36,12 +36,16 @@ const baseOrder = () => ({
     {
       id: 'item-id',
       orderId: 'order-id',
+      kind: CommerceItemKind.PRODUCT,
       productId: 'product-id',
       variantId: 'variant-id',
+      garageBuildId: null,
+      buildSnapshot: null,
       quantity: 2,
-      price: 60000,
+      unitPrice: 60000,
       product: { id: 'product-id', name: 'Keyboard', images: ['image.jpg'] },
       variant: { id: 'variant-id', name: 'Brass', extraPrice: 10000 },
+      garageBuild: null,
     },
   ],
 });
@@ -93,6 +97,10 @@ describe('OrdersService', () => {
         {
           productId: 'keyboard-id',
           variantId: 'variant-id',
+          kind: CommerceItemKind.PRODUCT,
+          garageBuildId: null,
+          buildSnapshot: null,
+          unitPrice: null,
           quantity: 2,
           product: { price: 50000 },
           variant: { extraPrice: 10000 },
@@ -100,6 +108,10 @@ describe('OrdersService', () => {
         {
           productId: 'switch-id',
           variantId: null,
+          kind: CommerceItemKind.PRODUCT,
+          garageBuildId: null,
+          buildSnapshot: null,
+          unitPrice: null,
           quantity: 3,
           product: { price: 1000 },
           variant: null,
@@ -115,17 +127,61 @@ describe('OrdersService', () => {
       {
         productId: 'keyboard-id',
         variantId: 'variant-id',
+        kind: CommerceItemKind.PRODUCT,
+        garageBuildId: null,
+        buildSnapshot: null,
         quantity: 2,
-        price: 60000,
+        unitPrice: 60000,
       },
       {
         productId: 'switch-id',
         variantId: null,
+        kind: CommerceItemKind.PRODUCT,
+        garageBuildId: null,
+        buildSnapshot: null,
         quantity: 3,
-        price: 1000,
+        unitPrice: 1000,
       },
     ]);
     expect(service.getOrderTotal(items)).toBe(123000);
+  });
+
+  it('prices Garage bundles from cart snapshots and excludes products', () => {
+    const { service } = createService();
+    const cart = {
+      items: [
+        {
+          id: 'cart-garage-id',
+          cartId: 'cart-id',
+          kind: CommerceItemKind.GARAGE_BUILD,
+          productId: null,
+          variantId: null,
+          garageBuildId: 'build-id',
+          buildSnapshot: { name: 'Office 75' },
+          unitPrice: 85000,
+          quantity: 2,
+          product: null,
+          variant: null,
+        },
+      ],
+    };
+
+    const items = service.buildPricedItems(
+      cart as unknown as Parameters<OrdersService['buildPricedItems']>[0],
+    );
+
+    expect(items).toEqual([
+      {
+        kind: CommerceItemKind.GARAGE_BUILD,
+        productId: null,
+        variantId: null,
+        garageBuildId: 'build-id',
+        buildSnapshot: { name: 'Office 75' },
+        quantity: 2,
+        unitPrice: 85000,
+      },
+    ]);
+    expect(service.getOrderTotal(items)).toBe(170000);
   });
 
   it('returns the existing order when payment verification is retried', async () => {

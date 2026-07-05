@@ -1,19 +1,52 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Prisma } from '../../generated/prisma/client.js';
+import { CommerceItemKind } from '../../generated/prisma/enums.js';
+import { GarageService } from '../garage/garage.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { AddGarageBuildToCartDto } from './dto/add-garage-build-to-cart.dto.js';
 import { CreateCartItemDto } from './dto/create-cart-item.dto.js';
 import { CreateCartDto } from './dto/create-cart.dto.js';
 
 @Injectable()
 export class CartService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private garageService: GarageService,
+  ) {}
 
   private includeItems = {
-    items: { include: { product: true, variant: true } },
+    items: { include: { product: true, variant: true, garageBuild: true } },
   } satisfies Prisma.CartInclude;
 
   private toMergeKey(item: { productId: string; variantId?: string | null }) {
     return `${item.productId}:${item.variantId ?? 'null'}`;
+  }
+
+  private productRows(
+    items:
+      | {
+          kind?: CommerceItemKind | null;
+          productId?: string | null;
+          variantId?: string | null;
+          quantity: number;
+        }[]
+      | undefined,
+  ) {
+    return items
+      ?.filter(
+        (item) =>
+          (!item.kind || item.kind === CommerceItemKind.PRODUCT) &&
+          typeof item.productId === 'string',
+      )
+      .map((item) => ({
+        productId: item.productId as string,
+        variantId: item.variantId ?? null,
+        quantity: item.quantity,
+      }));
   }
 
   private mergeCartItems(
@@ -31,14 +64,16 @@ export class CartService {
       });
     });
 
-    return Array.from(map.entries()).map(([key, quantity]) => {
-      const [productId, variantId] = key.split(':');
-      return {
-        productId,
-        variantId: variantId === 'null' ? null : variantId,
-        quantity,
-      };
-    });
+    return Array.from(map.entries())
+      .map(([key, quantity]) => {
+        const [productId, variantId] = key.split(':');
+        return {
+          productId,
+          variantId: variantId === 'null' ? null : variantId,
+          quantity,
+        };
+      })
+      .filter((item) => item.quantity > 0);
   }
 
   private async getOrCreateCartById(cartId: string, userId?: string | null) {
@@ -87,6 +122,7 @@ export class CartService {
           user: undefined,
           items: {
             create: dto.items.map((i) => ({
+              kind: CommerceItemKind.PRODUCT,
               productId: i.productId,
               variantId: i.variantId ?? null,
               quantity: i.quantity,
@@ -104,6 +140,7 @@ export class CartService {
       data: {
         items: {
           create: dto.items.map((i) => ({
+            kind: CommerceItemKind.PRODUCT,
             productId: i.productId,
             variantId: i.variantId ?? null,
             quantity: i.quantity,
@@ -122,24 +159,82 @@ export class CartService {
     const cart = await this.getOrCreateCartById(cartId, userId ?? undefined);
     const existing = cart.items.find(
       (ci) =>
+        ci.kind === CommerceItemKind.PRODUCT &&
         ci.productId === item.productId &&
         ci.variantId === (item.variantId ?? null),
     );
     if (existing) {
+      const quantity = existing.quantity + item.quantity;
+      if (quantity <= 0) {
+        await this.prisma.cartItem.delete({ where: { id: existing.id } });
+        return this.getCartById(cart.id);
+      }
+
       await this.prisma.cartItem.update({
         where: { id: existing.id },
-        data: { quantity: existing.quantity + item.quantity },
+        data: { quantity },
       });
       return this.getCartById(cart.id);
     }
+
+    if (item.quantity <= 0) {
+      throw new BadRequestException('Quantity must be positive for a new item');
+    }
+
     await this.prisma.cartItem.create({
       data: {
         cartId: cart.id,
+        kind: CommerceItemKind.PRODUCT,
         productId: item.productId,
         variantId: item.variantId ?? null,
         quantity: item.quantity,
       },
     });
+    return this.getCartById(cart.id);
+  }
+
+  async addGarageBuildByUserId(userId: string, item: AddGarageBuildToCartDto) {
+    const cart = await this.getOrCreateCartByUser(userId);
+    const existing = cart.items.find(
+      (ci) =>
+        ci.kind === CommerceItemKind.GARAGE_BUILD &&
+        ci.garageBuildId === item.garageBuildId,
+    );
+
+    if (existing) {
+      const quantity = existing.quantity + item.quantity;
+      if (quantity <= 0) {
+        await this.prisma.cartItem.delete({ where: { id: existing.id } });
+        return this.getCartById(cart.id);
+      }
+
+      await this.prisma.cartItem.update({
+        where: { id: existing.id },
+        data: { quantity },
+      });
+      return this.getCartById(cart.id);
+    }
+
+    if (item.quantity <= 0) {
+      throw new BadRequestException('Quantity must be positive for a new item');
+    }
+
+    const snapshot = await this.garageService.getCartSnapshot(
+      userId,
+      item.garageBuildId,
+    );
+
+    await this.prisma.cartItem.create({
+      data: {
+        cartId: cart.id,
+        kind: CommerceItemKind.GARAGE_BUILD,
+        garageBuildId: snapshot.garageBuildId,
+        buildSnapshot: snapshot.snapshot as unknown as Prisma.InputJsonValue,
+        unitPrice: snapshot.unitPrice,
+        quantity: item.quantity,
+      },
+    });
+
     return this.getCartById(cart.id);
   }
 
@@ -199,7 +294,10 @@ export class CartService {
       return this.getOrCreateCartByUser(userId);
     }
 
-    const mergedItems = this.mergeCartItems(guestCart?.items, userCart?.items);
+    const mergedItems = this.mergeCartItems(
+      this.productRows(guestCart?.items),
+      this.productRows(userCart?.items),
+    );
 
     const targetCart =
       userCart ??
@@ -208,11 +306,17 @@ export class CartService {
         include: { items: true },
       }));
 
-    await this.prisma.cartItem.deleteMany({ where: { cartId: targetCart.id } });
+    await this.prisma.cartItem.deleteMany({
+      where: { cartId: targetCart.id, kind: CommerceItemKind.PRODUCT },
+    });
 
     if (mergedItems.length > 0) {
       await this.prisma.cartItem.createMany({
-        data: mergedItems.map((item) => ({ cartId: targetCart.id, ...item })),
+        data: mergedItems.map((item) => ({
+          cartId: targetCart.id,
+          kind: CommerceItemKind.PRODUCT,
+          ...item,
+        })),
       });
     }
 
@@ -243,13 +347,22 @@ export class CartService {
     }
 
     const userCart = await this.getOrCreateCartByUser(userId);
-    const mergedItems = this.mergeCartItems(userCart.items, guestItems);
+    const mergedItems = this.mergeCartItems(
+      this.productRows(userCart.items),
+      guestItems,
+    );
 
-    await this.prisma.cartItem.deleteMany({ where: { cartId: userCart.id } });
+    await this.prisma.cartItem.deleteMany({
+      where: { cartId: userCart.id, kind: CommerceItemKind.PRODUCT },
+    });
 
     if (mergedItems.length > 0) {
       await this.prisma.cartItem.createMany({
-        data: mergedItems.map((item) => ({ cartId: userCart.id, ...item })),
+        data: mergedItems.map((item) => ({
+          cartId: userCart.id,
+          kind: CommerceItemKind.PRODUCT,
+          ...item,
+        })),
       });
     }
 

@@ -11,5 +11,5 @@ export class CreateOrderItemDto {
   quantity!: number;
 
   @IsNumber()
-  price!: number; // cents - snapshot
+  unitPrice!: number; // cents - snapshot
 }

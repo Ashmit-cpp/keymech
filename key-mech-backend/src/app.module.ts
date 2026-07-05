@@ -9,6 +9,7 @@ import { PrismaModule } from './prisma/prisma.module.js';
 import { ProductsModule } from './products/products.module.js';
 import { UsersModule } from './users/users.module.js';
 import { AuthModule } from './auth/auth.module.js';
+import { GarageModule } from './garage/garage.module.js';
 import { WishlistModule } from './wishlist/wishlist.module.js';
 import { validateEnv } from './config/env.validation.js';
 
@@ -21,6 +22,7 @@ import { validateEnv } from './config/env.validation.js';
     CartModule,
     OrdersModule,
     AuthModule,
+    GarageModule,
     WishlistModule,
   ],
   controllers: [AppController, HealthController],
