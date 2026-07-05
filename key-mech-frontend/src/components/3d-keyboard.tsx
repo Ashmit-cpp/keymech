@@ -57,188 +57,151 @@ function garageKeycapRole(keyId: string): "base" | "modifier" | "accent" {
   return "base";
 }
 
-interface KeyboardLabelOverlayProps {
-  nodes: GLTFResult["nodes"];
-  legendColor: string;
+const GARAGE_ATLAS_WIDTH = 2048;
+const GARAGE_ATLAS_HEIGHT = 768;
+const GARAGE_ATLAS_UNIT = 128;
+const GARAGE_LEGEND_MASK_PATH = "/keycap-legends-mask.png";
+
+type GarageAtlasRegion = {
+  id: string;
+  x: number;
+  y: number;
+  w: number;
+  h?: number;
+};
+
+const u = GARAGE_ATLAS_UNIT;
+const GARAGE_ATLAS_REGIONS: GarageAtlasRegion[] = [
+  ...["esc", "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9", "f10", "f11", "f12"].map(
+    (id, col) => ({ id, x: col * u, y: 0, w: u }),
+  ),
+  ...["grave", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "zero", "dash", "equal"].map(
+    (id, col) => ({ id, x: col * u, y: u, w: u }),
+  ),
+  { id: "backspace", x: 13 * u, y: u, w: 2 * u },
+  { id: "del", x: 15 * u, y: u, w: u },
+  { id: "tab", x: 0, y: 2 * u, w: 1.5 * u },
+  ...["q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "lsquarebracket", "rsquarebracket"].map(
+    (id, index) => ({ id, x: 1.5 * u + index * u, y: 2 * u, w: u }),
+  ),
+  { id: "backslash", x: 13.5 * u, y: 2 * u, w: 1.5 * u },
+  { id: "pageup", x: 15 * u, y: 2 * u, w: u },
+  { id: "caps", x: 0, y: 3 * u, w: 1.75 * u },
+  ...["a", "s", "d", "f", "g", "h", "j", "k", "l", "semicolon", "quote"].map(
+    (id, index) => ({ id, x: 1.75 * u + index * u, y: 3 * u, w: u }),
+  ),
+  { id: "enter", x: 12.75 * u, y: 3 * u, w: 2.25 * u },
+  { id: "pagedown", x: 15 * u, y: 3 * u, w: u },
+  { id: "lshift", x: 0, y: 4 * u, w: 2.25 * u },
+  ...["z", "x", "c", "v", "b", "n", "m", "comma", "period", "slash"].map(
+    (id, index) => ({ id, x: 2.25 * u + index * u, y: 4 * u, w: u }),
+  ),
+  { id: "rshift", x: 12.25 * u, y: 4 * u, w: 1.75 * u },
+  { id: "arrowup", x: 14 * u, y: 4 * u, w: u },
+  { id: "end", x: 15 * u, y: 4 * u, w: u },
+  { id: "lcontrol", x: 0, y: 5 * u, w: u },
+  { id: "lwin", x: u, y: 5 * u, w: u },
+  { id: "lalt", x: 2 * u, y: 5 * u, w: 1.75 * u },
+  { id: "space", x: 3.75 * u, y: 5 * u, w: 6.25 * u },
+  { id: "ralt", x: 10 * u, y: 5 * u, w: 1.5 * u },
+  { id: "fn", x: 11.5 * u, y: 5 * u, w: u },
+  { id: "arrowleft", x: 13 * u, y: 5 * u, w: u },
+  { id: "arrowdown", x: 14 * u, y: 5 * u, w: u },
+  { id: "arrowright", x: 15 * u, y: 5 * u, w: u },
+];
+
+function readCanvasColor(color: string): [number, number, number] {
+  const canvas = document.createElement("canvas");
+  canvas.width = 1;
+  canvas.height = 1;
+  const ctx = canvas.getContext("2d")!;
+  ctx.fillStyle = color;
+  ctx.fillRect(0, 0, 1, 1);
+  const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
+  return [r, g, b];
 }
 
-function KeyboardLabelOverlay({ nodes, legendColor }: KeyboardLabelOverlayProps) {
-  type KeyEntry = {
-    geo: THREE.BufferGeometry;
-    mp: [number, number, number];
-    label: string;
-    fs: number;
-  };
+function buildGarageKeycapMaterial({
+  theme,
+  legendMask,
+}: {
+  theme: GarageKeycapTheme;
+  legendMask: THREE.Texture;
+}) {
+  const canvas = document.createElement("canvas");
+  canvas.width = GARAGE_ATLAS_WIDTH;
+  canvas.height = GARAGE_ATLAS_HEIGHT;
 
-  const overlay = useMemo(() => {
-    const keys: KeyEntry[] = [
-      // Function row
-      { geo: nodes.K_ESC.geometry, mp: [-0.051, 0.01, -0.106], label: "Esc", fs: 11 },
-      { geo: nodes.K_F1.geometry, mp: [-0.051, 0.01, -0.106], label: "F1", fs: 11 },
-      { geo: nodes.K_F2.geometry, mp: [-0.051, 0.01, -0.106], label: "F2", fs: 11 },
-      { geo: nodes.K_F3.geometry, mp: [-0.051, 0.01, -0.106], label: "F3", fs: 11 },
-      { geo: nodes.K_F4.geometry, mp: [-0.051, 0.01, -0.106], label: "F4", fs: 11 },
-      { geo: nodes.K_F5.geometry, mp: [-0.051, 0.01, -0.106], label: "F5", fs: 11 },
-      { geo: nodes.K_F6.geometry, mp: [-0.051, 0.01, -0.106], label: "F6", fs: 11 },
-      { geo: nodes.K_F7.geometry, mp: [-0.051, 0.01, -0.106], label: "F7", fs: 11 },
-      { geo: nodes.K_F8.geometry, mp: [-0.051, 0.01, -0.106], label: "F8", fs: 11 },
-      { geo: nodes.K_F9.geometry, mp: [-0.051, 0.01, -0.106], label: "F9", fs: 11 },
-      { geo: nodes.K_F10.geometry, mp: [-0.051, 0.01, -0.106], label: "F10", fs: 10 },
-      { geo: nodes.K_F11.geometry, mp: [-0.051, 0.01, -0.106], label: "F11", fs: 10 },
-      { geo: nodes.K_F12.geometry, mp: [-0.051, 0.01, -0.106], label: "F12", fs: 10 },
-      { geo: nodes.K_DEL.geometry, mp: [-0.165, 0.01, -0.087], label: "Del", fs: 11 },
-      // Number row
-      { geo: nodes.K_GRAVE.geometry, mp: [-0.165, 0.01, -0.087], label: "`", fs: 13 },
-      { geo: nodes.K_1.geometry, mp: [-0.165, 0.01, -0.087], label: "1", fs: 14 },
-      { geo: nodes.K_2.geometry, mp: [-0.165, 0.01, -0.087], label: "2", fs: 14 },
-      { geo: nodes.K_3.geometry, mp: [-0.165, 0.01, -0.087], label: "3", fs: 14 },
-      { geo: nodes.K_4.geometry, mp: [-0.165, 0.01, -0.087], label: "4", fs: 14 },
-      { geo: nodes.K_5.geometry, mp: [-0.165, 0.01, -0.087], label: "5", fs: 14 },
-      { geo: nodes.K_6.geometry, mp: [-0.165, 0.01, -0.087], label: "6", fs: 14 },
-      { geo: nodes.K_7.geometry, mp: [-0.165, 0.01, -0.087], label: "7", fs: 14 },
-      { geo: nodes.K_8.geometry, mp: [-0.165, 0.01, -0.087], label: "8", fs: 14 },
-      { geo: nodes.K_9.geometry, mp: [-0.165, 0.01, -0.087], label: "9", fs: 14 },
-      { geo: nodes.K_0.geometry, mp: [-0.165, 0.01, -0.087], label: "0", fs: 14 },
-      { geo: nodes.K_DASH.geometry, mp: [-0.165, 0.01, -0.087], label: "-", fs: 14 },
-      { geo: nodes.K_EQUAL.geometry, mp: [-0.165, 0.01, -0.087], label: "=", fs: 14 },
-      { geo: nodes.K_BACKSPACE.geometry, mp: [0.092, 0, -0.087], label: "Bksp", fs: 10 },
-      // Top row
-      { geo: nodes.K_TAB.geometry, mp: [-0.16, 0.008, -0.068], label: "Tab", fs: 12 },
-      { geo: nodes.K_Q.geometry, mp: [-0.136, 0.008, -0.068], label: "Q", fs: 14 },
-      { geo: nodes.K_W.geometry, mp: [-0.136, 0.008, -0.068], label: "W", fs: 14 },
-      { geo: nodes.K_E.geometry, mp: [-0.136, 0.008, -0.068], label: "E", fs: 14 },
-      { geo: nodes.K_R.geometry, mp: [-0.136, 0.008, -0.068], label: "R", fs: 14 },
-      { geo: nodes.K_T.geometry, mp: [-0.136, 0.008, -0.068], label: "T", fs: 14 },
-      { geo: nodes.K_Y.geometry, mp: [-0.136, 0.008, -0.068], label: "Y", fs: 14 },
-      { geo: nodes.K_U.geometry, mp: [-0.136, 0.008, -0.068], label: "U", fs: 14 },
-      { geo: nodes.K_I.geometry, mp: [-0.136, 0.008, -0.068], label: "I", fs: 14 },
-      { geo: nodes.K_O.geometry, mp: [-0.136, 0.008, -0.068], label: "O", fs: 14 },
-      { geo: nodes.K_P.geometry, mp: [-0.136, 0.008, -0.068], label: "P", fs: 14 },
-      { geo: nodes.K_LSQUAREBRACKET.geometry, mp: [-0.136, 0.008, -0.068], label: "[", fs: 14 },
-      { geo: nodes.K_RSQUAREBRACKET.geometry, mp: [-0.136, 0.008, -0.068], label: "]", fs: 14 },
-      { geo: nodes.K_BACKSLASH.geometry, mp: [-0.16, 0.008, -0.068], label: "\\", fs: 14 },
-      { geo: nodes.K_PAGEUP.geometry, mp: [-0.136, 0.008, -0.068], label: "PgUp", fs: 10 },
-      // Home row
-      { geo: nodes.K_CAPS.geometry, mp: [-0.158, 0, -0.049], label: "Caps", fs: 11 },
-      { geo: nodes.K_A.geometry, mp: [-0.132, 0.007, -0.049], label: "A", fs: 14 },
-      { geo: nodes.K_S.geometry, mp: [-0.132, 0.007, -0.049], label: "S", fs: 14 },
-      { geo: nodes.K_D.geometry, mp: [-0.132, 0.007, -0.049], label: "D", fs: 14 },
-      { geo: nodes.K_F.geometry, mp: [-0.132, 0.007, -0.049], label: "F", fs: 14 },
-      { geo: nodes.K_G.geometry, mp: [-0.132, 0.007, -0.049], label: "G", fs: 14 },
-      { geo: nodes.K_H.geometry, mp: [-0.132, 0.007, -0.049], label: "H", fs: 14 },
-      { geo: nodes.K_J.geometry, mp: [-0.132, 0.007, -0.049], label: "J", fs: 14 },
-      { geo: nodes.K_K.geometry, mp: [-0.132, 0.007, -0.049], label: "K", fs: 14 },
-      { geo: nodes.K_L.geometry, mp: [-0.132, 0.007, -0.049], label: "L", fs: 14 },
-      { geo: nodes.K_SEMICOLON.geometry, mp: [-0.132, 0.007, -0.049], label: ";", fs: 14 },
-      { geo: nodes.K_QUOTE.geometry, mp: [-0.132, 0.007, -0.049], label: "'", fs: 14 },
-      { geo: nodes.K_ENTER.geometry, mp: [0.09, 0, -0.049], label: "Enter", fs: 11 },
-      { geo: nodes.K_PAGEDOWN.geometry, mp: [-0.132, 0.007, -0.049], label: "PgDn", fs: 10 },
-      // Bottom row
-      { geo: nodes.K_LSHIFT.geometry, mp: [-0.153, 0, -0.03], label: "Shift", fs: 11 },
-      { geo: nodes.K_Z.geometry, mp: [-0.122, 0.008, -0.03], label: "Z", fs: 14 },
-      { geo: nodes.K_X.geometry, mp: [-0.122, 0.008, -0.03], label: "X", fs: 14 },
-      { geo: nodes.K_C.geometry, mp: [-0.122, 0.008, -0.03], label: "C", fs: 14 },
-      { geo: nodes.K_V.geometry, mp: [-0.122, 0.008, -0.03], label: "V", fs: 14 },
-      { geo: nodes.K_B.geometry, mp: [-0.122, 0.008, -0.03], label: "B", fs: 14 },
-      { geo: nodes.K_N.geometry, mp: [-0.122, 0.008, -0.03], label: "N", fs: 14 },
-      { geo: nodes.K_M.geometry, mp: [-0.122, 0.008, -0.03], label: "M", fs: 14 },
-      { geo: nodes.K_COMMA.geometry, mp: [-0.122, 0.008, -0.03], label: ",", fs: 14 },
-      { geo: nodes.K_PERIOD.geometry, mp: [-0.122, 0.008, -0.03], label: ".", fs: 14 },
-      { geo: nodes.K_SLASH.geometry, mp: [-0.122, 0.008, -0.03], label: "/", fs: 14 },
-      { geo: nodes.K_RSHIFT.geometry, mp: [0.076, 0, -0.03], label: "Shift", fs: 11 },
-      { geo: nodes.K_ARROWUP.geometry, mp: [-0.122, 0.008, -0.03], label: "↑", fs: 14 },
-      { geo: nodes.K_END.geometry, mp: [-0.122, 0.008, -0.03], label: "End", fs: 11 },
-      // Modifier row
-      { geo: nodes.K_LCONTROL.geometry, mp: [-0.162, 0.008, -0.011], label: "Ctrl", fs: 11 },
-      { geo: nodes.K_LWIN.geometry, mp: [-0.162, 0.008, -0.011], label: "Win", fs: 11 },
-      { geo: nodes.K_LALT.geometry, mp: [-0.162, 0.008, -0.011], label: "Alt", fs: 11 },
-      { geo: nodes.K_RALT.geometry, mp: [-0.162, 0.008, -0.011], label: "Alt", fs: 11 },
-      { geo: nodes.K_FN.geometry, mp: [-0.162, 0.008, -0.011], label: "Fn", fs: 11 },
-      // Arrow keys
-      { geo: nodes.K_ARROWLEFT.geometry, mp: [0.083, 0.008, -0.011], label: "←", fs: 14 },
-      { geo: nodes.K_ARROWDOWN.geometry, mp: [0.083, 0.008, -0.011], label: "↓", fs: 14 },
-      { geo: nodes.K_ARROWRIGHT.geometry, mp: [0.083, 0.008, -0.011], label: "→", fs: 14 },
-    ];
+  const ctx = canvas.getContext("2d")!;
+  ctx.clearRect(0, 0, GARAGE_ATLAS_WIDTH, GARAGE_ATLAS_HEIGHT);
 
-    // Compute world-space center of each key's top face
-    const centers = keys.map(({ geo, mp, label, fs }) => {
-      geo.computeBoundingBox();
-      const bb = geo.boundingBox!;
-      return {
-        x: (bb.min.x + bb.max.x) / 2 + mp[0],
-        y: bb.max.y + mp[1],
-        z: (bb.min.z + bb.max.z) / 2 + mp[2],
-        label,
-        fs,
-      };
-    });
+  for (const region of GARAGE_ATLAS_REGIONS) {
+    const role = garageKeycapRole(region.id);
+    ctx.fillStyle =
+      role === "accent"
+        ? theme.accent
+        : role === "modifier"
+          ? theme.modifier
+          : theme.base;
+    ctx.fillRect(region.x, region.y, region.w, region.h ?? u);
+  }
 
-    const pad = 0.01;
-    const minX = Math.min(...centers.map((c) => c.x)) - pad;
-    const maxX = Math.max(...centers.map((c) => c.x)) + pad;
-    const minZ = Math.min(...centers.map((c) => c.z)) - pad;
-    const maxZ = Math.max(...centers.map((c) => c.z)) + pad;
-
-    // Flat plane just above the highest keycap top surface.
-    // A tilt was attempted but Caps/Shift/Enter/Space have mp[1]=0 while neighbouring alphas
-    // have mp[1]=0.007-0.008, making any linear slope calculation unreliable. Flat at maxY is safest.
-    const planeZSpan = maxZ - minZ;
-    const planeY = Math.max(...centers.map((c) => c.y)) + 0.0002;
-
-    const W = 1024;
-    const H = Math.max(64, Math.round(W * (maxZ - minZ) / (maxX - minX)));
-    const canvas = document.createElement("canvas");
-    canvas.width = W;
-    canvas.height = H;
-    const ctx = canvas.getContext("2d")!;
-    ctx.clearRect(0, 0, W, H);
-    ctx.fillStyle = legendColor;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-
-    centers.forEach((c) => {
-      const cx = ((c.x - minX) / (maxX - minX)) * W;
-      // With CanvasTexture flipY=true (default):
-      // canvas y=0 (top) → UV v=1 → plane local y=+H/2 → world z=minZ (function row)
-      // canvas y=H (bottom) → UV v=0 → plane local y=-H/2 → world z=maxZ (modifier row)
-      // So: canvas_y = (worldZ - minZ) / (maxZ - minZ) * H
-      const cy = ((c.z - minZ) / (maxZ - minZ)) * H;
-      ctx.font = `bold ${c.fs}px system-ui, sans-serif`;
-      ctx.fillText(c.label, cx, cy);
-    });
-
-    const texture = new THREE.CanvasTexture(canvas);
-
-    return {
-      texture,
-      planeW: maxX - minX,
-      planeH: planeZSpan,
-      planeCX: (minX + maxX) / 2,
-      planeCZ: (minZ + maxZ) / 2,
-      planeY,
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nodes, legendColor]);
-
-  useEffect(() => {
-    return () => overlay.texture.dispose();
-  }, [overlay.texture]);
-
-  return (
-    <mesh
-      position={[overlay.planeCX, overlay.planeY, overlay.planeCZ]}
-      rotation={[-Math.PI / 2, 0, 0]}
-      renderOrder={2}
-    >
-      <planeGeometry args={[overlay.planeW, overlay.planeH]} />
-      <meshBasicMaterial
-        map={overlay.texture}
-        transparent
-        alphaTest={0.05}
-        depthWrite={false}
-      />
-    </mesh>
+  const maskCanvas = document.createElement("canvas");
+  maskCanvas.width = GARAGE_ATLAS_WIDTH;
+  maskCanvas.height = GARAGE_ATLAS_HEIGHT;
+  const maskCtx = maskCanvas.getContext("2d")!;
+  maskCtx.drawImage(
+    legendMask.image as CanvasImageSource,
+    0,
+    0,
+    GARAGE_ATLAS_WIDTH,
+    GARAGE_ATLAS_HEIGHT,
   );
+
+  const imageData = ctx.getImageData(
+    0,
+    0,
+    GARAGE_ATLAS_WIDTH,
+    GARAGE_ATLAS_HEIGHT,
+  );
+  const maskData = maskCtx.getImageData(
+    0,
+    0,
+    GARAGE_ATLAS_WIDTH,
+    GARAGE_ATLAS_HEIGHT,
+  ).data;
+  const [legendR, legendG, legendB] = readCanvasColor(theme.legend);
+
+  for (let i = 0; i < imageData.data.length; i += 4) {
+    const luminance =
+      0.2126 * maskData[i] + 0.7152 * maskData[i + 1] + 0.0722 * maskData[i + 2];
+    const maskAlpha = maskData[i + 3] / 255;
+    const legendAlpha = Math.max(0, Math.min(1, (luminance - 40) / 215)) * maskAlpha;
+    if (legendAlpha <= 0) continue;
+
+    imageData.data[i] =
+      imageData.data[i] * (1 - legendAlpha) + legendR * legendAlpha;
+    imageData.data[i + 1] =
+      imageData.data[i + 1] * (1 - legendAlpha) + legendG * legendAlpha;
+    imageData.data[i + 2] =
+      imageData.data[i + 2] * (1 - legendAlpha) + legendB * legendAlpha;
+  }
+
+  ctx.putImageData(imageData, 0, 0);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.flipY = false;
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.anisotropy = 8;
+  texture.needsUpdate = true;
+
+  const material = new THREE.MeshStandardMaterial({
+    map: texture,
+    roughness: 0.6,
+    metalness: 0,
+  });
+
+  return { material, texture };
 }
 
 /**
@@ -390,6 +353,8 @@ export interface KeyboardRefs {
   weight: React.RefObject<THREE.Mesh | null>;
   screen: React.RefObject<THREE.Mesh | null>;
   knob: React.RefObject<THREE.Mesh | null>;
+  pcb: React.RefObject<THREE.Mesh | null>;
+  bottomCase: React.RefObject<THREE.Group | null>;
 
   /** All keycap row groups — use for whole-keyboard keycap transforms (e.g. hero zoom). */
   keycapsRoot: React.RefObject<THREE.Group | null>;
@@ -467,6 +432,8 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
     const weightRef = useRef<THREE.Mesh>(null);
     const screenRef = useRef<THREE.Mesh>(null);
     const knobRef = useRef<THREE.Mesh>(null);
+    const pcbRef = useRef<THREE.Mesh>(null);
+    const bottomCaseRef = useRef<THREE.Group>(null);
     const keycapsRootRef = useRef<THREE.Group>(null);
 
     // Switch group refs
@@ -578,6 +545,8 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
       weight: weightRef,
       screen: screenRef,
       knob: knobRef,
+      pcb: pcbRef,
+      bottomCase: bottomCaseRef,
       keycapsRoot: keycapsRootRef,
       switches: {
         functionRow: switchFunctionRowRef,
@@ -605,6 +574,10 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
     keycapTexture.flipY = false;
     keycapTexture.colorSpace = THREE.SRGBColorSpace;
 
+    const garageLegendMaskTexture = useTexture(GARAGE_LEGEND_MASK_PATH);
+    garageLegendMaskTexture.flipY = false;
+    garageLegendMaskTexture.colorSpace = THREE.SRGBColorSpace;
+
     const knurlTexture = useTexture("/Knurl.jpg");
     knurlTexture.flipY = false;
 
@@ -625,49 +598,28 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
 
     const keycapMat = keycapMaterial || defaultKeycapMat;
 
-    const garageGroupMaterials = useMemo(() => {
+    const garageKeycapMaterial = useMemo(() => {
       if (!garageKeycapTheme) return null;
-
-      const baseMat = new THREE.MeshStandardMaterial({
-        color: new THREE.Color(garageKeycapTheme.base),
-        roughness: 0.6,
-        metalness: 0,
+      return buildGarageKeycapMaterial({
+        theme: garageKeycapTheme,
+        legendMask: garageLegendMaskTexture,
       });
-      const modifierMat = new THREE.MeshStandardMaterial({
-        color: new THREE.Color(garageKeycapTheme.modifier),
-        roughness: 0.6,
-        metalness: 0,
-      });
-      const accentMat = new THREE.MeshStandardMaterial({
-        color: new THREE.Color(garageKeycapTheme.accent),
-        roughness: 0.6,
-        metalness: 0,
-      });
-      return { base: baseMat, modifier: modifierMat, accent: accentMat };
-    }, [garageKeycapTheme]);
+    }, [garageKeycapTheme, garageLegendMaskTexture]);
 
     useEffect(() => {
-      if (!garageGroupMaterials) return;
-      const g = garageGroupMaterials;
+      if (!garageKeycapMaterial) return;
       return () => {
-        g.base.dispose();
-        g.modifier.dispose();
-        g.accent.dispose();
+        garageKeycapMaterial.material.dispose();
+        garageKeycapMaterial.texture.dispose();
       };
-    }, [garageGroupMaterials]);
+    }, [garageKeycapMaterial]);
 
-    const capMat = (keyId: string): THREE.Material => {
-      if (!garageGroupMaterials) return keycapMat;
-      const role = garageKeycapRole(keyId);
-      if (role === "accent") return garageGroupMaterials.accent;
-      if (role === "modifier") return garageGroupMaterials.modifier;
-      return garageGroupMaterials.base;
-    };
+    const renderedKeycapMat = garageKeycapMaterial?.material ?? keycapMat;
 
     const useSecondUvForAtlas =
       keycapAtlasUsesUv2 !== undefined
-        ? keycapAtlasUsesUv2 && materialUsesKeycapTextureMap(keycapMat)
-        : materialUsesKeycapTextureMap(keycapMat);
+        ? keycapAtlasUsesUv2 && materialUsesKeycapTextureMap(renderedKeycapMat)
+        : materialUsesKeycapTextureMap(renderedKeycapMat);
     const keycapGeo = (geometry: THREE.BufferGeometry) =>
       keycapGeometryForTexturedAtlas(geometry, useSecondUvForAtlas);
 
@@ -735,6 +687,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
             position={[0.121, 0.004, -0.106]}
           />
           <mesh
+            ref={pcbRef}
             castShadow
             receiveShadow
             geometry={nodes.PCB.geometry}
@@ -1002,7 +955,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
             position={[-0.043, -0.001, -0.014]}
             rotation={[Math.PI, 0, Math.PI]}
           />
-          <group position={[-0.022, -0.014, -0.057]}>
+          <group ref={bottomCaseRef} position={[-0.022, -0.014, -0.057]}>
             <mesh
               castShadow
               receiveShadow
@@ -1051,7 +1004,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_ESC.geometry)}
-              material={capMat("esc")}
+              material={renderedKeycapMat}
               position={[-0.051, 0.01, -0.106]}
             />
             <mesh
@@ -1059,7 +1012,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_F1.geometry)}
-              material={capMat("f1")}
+              material={renderedKeycapMat}
               position={[-0.051, 0.01, -0.106]}
             />
             <mesh
@@ -1067,7 +1020,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_F2.geometry)}
-              material={capMat("f2")}
+              material={renderedKeycapMat}
               position={[-0.051, 0.01, -0.106]}
             />
             <mesh
@@ -1075,7 +1028,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_F3.geometry)}
-              material={capMat("f3")}
+              material={renderedKeycapMat}
               position={[-0.051, 0.01, -0.106]}
             />
             <mesh
@@ -1083,7 +1036,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_F4.geometry)}
-              material={capMat("f4")}
+              material={renderedKeycapMat}
               position={[-0.051, 0.01, -0.106]}
             />
             <mesh
@@ -1091,7 +1044,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_F5.geometry)}
-              material={capMat("f5")}
+              material={renderedKeycapMat}
               position={[-0.051, 0.01, -0.106]}
             />
             <mesh
@@ -1099,7 +1052,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_F6.geometry)}
-              material={capMat("f6")}
+              material={renderedKeycapMat}
               position={[-0.051, 0.01, -0.106]}
             />
             <mesh
@@ -1107,7 +1060,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_F7.geometry)}
-              material={capMat("f7")}
+              material={renderedKeycapMat}
               position={[-0.051, 0.01, -0.106]}
             />
             <mesh
@@ -1115,7 +1068,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_F8.geometry)}
-              material={capMat("f8")}
+              material={renderedKeycapMat}
               position={[-0.051, 0.01, -0.106]}
             />
             <mesh
@@ -1123,7 +1076,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_F9.geometry)}
-              material={capMat("f9")}
+              material={renderedKeycapMat}
               position={[-0.051, 0.01, -0.106]}
             />
             <mesh
@@ -1131,7 +1084,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_F10.geometry)}
-              material={capMat("f10")}
+              material={renderedKeycapMat}
               position={[-0.051, 0.01, -0.106]}
             />
             <mesh
@@ -1139,7 +1092,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_F11.geometry)}
-              material={capMat("f11")}
+              material={renderedKeycapMat}
               position={[-0.051, 0.01, -0.106]}
             />
             <mesh
@@ -1147,7 +1100,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_F12.geometry)}
-              material={capMat("f12")}
+              material={renderedKeycapMat}
               position={[-0.051, 0.01, -0.106]}
             />
             <mesh
@@ -1155,7 +1108,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_DEL.geometry)}
-              material={capMat("del")}
+              material={renderedKeycapMat}
               position={[-0.165, 0.01, -0.087]}
             />
           </group>
@@ -1167,7 +1120,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_GRAVE.geometry)}
-              material={capMat("grave")}
+              material={renderedKeycapMat}
               position={[-0.165, 0.01, -0.087]}
             />
             <mesh
@@ -1175,7 +1128,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_1.geometry)}
-              material={capMat("one")}
+              material={renderedKeycapMat}
               position={[-0.165, 0.01, -0.087]}
             />
             <mesh
@@ -1183,7 +1136,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_2.geometry)}
-              material={capMat("two")}
+              material={renderedKeycapMat}
               position={[-0.165, 0.01, -0.087]}
             />
             <mesh
@@ -1191,7 +1144,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_3.geometry)}
-              material={capMat("three")}
+              material={renderedKeycapMat}
               position={[-0.165, 0.01, -0.087]}
             />
             <mesh
@@ -1199,7 +1152,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_4.geometry)}
-              material={capMat("four")}
+              material={renderedKeycapMat}
               position={[-0.165, 0.01, -0.087]}
             />
             <mesh
@@ -1207,7 +1160,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_5.geometry)}
-              material={capMat("five")}
+              material={renderedKeycapMat}
               position={[-0.165, 0.01, -0.087]}
             />
             <mesh
@@ -1215,7 +1168,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_6.geometry)}
-              material={capMat("six")}
+              material={renderedKeycapMat}
               position={[-0.165, 0.01, -0.087]}
             />
             <mesh
@@ -1223,7 +1176,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_7.geometry)}
-              material={capMat("seven")}
+              material={renderedKeycapMat}
               position={[-0.165, 0.01, -0.087]}
             />
             <mesh
@@ -1231,7 +1184,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_8.geometry)}
-              material={capMat("eight")}
+              material={renderedKeycapMat}
               position={[-0.165, 0.01, -0.087]}
             />
             <mesh
@@ -1239,7 +1192,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_9.geometry)}
-              material={capMat("nine")}
+              material={renderedKeycapMat}
               position={[-0.165, 0.01, -0.087]}
             />
             <mesh
@@ -1247,7 +1200,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_0.geometry)}
-              material={capMat("zero")}
+              material={renderedKeycapMat}
               position={[-0.165, 0.01, -0.087]}
             />
             <mesh
@@ -1255,7 +1208,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_DASH.geometry)}
-              material={capMat("dash")}
+              material={renderedKeycapMat}
               position={[-0.165, 0.01, -0.087]}
             />
             <mesh
@@ -1263,7 +1216,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_EQUAL.geometry)}
-              material={capMat("equal")}
+              material={renderedKeycapMat}
               position={[-0.165, 0.01, -0.087]}
             />
             <mesh
@@ -1271,7 +1224,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_BACKSPACE.geometry)}
-              material={capMat("backspace")}
+              material={renderedKeycapMat}
               position={[0.092, 0, -0.087]}
             />
           </group>
@@ -1283,7 +1236,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_TAB.geometry)}
-              material={capMat("tab")}
+              material={renderedKeycapMat}
               position={[-0.16, 0.008, -0.068]}
             />
             <mesh
@@ -1291,7 +1244,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_Q.geometry)}
-              material={capMat("q")}
+              material={renderedKeycapMat}
               position={[-0.136, 0.008, -0.068]}
             />
             <mesh
@@ -1299,7 +1252,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_W.geometry)}
-              material={capMat("w")}
+              material={renderedKeycapMat}
               position={[-0.136, 0.008, -0.068]}
             />
             <mesh
@@ -1307,7 +1260,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_E.geometry)}
-              material={capMat("e")}
+              material={renderedKeycapMat}
               position={[-0.136, 0.008, -0.068]}
             />
             <mesh
@@ -1315,7 +1268,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_R.geometry)}
-              material={capMat("r")}
+              material={renderedKeycapMat}
               position={[-0.136, 0.008, -0.068]}
             />
             <mesh
@@ -1323,7 +1276,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_T.geometry)}
-              material={capMat("t")}
+              material={renderedKeycapMat}
               position={[-0.136, 0.008, -0.068]}
             />
             <mesh
@@ -1331,7 +1284,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_Y.geometry)}
-              material={capMat("y")}
+              material={renderedKeycapMat}
               position={[-0.136, 0.008, -0.068]}
             />
             <mesh
@@ -1339,7 +1292,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_U.geometry)}
-              material={capMat("u")}
+              material={renderedKeycapMat}
               position={[-0.136, 0.008, -0.068]}
             />
             <mesh
@@ -1347,7 +1300,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_I.geometry)}
-              material={capMat("i")}
+              material={renderedKeycapMat}
               position={[-0.136, 0.008, -0.068]}
             />
             <mesh
@@ -1355,7 +1308,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_O.geometry)}
-              material={capMat("o")}
+              material={renderedKeycapMat}
               position={[-0.136, 0.008, -0.068]}
             />
             <mesh
@@ -1363,7 +1316,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_P.geometry)}
-              material={capMat("p")}
+              material={renderedKeycapMat}
               position={[-0.136, 0.008, -0.068]}
             />
             <mesh
@@ -1371,7 +1324,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_LSQUAREBRACKET.geometry)}
-              material={capMat("lsquarebracket")}
+              material={renderedKeycapMat}
               position={[-0.136, 0.008, -0.068]}
             />
             <mesh
@@ -1379,7 +1332,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_RSQUAREBRACKET.geometry)}
-              material={capMat("rsquarebracket")}
+              material={renderedKeycapMat}
               position={[-0.136, 0.008, -0.068]}
             />
             <mesh
@@ -1387,7 +1340,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_BACKSLASH.geometry)}
-              material={capMat("backslash")}
+              material={renderedKeycapMat}
               position={[-0.16, 0.008, -0.068]}
             />
             <mesh
@@ -1395,7 +1348,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_PAGEUP.geometry)}
-              material={capMat("pageup")}
+              material={renderedKeycapMat}
               position={[-0.136, 0.008, -0.068]}
             />
           </group>
@@ -1407,7 +1360,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_CAPS.geometry)}
-              material={capMat("caps")}
+              material={renderedKeycapMat}
               position={[-0.158, 0, -0.049]}
             />
             <mesh
@@ -1415,7 +1368,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_A.geometry)}
-              material={capMat("a")}
+              material={renderedKeycapMat}
               position={[-0.132, 0.007, -0.049]}
             />
             <mesh
@@ -1423,7 +1376,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_S.geometry)}
-              material={capMat("s")}
+              material={renderedKeycapMat}
               position={[-0.132, 0.007, -0.049]}
             />
             <mesh
@@ -1431,7 +1384,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_D.geometry)}
-              material={capMat("d")}
+              material={renderedKeycapMat}
               position={[-0.132, 0.007, -0.049]}
             />
             <mesh
@@ -1439,7 +1392,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_F.geometry)}
-              material={capMat("f")}
+              material={renderedKeycapMat}
               position={[-0.132, 0.007, -0.049]}
             />
             <mesh
@@ -1447,7 +1400,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_G.geometry)}
-              material={capMat("g")}
+              material={renderedKeycapMat}
               position={[-0.132, 0.007, -0.049]}
             />
             <mesh
@@ -1455,7 +1408,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_H.geometry)}
-              material={capMat("h")}
+              material={renderedKeycapMat}
               position={[-0.132, 0.007, -0.049]}
             />
             <mesh
@@ -1463,7 +1416,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_J.geometry)}
-              material={capMat("j")}
+              material={renderedKeycapMat}
               position={[-0.132, 0.007, -0.049]}
             />
             <mesh
@@ -1471,7 +1424,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_K.geometry)}
-              material={capMat("k")}
+              material={renderedKeycapMat}
               position={[-0.132, 0.007, -0.049]}
             />
             <mesh
@@ -1479,7 +1432,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_L.geometry)}
-              material={capMat("l")}
+              material={renderedKeycapMat}
               position={[-0.132, 0.007, -0.049]}
             />
             <mesh
@@ -1487,7 +1440,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_SEMICOLON.geometry)}
-              material={capMat("semicolon")}
+              material={renderedKeycapMat}
               position={[-0.132, 0.007, -0.049]}
             />
             <mesh
@@ -1495,7 +1448,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_QUOTE.geometry)}
-              material={capMat("quote")}
+              material={renderedKeycapMat}
               position={[-0.132, 0.007, -0.049]}
             />
             <mesh
@@ -1503,7 +1456,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_ENTER.geometry)}
-              material={capMat("enter")}
+              material={renderedKeycapMat}
               position={[0.09, 0, -0.049]}
             />
             <mesh
@@ -1511,7 +1464,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_PAGEDOWN.geometry)}
-              material={capMat("pagedown")}
+              material={renderedKeycapMat}
               position={[-0.132, 0.007, -0.049]}
             />
           </group>
@@ -1523,7 +1476,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_LSHIFT.geometry)}
-              material={capMat("lshift")}
+              material={renderedKeycapMat}
               position={[-0.153, 0, -0.03]}
             />
             <mesh
@@ -1531,7 +1484,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_Z.geometry)}
-              material={capMat("z")}
+              material={renderedKeycapMat}
               position={[-0.122, 0.008, -0.03]}
             />
             <mesh
@@ -1539,7 +1492,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_X.geometry)}
-              material={capMat("x")}
+              material={renderedKeycapMat}
               position={[-0.122, 0.008, -0.03]}
             />
             <mesh
@@ -1547,7 +1500,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_C.geometry)}
-              material={capMat("c")}
+              material={renderedKeycapMat}
               position={[-0.122, 0.008, -0.03]}
             />
             <mesh
@@ -1555,7 +1508,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_V.geometry)}
-              material={capMat("v")}
+              material={renderedKeycapMat}
               position={[-0.122, 0.008, -0.03]}
             />
             <mesh
@@ -1563,7 +1516,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_B.geometry)}
-              material={capMat("b")}
+              material={renderedKeycapMat}
               position={[-0.122, 0.008, -0.03]}
             />
             <mesh
@@ -1571,7 +1524,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_N.geometry)}
-              material={capMat("n")}
+              material={renderedKeycapMat}
               position={[-0.122, 0.008, -0.03]}
             />
             <mesh
@@ -1579,7 +1532,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_M.geometry)}
-              material={capMat("m")}
+              material={renderedKeycapMat}
               position={[-0.122, 0.008, -0.03]}
             />
             <mesh
@@ -1587,7 +1540,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_COMMA.geometry)}
-              material={capMat("comma")}
+              material={renderedKeycapMat}
               position={[-0.122, 0.008, -0.03]}
             />
             <mesh
@@ -1595,7 +1548,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_PERIOD.geometry)}
-              material={capMat("period")}
+              material={renderedKeycapMat}
               position={[-0.122, 0.008, -0.03]}
             />
             <mesh
@@ -1603,7 +1556,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_SLASH.geometry)}
-              material={capMat("slash")}
+              material={renderedKeycapMat}
               position={[-0.122, 0.008, -0.03]}
             />
             <mesh
@@ -1611,7 +1564,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_RSHIFT.geometry)}
-              material={capMat("rshift")}
+              material={renderedKeycapMat}
               position={[0.076, 0, -0.03]}
             />
             <mesh
@@ -1619,7 +1572,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_ARROWUP.geometry)}
-              material={capMat("arrowup")}
+              material={renderedKeycapMat}
               position={[-0.122, 0.008, -0.03]}
             />
             <mesh
@@ -1627,7 +1580,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_END.geometry)}
-              material={capMat("end")}
+              material={renderedKeycapMat}
               position={[-0.122, 0.008, -0.03]}
             />
           </group>
@@ -1639,7 +1592,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_LCONTROL.geometry)}
-              material={capMat("lcontrol")}
+              material={renderedKeycapMat}
               position={[-0.162, 0.008, -0.011]}
             />
             <mesh
@@ -1647,7 +1600,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_LWIN.geometry)}
-              material={capMat("lwin")}
+              material={renderedKeycapMat}
               position={[-0.162, 0.008, -0.011]}
             />
             <mesh
@@ -1655,7 +1608,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_LALT.geometry)}
-              material={capMat("lalt")}
+              material={renderedKeycapMat}
               position={[-0.162, 0.008, -0.011]}
             />
             <mesh
@@ -1663,7 +1616,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_SPACE.geometry)}
-              material={capMat("space")}
+              material={renderedKeycapMat}
               position={[-0.043, 0, -0.01]}
             />
             <mesh
@@ -1671,7 +1624,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_RALT.geometry)}
-              material={capMat("ralt")}
+              material={renderedKeycapMat}
               position={[-0.162, 0.008, -0.011]}
             />
             <mesh
@@ -1679,7 +1632,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_FN.geometry)}
-              material={capMat("fn")}
+              material={renderedKeycapMat}
               position={[-0.162, 0.008, -0.011]}
             />
           </group>
@@ -1691,7 +1644,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_ARROWLEFT.geometry)}
-              material={capMat("arrowleft")}
+              material={renderedKeycapMat}
               position={[0.083, 0.008, -0.011]}
             />
             <mesh
@@ -1699,7 +1652,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_ARROWDOWN.geometry)}
-              material={capMat("arrowdown")}
+              material={renderedKeycapMat}
               position={[0.083, 0.008, -0.011]}
             />
             <mesh
@@ -1707,16 +1660,11 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
               castShadow
               receiveShadow
               geometry={keycapGeo(nodes.K_ARROWRIGHT.geometry)}
-              material={capMat("arrowright")}
+              material={renderedKeycapMat}
               position={[0.083, 0.008, -0.011]}
             />
           </group>
           </group>
-
-          {/* Keycap legend overlay — single plane/texture, only in Garage mode */}
-          {garageGroupMaterials && garageKeycapTheme && (
-            <KeyboardLabelOverlay nodes={nodes} legendColor={garageKeycapTheme.legend} />
-          )}
 
           <instancedMesh
             args={[nodes["2U_Wires"].geometry, materials.Gold, 3]}

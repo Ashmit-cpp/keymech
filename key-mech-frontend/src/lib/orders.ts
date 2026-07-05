@@ -61,11 +61,15 @@ export const getOrderStatusClassName = (status: OrderResponseDtoStatus) => {
 };
 
 export const getOrderItemSubtotal = (item: OrderItemResponseDto) =>
-  item.price * item.quantity;
+  item.unitPrice * item.quantity;
 
 export const getOrderPreview = (order: OrderResponseDto) => {
   if (!order.items.length) return "No items";
   const [firstItem, ...rest] = order.items;
   const suffix = rest.length ? ` +${rest.length} more` : "";
-  return `${firstItem.product.name}${suffix}`;
+  const itemName =
+    firstItem.kind === "GARAGE_BUILD"
+      ? "Garage Build"
+      : (firstItem.product?.name ?? "Product");
+  return `${itemName}${suffix}`;
 };

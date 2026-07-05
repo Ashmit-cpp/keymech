@@ -116,7 +116,7 @@ function addKeyboardWaveToTimeline({
   });
 }
 
-function CameraController() {
+function CameraController({ viewMode }: { viewMode: string }) {
   const { camera, size, invalidate } = useThree();
   const mouseRef = useRef({ x: 0.5, y: 0.5 });
   const targetRef = useRef(new THREE.Vector3(0, 0, 0));
@@ -128,13 +128,13 @@ function CameraController() {
   const baseCameraPosition = {
     x: 0,
     y: 0,
-    z: 2.85,
+    z: viewMode === "explode" ? 3.65 : 2.85,
   };
 
   useFrame(() => {
     const mouse = mouseRef.current;
 
-    if (prefersReducedMotion) {
+    if (prefersReducedMotion || viewMode !== "3d") {
       camera.position.set(
         baseCameraPosition.x,
         baseCameraPosition.y,
@@ -161,7 +161,7 @@ function CameraController() {
   });
 
   useEffect(() => {
-    if (prefersReducedMotion) return;
+    if (prefersReducedMotion || viewMode !== "3d") return;
 
     const handleMouseMove = (event: MouseEvent) => {
       mouseRef.current.x = event.clientX / size.width;
@@ -172,7 +172,7 @@ function CameraController() {
       window.addEventListener("mousemove", handleMouseMove);
       return () => window.removeEventListener("mousemove", handleMouseMove);
     }
-  }, [prefersReducedMotion, size]);
+  }, [prefersReducedMotion, size, viewMode]);
 
   return null;
 }
@@ -226,6 +226,7 @@ export interface SceneProps {
   garageKeycapTheme?: GarageKeycapTheme;
   selectedTextureId?: KeycapTextureId;
   isHeroKeyboardInView: boolean;
+  viewMode?: "3d" | "explode" | "top" | "side" | "front";
 }
 
 export function Scene({
@@ -236,6 +237,7 @@ export function Scene({
   garageKeycapTheme,
   selectedTextureId = KEYCAP_TEXTURES[0].id,
   isHeroKeyboardInView,
+  viewMode = "3d",
 }: SceneProps) {
   const invalidate = useThree((s) => s.invalidate);
   const keyboardGroupRef = useRef<THREE.Group>(null);
@@ -385,6 +387,133 @@ export function Scene({
     },
   );
 
+  useEffect(() => {
+    const refs = keyboardAnimationRef.current;
+    if (!refs) return;
+
+    const duration = 0.8;
+    const ease = "power2.out";
+    const isExploded = viewMode === "explode";
+
+    const targetY = isExploded
+      ? {
+          keycaps: 0.09,
+          knob: 0.07,
+          switches: 0.05,
+          screen: 0.04,
+          plate: 0.02,
+          pcb: 0.00,
+          topCase: -0.005,
+          bottomCase: -0.025,
+          weight: -0.04,
+        }
+      : {
+          keycaps: 0,
+          knob: 0.004,
+          switches: 0,
+          screen: 0.001,
+          plate: -0.006,
+          pcb: -0.009,
+          topCase: -0.014,
+          bottomCase: -0.014,
+          weight: -0.014,
+        };
+
+    // Animate keycapsRoot
+    if (refs.keycapsRoot.current) {
+      gsap.to(refs.keycapsRoot.current.position, {
+        y: targetY.keycaps,
+        duration,
+        ease,
+        onUpdate: invalidate,
+      });
+    }
+
+    // Animate knob
+    if (refs.knob.current) {
+      gsap.to(refs.knob.current.position, {
+        y: targetY.knob,
+        duration,
+        ease,
+        onUpdate: invalidate,
+      });
+    }
+
+    // Animate switches groups
+    if (refs.switches) {
+      Object.values(refs.switches).forEach((switchGroupRef) => {
+        if (switchGroupRef.current) {
+          gsap.to(switchGroupRef.current.position, {
+            y: targetY.switches,
+            duration,
+            ease,
+            onUpdate: invalidate,
+          });
+        }
+      });
+    }
+
+    // Animate screen
+    if (refs.screen.current) {
+      gsap.to(refs.screen.current.position, {
+        y: targetY.screen,
+        duration,
+        ease,
+        onUpdate: invalidate,
+      });
+    }
+
+    // Animate plate
+    if (refs.plate.current) {
+      gsap.to(refs.plate.current.position, {
+        y: targetY.plate,
+        duration,
+        ease,
+        onUpdate: invalidate,
+      });
+    }
+
+    // Animate pcb
+    if (refs.pcb.current) {
+      gsap.to(refs.pcb.current.position, {
+        y: targetY.pcb,
+        duration,
+        ease,
+        onUpdate: invalidate,
+      });
+    }
+
+    // Animate topCase
+    if (refs.topCase.current) {
+      gsap.to(refs.topCase.current.position, {
+        y: targetY.topCase,
+        duration,
+        ease,
+        onUpdate: invalidate,
+      });
+    }
+
+    // Animate bottomCase
+    if (refs.bottomCase.current) {
+      gsap.to(refs.bottomCase.current.position, {
+        y: targetY.bottomCase,
+        duration,
+        ease,
+        onUpdate: invalidate,
+      });
+    }
+
+    // Animate weight
+    if (refs.weight.current) {
+      gsap.to(refs.weight.current.position, {
+        y: targetY.weight,
+        duration,
+        ease,
+        onUpdate: invalidate,
+      });
+    }
+  }, [viewMode, keyboardRefsReady, invalidate]);
+
   // Hero already applies CSS scale on narrow viewports; keep 3D group near full size.
   const scalingFactor =
     typeof window !== "undefined" && window.innerWidth <= 500 ? 0.77 : 1;
@@ -402,7 +531,7 @@ export function Scene({
         rotateY={rotateY}
         rotateZ={rotateZ}
       />
-      <CameraController />
+      <CameraController viewMode={viewMode} />
       <PerspectiveCamera
         makeDefault
         position={[0, 0, 2.85]}

@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { useAuthStore } from "@/stores/auth-store";
 import { useGuestCartStore } from "@/stores/cart-store";
 import { useGuestWishlistStore } from "@/stores/wishlist-store";
+import { getStringArray } from "@/lib/product-utils";
 
 const CATEGORY_DISPLAY_MAP: Record<string, { label: string; path: string }> = {
   keyboard: { label: "Keyboards", path: "/category/keyboards" },
@@ -48,22 +49,12 @@ export default function ProductDetailPage() {
   const [justAddedToWishlist, setJustAddedToWishlist] = useState(false);
 
   const images: string[] = useMemo(() => {
-    if (!product?.images) return [];
-    try {
-      return JSON.parse(product.images);
-    } catch {
-      return [];
-    }
-  }, [product]);
+    return getStringArray(product?.images);
+  }, [product?.images]);
 
   const soundTests: string[] = useMemo(() => {
-    if (!product?.soundTests) return [];
-    try {
-      return JSON.parse(product.soundTests);
-    } catch {
-      return [];
-    }
-  }, [product]);
+    return getStringArray(product?.soundTests);
+  }, [product?.soundTests]);
 
   const extractYouTubeVideoId = (url: string): string | null => {
     const patterns = [

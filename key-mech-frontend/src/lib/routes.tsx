@@ -31,6 +31,8 @@ import CartPage from "@/pages/Cart";
 import CategoryPage from "@/pages/Category";
 import CheckoutPage from "@/pages/Checkout";
 import ContactPage from "@/pages/Contact";
+import GarageBuildDetailPage from "@/pages/GarageBuildDetail";
+import GarageMyBuildsPage from "@/pages/GarageMyBuilds";
 import GaragePage from "@/pages/Garage";
 import HomePage from "@/pages/Home";
 import NotFoundPage from "@/pages/NotFound";
@@ -62,6 +64,18 @@ const router = createBrowserRouter([
       {
         path: "garage",
         element: <GaragePage />,
+      },
+      {
+        path: "garage/builds/:id",
+        element: <GarageBuildDetailPage />,
+      },
+      {
+        path: "garage/my-builds",
+        element: (
+          <ProtectedRoute>
+            <GarageMyBuildsPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "blog",

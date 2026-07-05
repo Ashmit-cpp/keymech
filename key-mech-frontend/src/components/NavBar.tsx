@@ -110,25 +110,35 @@ export default function Navbar() {
     await logoutMutation.mutateAsync();
   }
 
+  const isGarage = pathname.startsWith("/garage");
+
   return (
     <nav
-    className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-      scrolled
-        ? "bg-card/80 shadow-sm backdrop-blur-sm border-b border-black/10"
-        : "bg-card/10 border-b border-black/8 backdrop-blur-none saturate-100"
-    }`}
-  >
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        isGarage
+          ? "bg-card border-b border-border shadow-sm"
+          : scrolled
+            ? "bg-card/80 shadow-sm backdrop-blur-sm border-b border-black/10"
+            : "bg-card/10 border-b border-black/8 backdrop-blur-none saturate-100"
+      }`}
+    >
     <div className="mx-auto flex h-16 w-full max-w-[1720px] items-center justify-between px-8 lg:px-12">
       {/* Logo */}
       <Button
         variant="link"
         size="sm"
-        className="px-0 no-underline hover:no-underline"
+        className="px-0 no-underline hover:no-underline flex items-center gap-2.5 text-foreground hover:text-primary transition-colors group"
         onClick={() => handleNav("/")}
         aria-label="Go to home"
       >
-        <span className="text-xl font-black tracking-tight text-foreground hover:text-primary transition-colors">
-          KM
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" className="h-7 w-7 transition-transform group-hover:scale-105 duration-200">
+          <rect x="4" y="4" width="56" height="56" fill="#121214" stroke="currentColor" stroke-width="4.5" />
+          <rect x="12" y="12" width="40" height="40" fill="#1E1E24" stroke="currentColor" stroke-width="4.5" />
+          <path d="M28 20H36V28H44V36H36V44H28V36H20V28H28V20Z" fill="var(--primary)" stroke="currentColor" stroke-width="4.5" stroke-linejoin="miter" />
+          <circle cx="32" cy="32" r="3" fill="#121214" />
+        </svg>
+        <span className="text-lg font-black tracking-tighter uppercase font-sans">
+          KeyMech
         </span>
       </Button>
   

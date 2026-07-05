@@ -1,6 +1,7 @@
-import { memo, Suspense, useRef, useState } from "react";
+import { memo, Suspense, useEffect, useRef, useState } from "react";
 import { Canvas, useThree } from "@react-three/fiber";
 import {
+  animate,
   type MotionValue,
   useMotionValue,
   useMotionValueEvent,
@@ -40,6 +41,7 @@ interface GltfKeyboardViewerProps {
   isHeroKeyboardInView?: boolean;
   /** Use full width of parent instead of viewport (e.g. Garage embedded preview). */
   embedded?: boolean;
+  viewMode?: "3d" | "explode" | "top" | "side" | "front";
 }
 
 function GltfKeyboardViewer({
@@ -52,6 +54,7 @@ function GltfKeyboardViewer({
   isInteractive = true,
   isHeroKeyboardInView = false,
   embedded = false,
+  viewMode = "3d",
 }: GltfKeyboardViewerProps) {
   const [isDragging, setIsDragging] = useState(false);
   const isDraggingRef = useRef(false);
@@ -76,6 +79,36 @@ function GltfKeyboardViewer({
   const mvRy = typeof baseRotateY === "number" ? fallbackRy : baseRotateY;
   const mvRz = typeof baseRotateZ === "number" ? fallbackRz : baseRotateZ;
 
+  useEffect(() => {
+    const duration = 0.8;
+    const ease = "easeInOut";
+
+    let targetBaseX = 28;
+    let targetBaseY = -8;
+    let targetBaseZ = 0;
+
+    if (viewMode === "top") {
+      targetBaseX = 90;
+      targetBaseY = 0;
+    } else if (viewMode === "side") {
+      targetBaseX = 0;
+      targetBaseY = -90;
+    } else if (viewMode === "front") {
+      targetBaseX = 0;
+      targetBaseY = 0;
+    } else if (viewMode === "3d" || viewMode === "explode") {
+      targetBaseX = 28;
+      targetBaseY = -8;
+    }
+
+    animate(mvRx, targetBaseX, { duration, ease });
+    animate(mvRy, targetBaseY, { duration, ease });
+    animate(mvRz, targetBaseZ, { duration, ease });
+    
+    animate(dragRx, 0, { duration, ease });
+    animate(dragRy, 0, { duration, ease });
+  }, [viewMode, mvRx, mvRy, mvRz, dragRx, dragRy]);
+
   const finalRotateX = useTransform([mvRx, dragRx], ([base, drag]: number[]) =>
     base + drag,
   );
@@ -91,7 +124,7 @@ function GltfKeyboardViewer({
       : "Specter 75 keyboard 3D preview";
 
   const handlePointerDown = (e: React.PointerEvent) => {
-    if (!interactive) return;
+    if (!interactive || viewMode !== "3d") return;
     isDraggingRef.current = true;
     setIsDragging(true);
     dragStart.current = {
@@ -104,7 +137,7 @@ function GltfKeyboardViewer({
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
-    if (!isDraggingRef.current || !interactive) return;
+    if (!isDraggingRef.current || !interactive || viewMode !== "3d") return;
     const dx = e.clientX - dragStart.current.x;
     const dy = e.clientY - dragStart.current.y;
     dragRx.set(Math.max(-60, Math.min(60, dragStart.current.rx - dy * 0.4)));
@@ -181,6 +214,7 @@ function GltfKeyboardViewer({
               garageKeycapTheme={garageKeycapTheme}
               selectedTextureId={selectedTextureId}
               isHeroKeyboardInView={isHeroKeyboardInView}
+              viewMode={viewMode}
             />
           </Suspense>
         </Canvas>

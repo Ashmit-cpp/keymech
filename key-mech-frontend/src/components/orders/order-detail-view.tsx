@@ -3,6 +3,7 @@ import type { OrderResponseDto } from "@/api/generated";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { getGarageBuildSnapshot } from "@/lib/garage";
 import {
   formatINR,
   formatOrderDate,
@@ -32,14 +33,21 @@ export function OrderDetailView({
           </CardHeader>
           <CardContent className="space-y-4">
             {order.items.map((item) => {
-              const firstImage = parseFirstImage(item.product.images);
+              const snapshot = getGarageBuildSnapshot(item.buildSnapshot);
+              const isGarage = item.kind === "GARAGE_BUILD";
+              const firstImage = isGarage
+                ? null
+                : parseFirstImage(item.product?.images);
+              const title = isGarage
+                ? (snapshot?.name ?? "Garage Build")
+                : (item.product?.name ?? "Product");
               return (
                 <div key={item.id} className="flex items-center gap-4">
                   <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded border bg-muted">
                     {firstImage ? (
                       <img
                         src={firstImage}
-                        alt={item.product.name}
+                        alt={title}
                         className="h-full w-full object-cover"
                       />
                     ) : (
@@ -47,14 +55,19 @@ export function OrderDetailView({
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium">{item.product.name}</p>
-                    {item.variant?.name && (
+                    <p className="truncate font-medium">{title}</p>
+                    {isGarage && snapshot ? (
+                      <p className="text-sm text-muted-foreground">
+                        Garage bundle · {snapshot.layout}
+                      </p>
+                    ) : null}
+                    {!isGarage && item.variant?.name && (
                       <p className="text-sm text-muted-foreground">
                         Variant: {item.variant.name}
                       </p>
                     )}
                     <p className="text-sm text-muted-foreground">
-                      Qty {item.quantity} x {formatINR(item.price)}
+                      Qty {item.quantity} x {formatINR(item.unitPrice)}
                     </p>
                   </div>
                   <p className="font-semibold">{formatINR(getOrderItemSubtotal(item))}</p>
