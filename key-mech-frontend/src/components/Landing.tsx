@@ -148,7 +148,7 @@ const Landing: React.FC = () => {
 
           <div className="relative ml-auto h-[12svh] min-h-[280px] w-full flex-1 overflow-hidden bg-background sm:h-[46svh] sm:min-h-[340px] md:h-screen">
             <motion.img
-              src="/landing.png"
+              src="/landing.webp"
               alt="Premium Keyboard Build"
               decoding="async"
               fetchPriority="high"

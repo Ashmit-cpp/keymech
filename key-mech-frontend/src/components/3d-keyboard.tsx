@@ -60,7 +60,7 @@ function garageKeycapRole(keyId: string): "base" | "modifier" | "accent" {
 const GARAGE_ATLAS_WIDTH = 2048;
 const GARAGE_ATLAS_HEIGHT = 768;
 const GARAGE_ATLAS_UNIT = 128;
-const GARAGE_LEGEND_MASK_PATH = "/keycap-legends-mask.png";
+const GARAGE_LEGEND_MASK_PATH = "/keycap-legends-mask.webp";
 
 type GarageAtlasRegion = {
   id: string;
@@ -205,7 +205,7 @@ function buildGarageKeycapMaterial({
 }
 
 /**
- * Keycap glTF primitives ship TEXCOORD_0 + TEXCOORD_1. Our shared atlas (e.g. t1.png) lines up
+ * Keycap glTF primitives ship TEXCOORD_0 + TEXCOORD_1. Our shared atlas (e.g. t1.webp) lines up
  * with the second set, but MeshStandardMaterial.map always samples `uv`. Without swapping, legends
  * project onto sides / plate. Cache clones per source BufferGeometry (shared across key rows).
  */
@@ -570,7 +570,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
       container: containerRef,
     }));
 
-    const keycapTexture = useTexture("/t1.png");
+    const keycapTexture = useTexture("/t1.webp");
     keycapTexture.flipY = false;
     keycapTexture.colorSpace = THREE.SRGBColorSpace;
 
@@ -585,7 +585,7 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
     knurlTexture.wrapS = THREE.RepeatWrapping;
     knurlTexture.wrapT = THREE.RepeatWrapping;
 
-    const screenTexture = useTexture("/screen_uv.png");
+    const screenTexture = useTexture("/screen_uv.webp");
     screenTexture.flipY = false;
 
     screenTexture.repeat.set(-1, -1);

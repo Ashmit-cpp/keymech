@@ -3,7 +3,7 @@ import { motion } from "motion/react";
 import { useHero } from "@/hooks/use-hero";
 import BuildSection from "./BuildSection";
 import GroupBuySection from "./GroupBuySection";
-import GltfKeyboardViewer from "./gltf-keyboard-viewer";
+import GltfKeyboardViewer from "./lazy-gltf-keyboard-viewer";
 import HeroIntroSection from "./HeroIntroSection";
 import WhatsInsideSection from "./WhatsInsideSection";
 

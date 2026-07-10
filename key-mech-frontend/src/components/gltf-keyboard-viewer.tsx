@@ -1,4 +1,11 @@
-import { memo, Suspense, useEffect, useRef, useState } from "react";
+import {
+  memo,
+  Suspense,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { Canvas, useThree } from "@react-three/fiber";
 import {
   animate,
@@ -29,7 +36,7 @@ function DragMotionInvalidate({
   return null;
 }
 
-interface GltfKeyboardViewerProps {
+export interface GltfKeyboardViewerProps {
   baseRotateX?: MotionValue<number> | number;
   baseRotateY?: MotionValue<number> | number;
   baseRotateZ?: MotionValue<number> | number;
@@ -57,6 +64,7 @@ function GltfKeyboardViewer({
   viewMode = "3d",
 }: GltfKeyboardViewerProps) {
   const [isDragging, setIsDragging] = useState(false);
+  const [isSceneReady, setIsSceneReady] = useState(false);
   const isDraggingRef = useRef(false);
   const dragStart = useRef({ x: 0, y: 0, rx: 0, ry: 0 });
   const stageRef = useRef<HTMLDivElement>(null);
@@ -85,7 +93,7 @@ function GltfKeyboardViewer({
 
     let targetBaseX = 28;
     let targetBaseY = -8;
-    let targetBaseZ = 0;
+    const targetBaseZ = 0;
 
     if (viewMode === "top") {
       targetBaseX = 90;
@@ -101,13 +109,33 @@ function GltfKeyboardViewer({
       targetBaseY = -8;
     }
 
-    animate(mvRx, targetBaseX, { duration, ease });
-    animate(mvRy, targetBaseY, { duration, ease });
-    animate(mvRz, targetBaseZ, { duration, ease });
+    // Numeric rotations are owned by this viewer (Garage previews), so view
+    // mode changes can animate them. MotionValues are owned by the landing
+    // page scroll timeline and must retain their current position when this
+    // lazy-loaded component mounts.
+    if (typeof baseRotateX === "number") {
+      animate(fallbackRx, targetBaseX, { duration, ease });
+    }
+    if (typeof baseRotateY === "number") {
+      animate(fallbackRy, targetBaseY, { duration, ease });
+    }
+    if (typeof baseRotateZ === "number") {
+      animate(fallbackRz, targetBaseZ, { duration, ease });
+    }
     
     animate(dragRx, 0, { duration, ease });
     animate(dragRy, 0, { duration, ease });
-  }, [viewMode, mvRx, mvRy, mvRz, dragRx, dragRy]);
+  }, [
+    viewMode,
+    baseRotateX,
+    baseRotateY,
+    baseRotateZ,
+    fallbackRx,
+    fallbackRy,
+    fallbackRz,
+    dragRx,
+    dragRy,
+  ]);
 
   const finalRotateX = useTransform([mvRx, dragRx], ([base, drag]: number[]) =>
     base + drag,
@@ -117,6 +145,7 @@ function GltfKeyboardViewer({
   );
 
   const interactive = isInteractive && !prefersReducedMotion;
+  const handleSceneReady = useCallback(() => setIsSceneReady(true), []);
 
   const previewAriaLabel =
     interactive && isInteractive
@@ -183,8 +212,20 @@ function GltfKeyboardViewer({
         role="img"
         aria-label={previewAriaLabel}
       >
+        <img
+          src="/landing.webp"
+          alt=""
+          aria-hidden="true"
+          className={cn(
+            "pointer-events-none absolute inset-0 h-full w-full object-contain transition-opacity duration-300",
+            isSceneReady ? "opacity-0" : "opacity-100",
+          )}
+        />
         <Canvas
-          className="h-full w-full"
+          className={cn(
+            "relative z-10 h-full w-full transition-opacity duration-300",
+            isSceneReady ? "opacity-100" : "opacity-0",
+          )}
           frameloop="demand"
           dpr={[1, 2]}
           shadows
@@ -215,6 +256,7 @@ function GltfKeyboardViewer({
               selectedTextureId={selectedTextureId}
               isHeroKeyboardInView={isHeroKeyboardInView}
               viewMode={viewMode}
+              onReady={handleSceneReady}
             />
           </Suspense>
         </Canvas>

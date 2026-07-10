@@ -90,7 +90,7 @@ export const KEYCAP_TEXTURES = [
   {
     id: "textured1",
     name: "Textured 1",
-    path: "/t6.png",
+    path: "/t6.webp",
     knobColor: "red",
     caseColor: "#161616",
     atlasUsesUv2: true,
@@ -98,7 +98,7 @@ export const KEYCAP_TEXTURES = [
   {
     id: "textured2",
     name: "Textured 2",
-    path: "/t2.png",
+    path: "/t2.webp",
     knobColor: "#00FFFF",
     caseColor: "#1D1D54",
     atlasUsesUv2: true,
@@ -106,7 +106,7 @@ export const KEYCAP_TEXTURES = [
   {
     id: "textured3",
     name: "Textured 3",
-    path: "/t3.png",
+    path: "/t3.webp",
     knobColor: "#9FE2BF",
     caseColor: "#13251E",
     atlasUsesUv2: true,

@@ -26,6 +26,27 @@ import * as THREE from "three";
 type Colorway = (typeof COLORWAYS)[number];
 type KeycapTextureId = (typeof KEYCAP_TEXTURES)[number]["id"];
 
+function getKeycapTextureConfig(textureId: KeycapTextureId) {
+  return (
+    KEYCAP_TEXTURES.find((texture) => texture.id === textureId) ??
+    KEYCAP_TEXTURES[0]
+  );
+}
+
+function prepareKeycapTexture(texture: THREE.Texture) {
+  texture.flipY = false;
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.needsUpdate = true;
+  return texture;
+}
+
+function createKeycapMaterial(texture: THREE.Texture) {
+  return new THREE.MeshStandardMaterial({
+    map: prepareKeycapTexture(texture),
+    roughness: 0.6,
+  });
+}
+
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
 const KEYBOARD_COLUMNS = [
@@ -227,6 +248,7 @@ export interface SceneProps {
   selectedTextureId?: KeycapTextureId;
   isHeroKeyboardInView: boolean;
   viewMode?: "3d" | "explode" | "top" | "side" | "front";
+  onReady?: () => void;
 }
 
 export function Scene({
@@ -238,39 +260,65 @@ export function Scene({
   selectedTextureId = KEYCAP_TEXTURES[0].id,
   isHeroKeyboardInView,
   viewMode = "3d",
+  onReady,
 }: SceneProps) {
   const invalidate = useThree((s) => s.invalidate);
   const keyboardGroupRef = useRef<THREE.Group>(null);
   const keyboardAnimationRef = useRef<KeyboardRefs | null>(null);
   const [keyboardRefsReady, setKeyboardRefsReady] = useState(false);
+  const [initialTextureConfig] = useState(() =>
+    getKeycapTextureConfig(selectedTextureId),
+  );
+  const initialTexture = useTexture(initialTextureConfig.path);
+  const initialKeycapMaterial = useMemo(
+    () => createKeycapMaterial(initialTexture),
+    [initialTexture],
+  );
   const [currentTextureId, setCurrentTextureId] =
-    useState<KeycapTextureId>(selectedTextureId);
+    useState<KeycapTextureId>(initialTextureConfig.id);
+  const [keycapMaterials, setKeycapMaterials] = useState<
+    Partial<Record<KeycapTextureId, THREE.MeshStandardMaterial>>
+  >(() => ({ [initialTextureConfig.id]: initialKeycapMaterial }));
+  const loadingTextureIds = useRef(new Set<KeycapTextureId>());
 
-  const texturePaths = useMemo(() => KEYCAP_TEXTURES.map((t) => t.path), []);
-  const loadedTextures = useTexture(texturePaths);
+  useEffect(() => {
+    const textureConfig = getKeycapTextureConfig(selectedTextureId);
+    if (
+      keycapMaterials[textureConfig.id] ||
+      loadingTextureIds.current.has(textureConfig.id)
+    ) {
+      return;
+    }
 
-  const keycapMaterials = useMemo(() => {
-    const materialMap: Partial<Record<KeycapTextureId, THREE.MeshStandardMaterial>> =
-      {};
-    const textures = Array.isArray(loadedTextures)
-      ? loadedTextures
-      : [loadedTextures];
+    let cancelled = false;
+    loadingTextureIds.current.add(textureConfig.id);
 
-    KEYCAP_TEXTURES.forEach((textureConfig, index) => {
-      const texture = textures[index];
-      if (!texture) return;
+    new THREE.TextureLoader().load(
+      textureConfig.path,
+      (texture) => {
+        loadingTextureIds.current.delete(textureConfig.id);
+        if (cancelled) {
+          texture.dispose();
+          return;
+        }
 
-      texture.flipY = false;
-      texture.colorSpace = THREE.SRGBColorSpace;
-      texture.needsUpdate = true;
-      materialMap[textureConfig.id] = new THREE.MeshStandardMaterial({
-        map: texture,
-        roughness: 0.6,
-      });
-    });
+        const material = createKeycapMaterial(texture);
+        setKeycapMaterials((materials) => ({
+          ...materials,
+          [textureConfig.id]: material,
+        }));
+        invalidate();
+      },
+      undefined,
+      () => {
+        loadingTextureIds.current.delete(textureConfig.id);
+      },
+    );
 
-    return materialMap;
-  }, [loadedTextures]);
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedTextureId, keycapMaterials, invalidate]);
 
   const currentKnobColor =
     KEYCAP_TEXTURES.find((texture) => texture.id === currentTextureId)
@@ -286,6 +334,10 @@ export function Scene({
     keyboardAnimationRef.current = refs;
     setKeyboardRefsReady(Boolean(refs));
   }, []);
+
+  useEffect(() => {
+    if (keyboardRefsReady) onReady?.();
+  }, [keyboardRefsReady, onReady]);
 
   useGSAP(
     () => {
@@ -337,6 +389,7 @@ export function Scene({
   useGSAP(
     () => {
       if (selectedTextureId === currentTextureId) return;
+      if (!keycapMaterials[selectedTextureId]) return;
 
       const keyboard = keyboardGroupRef.current;
       if (!keyboard) {
@@ -382,7 +435,12 @@ export function Scene({
       };
     },
     {
-      dependencies: [selectedTextureId, invalidate],
+      dependencies: [
+        selectedTextureId,
+        currentTextureId,
+        keycapMaterials,
+        invalidate,
+      ],
       revertOnUpdate: true,
     },
   );

@@ -10,7 +10,7 @@ import {
   useProductsControllerFindAll,
   type ProductResponseDto,
 } from "@/api/generated";
-import GltfKeyboardViewer from "@/components/gltf-keyboard-viewer";
+import GltfKeyboardViewer from "@/components/lazy-gltf-keyboard-viewer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LoadingState } from "@/components/ui/loading-state";

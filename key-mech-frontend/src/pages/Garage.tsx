@@ -37,7 +37,7 @@ import {
   useGarageControllerUpdate,
   useProductsControllerFindAll,
 } from "@/api/generated";
-import GltfKeyboardViewer from "@/components/gltf-keyboard-viewer";
+import GltfKeyboardViewer from "@/components/lazy-gltf-keyboard-viewer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
