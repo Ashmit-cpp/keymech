@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion, AnimatePresence } from "framer-motion";
 
 const copyContainer = {
   hidden: { opacity: 0 },
@@ -31,6 +31,13 @@ const Landing: React.FC = () => {
   const navigate = useNavigate();
   const prefersReducedMotion = useReducedMotion();
   const [isImageLoaded, setIsImageLoaded] = useState(false);
+  const [showScroll, setShowScroll] = useState(true);
+
+  useEffect(() => {
+    const onScroll = () => setShowScroll(window.scrollY < 80);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const handleShopKeyboards = () => {
     navigate("/category/keyboards");
@@ -185,6 +192,30 @@ const Landing: React.FC = () => {
           </span>
           <span>[PERFORMANCE]</span>
         </div>
+
+        {/* Centre scroll indicator */}
+        <AnimatePresence>
+          {showScroll && (
+            <motion.div
+              key="scroll-indicator"
+              className="absolute left-1/2 bottom-6 sm:bottom-8 md:bottom-10 -translate-x-1/2 flex flex-col items-center gap-1.5 select-none"
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 4, transition: { duration: 0.25 } }}
+              transition={{ delay: 1.4, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <span className="font-mono text-[0.6rem] font-semibold tracking-[0.22em] uppercase text-foreground/50">
+                Scroll
+              </span>
+              <motion.div
+                animate={prefersReducedMotion ? {} : { y: [0, 5, 0] }}
+                transition={{ duration: 1.3, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <ChevronDown className="h-4 w-4 text-foreground/50" strokeWidth={1.75} />
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Right side pagination & dashes */}
         <div className="hidden items-center gap-12 sm:flex">
