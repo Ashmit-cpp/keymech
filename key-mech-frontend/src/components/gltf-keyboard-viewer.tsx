@@ -49,6 +49,10 @@ export interface GltfKeyboardViewerProps {
   /** Use full width of parent instead of viewport (e.g. Garage embedded preview). */
   embedded?: boolean;
   viewMode?: "3d" | "explode" | "top" | "side" | "front";
+  /** Keep the static keyboard poster visible until the WebGL scene is ready. */
+  showLoadingPoster?: boolean;
+  /** Called after the model, textures, and scene refs have finished loading. */
+  onReady?: () => void;
 }
 
 function GltfKeyboardViewer({
@@ -62,6 +66,8 @@ function GltfKeyboardViewer({
   isHeroKeyboardInView = false,
   embedded = false,
   viewMode = "3d",
+  showLoadingPoster = true,
+  onReady,
 }: GltfKeyboardViewerProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isSceneReady, setIsSceneReady] = useState(false);
@@ -145,7 +151,14 @@ function GltfKeyboardViewer({
   );
 
   const interactive = isInteractive && !prefersReducedMotion;
-  const handleSceneReady = useCallback(() => setIsSceneReady(true), []);
+  const hasReportedReady = useRef(false);
+  const handleSceneReady = useCallback(() => {
+    setIsSceneReady(true);
+    if (hasReportedReady.current) return;
+
+    hasReportedReady.current = true;
+    onReady?.();
+  }, [onReady]);
 
   const previewAriaLabel =
     interactive && isInteractive
@@ -212,15 +225,17 @@ function GltfKeyboardViewer({
         role="img"
         aria-label={previewAriaLabel}
       >
-        <img
-          src="/landing.webp"
-          alt=""
-          aria-hidden="true"
-          className={cn(
-            "pointer-events-none absolute inset-0 h-full w-full object-contain transition-opacity duration-300",
-            isSceneReady ? "opacity-0" : "opacity-100",
-          )}
-        />
+        {showLoadingPoster && (
+          <img
+            src="/landing.webp"
+            alt=""
+            aria-hidden="true"
+            className={cn(
+              "pointer-events-none absolute inset-0 h-full w-full object-contain transition-opacity duration-300",
+              isSceneReady ? "opacity-0" : "opacity-100",
+            )}
+          />
+        )}
         <Canvas
           className={cn(
             "relative z-10 h-full w-full transition-opacity duration-300",

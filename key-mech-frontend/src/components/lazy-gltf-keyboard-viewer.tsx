@@ -39,7 +39,13 @@ export default function LazyGltfKeyboardViewer(
   props: GltfKeyboardViewerProps,
 ) {
   return (
-    <Suspense fallback={<KeyboardPoster embedded={props.embedded} />}>
+    <Suspense
+      fallback={
+        props.showLoadingPoster === false ? null : (
+          <KeyboardPoster embedded={props.embedded} />
+        )
+      }
+    >
       <GltfKeyboardViewer {...props} />
     </Suspense>
   );

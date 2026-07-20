@@ -8,7 +8,7 @@ interface BuildSectionProps {
 }
 
 const rightFeatures = [
-  "8 programmable macro keys",
+  "User-defined key bindings",
   "Optimized gaming mode",
   "Dynamic RGB engine",
   "20 onboard profiles",
@@ -17,11 +17,11 @@ const rightFeatures = [
 ];
 
 const leftFeatures = [
+  "8 programmable macro keys",
   "Expanded customization options",
   "Personalized lighting effects",
-  "User-defined key bindings",
   "Real-time battery monitoring",
-  "Advanced anti-ghosting technology",
+  "Anti-ghosting technology",
 
 ];
 
@@ -50,7 +50,7 @@ export default function BuildSection({
             <span className="text-primary">.</span>
           </h2>
 
-          <div className="grid w-full max-w-[560px] grid-cols-1 gap-x-14 gap-y-10 md:grid-cols-2">
+          <div className="grid w-full max-w-[360px] grid-cols-1 gap-x-2 gap-y-10 md:grid-cols-2">
             <div className="flex w-full min-w-0 flex-col">
               {leftFeatures.map((feature, i) => (
                 <motion.div

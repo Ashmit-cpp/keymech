@@ -46,7 +46,7 @@ export default function HeroIntroSection({
         variants={copyContainer}
         initial="hidden"
         animate="show"
-        className="relative z-10 mx-auto flex w-full max-w-5xl flex-none flex-col items-center gap-5 px-6 pb-4 pt-10 text-center md:pt-14"
+        className="relative z-10 mx-auto flex w-full max-w-5xl flex-none flex-col items-center gap-3 px-6 pb-4 pt-10 text-center md:pt-14"
       >
         <motion.div variants={copyItem} className="flex gap-2" aria-hidden>
           {[0, 1, 2].map((i) => (

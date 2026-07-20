@@ -27,7 +27,11 @@ const copyItem = {
   },
 };
 
-const Landing: React.FC = () => {
+interface LandingProps {
+  isScrollBlocked?: boolean;
+}
+
+const Landing: React.FC<LandingProps> = ({ isScrollBlocked = false }) => {
   const navigate = useNavigate();
   const prefersReducedMotion = useReducedMotion();
   const [isImageLoaded, setIsImageLoaded] = useState(false);
@@ -195,7 +199,7 @@ const Landing: React.FC = () => {
 
         {/* Centre scroll indicator */}
         <AnimatePresence>
-          {showScroll && (
+          {showScroll && !isScrollBlocked && (
             <motion.div
               key="scroll-indicator"
               className="absolute left-1/2 bottom-6 sm:bottom-8 md:bottom-10 -translate-x-1/2 flex flex-col items-center gap-1.5 select-none"

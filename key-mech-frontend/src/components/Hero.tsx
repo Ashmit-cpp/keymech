@@ -9,7 +9,11 @@ import WhatsInsideSection from "./WhatsInsideSection";
 
 const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
-export default function Hero() {
+interface HeroProps {
+  onKeyboardReady?: () => void;
+}
+
+export default function Hero({ onKeyboardReady }: HeroProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const {
     x,
@@ -80,6 +84,8 @@ export default function Hero() {
                       isHeroKeyboardInView={isHeroKeyboardInView}
                       activeColorway={activeColorway}
                       selectedTextureId={selectedTextureId}
+                      showLoadingPoster={false}
+                      onReady={onKeyboardReady}
                     />
                   </div>
                 </motion.div>
