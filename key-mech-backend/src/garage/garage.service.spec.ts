@@ -55,9 +55,11 @@ const product = (
   price: number,
   options: {
     variantId?: string;
+    variantSku?: string;
     variantExtraPrice?: number;
     keyboardLayout?: string;
     variantLayouts?: string[];
+    variantSpecs?: Record<string, unknown>;
   } = {},
 ) => ({
   id,
@@ -75,11 +77,14 @@ const product = (
     ? [
         {
           id: options.variantId,
+          sku: options.variantSku ?? null,
           name: `${options.variantId} variant`,
           extraPrice: options.variantExtraPrice ?? 0,
-          specs: options.variantLayouts
-            ? { supportedLayouts: options.variantLayouts }
-            : null,
+          specs:
+            options.variantSpecs ??
+            (options.variantLayouts
+              ? { supportedLayouts: options.variantLayouts }
+              : null),
         },
       ]
     : [],
@@ -190,5 +195,66 @@ describe('GarageService', () => {
       layout: '75',
       totalPrice: 146400,
     });
+  });
+
+  it('does not charge again for components included with an assembled keyboard', async () => {
+    const products = validProducts();
+    products[0] = product('case-id', Category.KEYBOARD, 100000, {
+      variantId: 'case-var-id',
+      keyboardLayout: 'P75',
+      variantSpecs: {
+        garageComponents: {
+          pcbSku: 'included-pcb',
+          plateSku: 'included-plate',
+          switchSku: 'included-switches',
+          keycapSku: 'included-keycaps',
+          stabilizerSku: 'included-stabilizers',
+        },
+      },
+    });
+    products[1] = product('pcb-id', Category.PCB, 12000, {
+      variantId: 'pcb-var-id',
+      variantSku: 'included-pcb',
+      variantLayouts: ['75'],
+    });
+    products[2] = product('plate-id', Category.PLATE, 5000, {
+      variantId: 'plate-var-id',
+      variantSku: 'included-plate',
+      variantLayouts: ['75'],
+    });
+    products[3] = product('switch-id', Category.SWITCH, 3500, {
+      variantId: 'switch-var-id',
+      variantSku: 'included-switches',
+    });
+    products[4] = product('keycap-id', Category.KEYCAP, 18000, {
+      variantId: 'keycap-var-id',
+      variantSku: 'included-keycaps',
+      variantLayouts: ['75'],
+    });
+    products[5] = product('stabilizer-id', Category.STABILIZER, 2400, {
+      variantId: 'stabilizer-var-id',
+      variantSku: 'included-stabilizers',
+    });
+    const assembledSelections = {
+      case: { productId: 'case-id', variantId: 'case-var-id' },
+      pcb: { productId: 'pcb-id', variantId: 'pcb-var-id' },
+      plate: { productId: 'plate-id', variantId: 'plate-var-id' },
+      switches: { productId: 'switch-id', variantId: 'switch-var-id' },
+      keycaps: { productId: 'keycap-id', variantId: 'keycap-var-id' },
+      stabilizers: {
+        productId: 'stabilizer-id',
+        variantId: 'stabilizer-var-id',
+      },
+    };
+    const { service, mocks } = createService(products);
+
+    await service.create(
+      'user-id',
+      createDto({ selections: assembledSelections }),
+    );
+
+    const [createArg] = mocks.create.calls[0] ?? [];
+    const data = (createArg as { data: Record<string, unknown> }).data;
+    expect(data.totalPrice).toBe(100000);
   });
 });

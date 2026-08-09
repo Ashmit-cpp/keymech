@@ -67,6 +67,7 @@ interface PricedGarageComponent {
   category: Category;
   images: Prisma.JsonValue | null;
   unitPrice: number;
+  includedInBase: boolean;
 }
 
 export interface GarageBuildSnapshot {
@@ -168,6 +169,39 @@ export class GarageService {
     return Array.from(new Set(layouts));
   }
 
+  private getIncludedComponentSkus(
+    variant: ProductForBuild['variants'][number] | null,
+  ): Partial<Record<Exclude<GarageSlot, 'case'>, string>> {
+    const parsed = this.parseJsonish(variant?.specs);
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      return {};
+    }
+
+    const components = (parsed as Record<string, unknown>).garageComponents;
+    if (
+      !components ||
+      typeof components !== 'object' ||
+      Array.isArray(components)
+    ) {
+      return {};
+    }
+
+    const record = components as Record<string, unknown>;
+    const keys = {
+      pcb: 'pcbSku',
+      plate: 'plateSku',
+      switches: 'switchSku',
+      keycaps: 'keycapSku',
+      stabilizers: 'stabilizerSku',
+    } as const;
+
+    return Object.fromEntries(
+      Object.entries(keys).flatMap(([slot, key]) =>
+        typeof record[key] === 'string' ? [[slot, record[key]]] : [],
+      ),
+    );
+  }
+
   private assertSelectionRecord(
     selections: unknown,
   ): Record<GarageSlot, GarageComponentSelectionDto> {
@@ -231,6 +265,14 @@ export class GarageService {
 
     let totalPrice = 0;
     const components = {} as Record<GarageSlot, PricedGarageComponent>;
+    const caseSelection = normalizedSelections.case;
+    const caseProduct = productById.get(caseSelection.productId);
+    const caseVariant = caseSelection.variantId
+      ? (caseProduct?.variants.find(
+          (variant) => variant.id === caseSelection.variantId,
+        ) ?? null)
+      : null;
+    const includedComponentSkus = this.getIncludedComponentSkus(caseVariant);
 
     for (const slot of GARAGE_SLOTS) {
       const selection = normalizedSelections[slot];
@@ -269,7 +311,13 @@ export class GarageService {
         );
       }
 
-      const unitPrice = product.price + (variant?.extraPrice ?? 0);
+      const includedInBase =
+        slot !== 'case' &&
+        Boolean(variant?.sku) &&
+        includedComponentSkus[slot] === variant?.sku;
+      const unitPrice = includedInBase
+        ? 0
+        : product.price + (variant?.extraPrice ?? 0);
       totalPrice += unitPrice;
       components[slot] = {
         slot,
@@ -280,6 +328,7 @@ export class GarageService {
         category: product.category,
         images: product.images,
         unitPrice,
+        includedInBase,
       };
     }
 

@@ -45,6 +45,7 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import {
   GARAGE_SLOTS,
+  getIncludedGarageComponentSkus,
   parseJsonish,
   supportsGarageLayout,
   toGarageSelectionsDto,
@@ -409,6 +410,21 @@ export default function GaragePage() {
       : KEYCAP_TEXTURES[0].id;
   }, [selectedProducts.case.variant?.specs]);
 
+  const includedComponentSkus = useMemo(
+    () => getIncludedGarageComponentSkus(selectedProducts.case.variant),
+    [selectedProducts.case.variant],
+  );
+
+  function componentPriceLabel(
+    slot: Exclude<GarageSlot, "case">,
+    product: ProductResponseDto,
+    variant: ProductVariantResponseDto | null,
+  ) {
+    return variant?.sku && includedComponentSkus[slot] === variant.sku
+      ? "Included"
+      : formatINR(productUnitPrice(product, variant));
+  }
+
   const derived = useMemo(() => {
     const errors: string[] = [];
     let total = 0;
@@ -427,11 +443,15 @@ export default function GaragePage() {
         errors.push(`${label} does not support ${layout}`);
       }
 
-      total += productUnitPrice(product, variant);
+      const includedInBase =
+        id !== "case" &&
+        Boolean(variant?.sku) &&
+        includedComponentSkus[id] === variant?.sku;
+      if (!includedInBase) total += productUnitPrice(product, variant);
     });
 
     return { errors, total };
-  }, [layout, selectedProducts]);
+  }, [includedComponentSkus, layout, selectedProducts]);
 
   useEffect(() => {
     setCompatibilityErrors(derived.errors);
@@ -851,7 +871,7 @@ export default function GaragePage() {
                         </p>
                       </div>
                       <span className="font-semibold text-xs shrink-0 ml-2">
-                        {formatINR(productUnitPrice(product, displayVariant))}
+                        {componentPriceLabel("plate", product, displayVariant)}
                       </span>
                     </button>
                   );
@@ -987,7 +1007,7 @@ export default function GaragePage() {
                         </p>
                       </div>
                       <span className="font-semibold text-xs shrink-0 ml-2">
-                        {formatINR(productUnitPrice(product, displayVariant))}
+                        {componentPriceLabel("switches", product, displayVariant)}
                       </span>
                     </button>
 
@@ -1193,7 +1213,7 @@ export default function GaragePage() {
                         </p>
                       </div>
                       <span className="font-bold text-xs shrink-0 ml-2">
-                        {formatINR(productUnitPrice(product, compatibleVariant ?? null))}
+                        {componentPriceLabel("pcb", product, compatibleVariant ?? null)}
                       </span>
                     </button>
                   );
@@ -1238,7 +1258,11 @@ export default function GaragePage() {
                         </p>
                       </div>
                       <span className="font-bold text-xs shrink-0 ml-2">
-                        {formatINR(productUnitPrice(product, compatibleVariant ?? null))}
+                        {componentPriceLabel(
+                          "stabilizers",
+                          product,
+                          compatibleVariant ?? null,
+                        )}
                       </span>
                     </button>
                   );

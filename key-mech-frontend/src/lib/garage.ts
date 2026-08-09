@@ -33,6 +33,7 @@ export interface GarageComponentSnapshot {
   category: string;
   images?: unknown;
   unitPrice: number;
+  includedInBase?: boolean;
 }
 
 export interface GarageBuildSnapshot {
@@ -138,6 +139,33 @@ export const supportsGarageLayout = (
 ) => {
   const layouts = getProductSupportedLayouts(product, variant);
   return layouts.length === 0 || layouts.includes(layout);
+};
+
+const INCLUDED_COMPONENT_SPEC_KEYS = {
+  pcb: "pcbSku",
+  plate: "plateSku",
+  switches: "switchSku",
+  keycaps: "keycapSku",
+  stabilizers: "stabilizerSku",
+} as const;
+
+export const getIncludedGarageComponentSkus = (
+  variant?: ProductVariantResponseDto | null,
+): Partial<Record<Exclude<GarageSlot, "case">, string>> => {
+  const specs = parseJsonish(variant?.specs);
+  if (!specs || typeof specs !== "object" || Array.isArray(specs)) return {};
+
+  const components = (specs as Record<string, unknown>).garageComponents;
+  if (!components || typeof components !== "object" || Array.isArray(components)) {
+    return {};
+  }
+
+  const record = components as Record<string, unknown>;
+  return Object.fromEntries(
+    Object.entries(INCLUDED_COMPONENT_SPEC_KEYS).flatMap(([slot, key]) =>
+      typeof record[key] === "string" ? [[slot, record[key]]] : [],
+    ),
+  );
 };
 
 export const getGarageTheme = (value: unknown): GarageKeycapTheme => {
