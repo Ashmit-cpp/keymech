@@ -4,7 +4,8 @@ export interface GarageKeycapTheme {
   base: string;
   modifier: string;
   accent: string;
-  legend: string;
+  primaryLegend: string;
+  secondaryLegend: string;
 }
 
 export interface GarageThemePreset {
@@ -26,7 +27,8 @@ export function garageThemeFromColorway(
     base: v["--key-base"],
     modifier: v["--key-mod"],
     accent: v["--key-accent1"],
-    legend: v["--key-legend"],
+    primaryLegend: v["--key-legend"],
+    secondaryLegend: v["--key-mod-legend"],
   };
 }
 
@@ -50,7 +52,8 @@ export function garageThemesEqual(
     a.base === b.base &&
     a.modifier === b.modifier &&
     a.accent === b.accent &&
-    a.legend === b.legend
+    a.primaryLegend === b.primaryLegend &&
+    a.secondaryLegend === b.secondaryLegend
   );
 }
 
@@ -71,4 +74,36 @@ export function normalizeHexInput(value: string): string | null {
     return `#${t[0]}${t[0]}${t[1]}${t[1]}${t[2]}${t[2]}`.toLowerCase();
   }
   return null;
+}
+
+const DARK_LEGEND = "#101820";
+const LIGHT_LEGEND = "#f8f8f2";
+
+function relativeLuminance(color: string): number | null {
+  const normalized = normalizeHexInput(color);
+  if (!normalized) return null;
+  const channels = [1, 3, 5].map((offset) => {
+    const channel = Number.parseInt(normalized.slice(offset, offset + 2), 16) / 255;
+    return channel <= 0.04045
+      ? channel / 12.92
+      : ((channel + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
+}
+
+function contrastRatio(a: number, b: number): number {
+  const lighter = Math.max(a, b);
+  const darker = Math.min(a, b);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
+export function readableLegendColor(background: string): string {
+  const backgroundLuminance = relativeLuminance(background);
+  const darkLuminance = relativeLuminance(DARK_LEGEND)!;
+  const lightLuminance = relativeLuminance(LIGHT_LEGEND)!;
+  if (backgroundLuminance === null) return DARK_LEGEND;
+  return contrastRatio(backgroundLuminance, lightLuminance) >=
+    contrastRatio(backgroundLuminance, darkLuminance)
+    ? LIGHT_LEGEND
+    : DARK_LEGEND;
 }

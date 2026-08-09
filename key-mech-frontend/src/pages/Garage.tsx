@@ -57,7 +57,9 @@ import {
   cloneGarageTheme,
   findMatchingPresetId,
   GARAGE_THEME_PRESETS,
+  garageThemesEqual,
   normalizeHexInput,
+  readableLegendColor,
   type GarageKeycapTheme,
 } from "@/lib/garage-theme";
 import { formatINR } from "@/lib/orders";
@@ -140,6 +142,16 @@ function productAndVariantBySku(
   );
   const variant = product?.variants.find((candidate) => candidate.sku === sku);
   return product && variant ? { product, variant } : null;
+}
+
+function garageTheme(
+  base: string,
+  modifier: string,
+  accent: string,
+  primaryLegend: string,
+  secondaryLegend = readableLegendColor(modifier),
+): GarageKeycapTheme {
+  return { base, modifier, accent, primaryLegend, secondaryLegend };
 }
 
 export default function GaragePage() {
@@ -628,7 +640,7 @@ export default function GaragePage() {
       switchSku: "GAT-KS3-MY-PRO-110",
       keycapSku: "KC-OSA-PBT-RETRO-141",
       stabSku: "KC-STAB-GOLD-SCREWIN-10",
-      theme: { base: "#ffffff", modifier: "#7277a9", accent: "#ff79c6", legend: "#050505" },
+      theme: garageTheme("#ffffff", "#7277a9", "#ff79c6", "#050505"),
       image: "https://www.keychron.com/cdn/shop/files/Keychron-Q1-Max-QMK-VIA-Wireless-Custom-Mechanical-Keyboard-75_-Layout-Aluminum-Black-Fully-Assembled-Knob-for-Mac-Windows-Linux-Gateron-Jupiter-Red.jpg?v=1753685590&width=150",
     },
     {
@@ -641,7 +653,7 @@ export default function GaragePage() {
       switchSku: "GAT-KS3-MY-PRO-110",
       keycapSku: "KC-OSA-PBT-WOB-141",
       stabSku: "KC-STAB-GOLD-SCREWIN-10",
-      theme: { base: "#1a1b2e", modifier: "#3d59a1", accent: "#7aa2f7", legend: "#c0cff7" },
+      theme: garageTheme("#1a1b2e", "#3d59a1", "#7aa2f7", "#c0cff7"),
       image: "https://www.keychron.com/cdn/shop/files/Keychron-Q1-Max-QMK-VIA-Wireless-Custom-Mechanical-Keyboard-75_-Layout-Aluminum-Black-Fully-Assembled-Knob-for-Mac-Windows-Linux-Gateron-Jupiter-Red.jpg?v=1753685590&width=150",
     },
     {
@@ -654,7 +666,7 @@ export default function GaragePage() {
       switchSku: "GAT-KS3-MY-PRO-110",
       keycapSku: "KC-OSA-PBT-RETRO-141",
       stabSku: "KC-STAB-GOLD-SCREWIN-10",
-      theme: { base: "#ffd1dc", modifier: "#d4145a", accent: "#ffffff", legend: "#4a0e30" },
+      theme: garageTheme("#ffd1dc", "#d4145a", "#ffffff", "#4a0e30"),
       image: "https://www.keychron.com/cdn/shop/files/Keychron-Q1-Max-QMK-VIA-Wireless-Custom-Mechanical-Keyboard-75_-Layout-Aluminum-Black-Fully-Assembled-Knob-for-Mac-Windows-Linux-Gateron-Jupiter-Red.jpg?v=1753685590&width=150",
     },
     {
@@ -667,7 +679,7 @@ export default function GaragePage() {
       switchSku: "GAT-KS3-MY-PRO-45",
       keycapSku: "KC-OSA-PBT-RETRO-141",
       stabSku: "KC-STAB-GOLD-SCREWIN-10",
-      theme: { base: "#f0d5c0", modifier: "#b87045", accent: "#e6db74", legend: "#2e2e2e" },
+      theme: garageTheme("#f0d5c0", "#b87045", "#e6db74", "#2e2e2e"),
       image: "https://www.keychron.com/cdn/shop/files/Keychron-Q2-Max-QMK-VIA-Wireless-Custom-Mechanical-Keyboard-65_-Layout-Aluminum-Black-Fully-Assembled-Knob-for-Mac-Windows-Linux-Gateron-Jupiter-Red.jpg?v=1754098803&width=150",
     },
     {
@@ -680,7 +692,7 @@ export default function GaragePage() {
       switchSku: "CHERRY-MX2A-BLK-110",
       keycapSku: "KC-CHERRY-PBT-DOLCH-143",
       stabSku: "KC-STAB-GOLD-SCREWIN-10",
-      theme: { base: "#5f7d53", modifier: "#2d3d26", accent: "#a6e22e", legend: "#ffffff" },
+      theme: garageTheme("#5f7d53", "#2d3d26", "#a6e22e", "#ffffff"),
       image: "https://www.keychron.com/cdn/shop/products/Gateron-KS-3-Milky-Yellow-Pro-Switch-Set.jpg?v=1664419753&width=150",
     },
     {
@@ -693,7 +705,7 @@ export default function GaragePage() {
       switchSku: "GAT-KS3-MY-PRO-110",
       keycapSku: "KC-CHERRY-PBT-BBY-143",
       stabSku: "KC-STAB-GOLD-SCREWIN-10",
-      theme: { base: "#e0f7fa", modifier: "#00b0ff", accent: "#ffffff", legend: "#001b29" },
+      theme: garageTheme("#e0f7fa", "#00b0ff", "#ffffff", "#001b29"),
       image: "https://www.keychron.com/cdn/shop/files/Keychron-Q1-Max-QMK-VIA-Wireless-Custom-Mechanical-Keyboard-75_-Layout-Aluminum-Black-Fully-Assembled-Knob-for-Mac-Windows-Linux-Gateron-Jupiter-Red.jpg?v=1753685590&width=150",
     },
   ], []);
@@ -951,19 +963,20 @@ export default function GaragePage() {
                 <span className="h-7 w-7 rounded-none border border-border block" style={{ backgroundColor: theme.base }} title="Base color" />
                 <span className="h-7 w-7 rounded-none border border-border block" style={{ backgroundColor: theme.modifier }} title="Modifiers color" />
                 <span className="h-7 w-7 rounded-none border border-border block" style={{ backgroundColor: theme.accent }} title="Accent color" />
-                <span className="h-7 w-7 rounded-none border border-border block" style={{ backgroundColor: theme.legend }} title="Legends color" />
+                <span className="h-7 w-7 rounded-none border border-border block" style={{ backgroundColor: theme.primaryLegend }} title="Primary legends color" />
+                <span className="h-7 w-7 rounded-none border border-border block" style={{ backgroundColor: theme.secondaryLegend }} title="Secondary legends color" />
               </div>
 
               {/* Visual Keycaps Mock */}
               <div className="grid grid-cols-2 gap-3 p-4 bg-muted/20 border border-border rounded-none">
-                <div className="aspect-square border border-border flex flex-col justify-between p-2" style={{ backgroundColor: theme.accent }}>
-                  <span className="text-[10px] font-bold" style={{ color: theme.legend }}>Esc</span>
+                <div className="aspect-square border border-border flex flex-col justify-between p-2" style={{ backgroundColor: theme.modifier }}>
+                  <span className="text-[10px] font-bold" style={{ color: theme.secondaryLegend }}>Esc</span>
                 </div>
                 <div className="aspect-square border border-border flex flex-col justify-between p-2" style={{ backgroundColor: theme.base }}>
-                  <span className="text-[10px] font-bold" style={{ color: theme.legend }}>A</span>
+                  <span className="text-[10px] font-bold" style={{ color: theme.primaryLegend }}>A</span>
                 </div>
                 <div className="col-span-2 h-12 border border-border flex flex-col justify-between p-2" style={{ backgroundColor: theme.accent }}>
-                  <span className="text-[10px] font-bold" style={{ color: theme.legend }}>↵ Enter</span>
+                  <span className="text-[10px] font-bold" style={{ color: theme.primaryLegend }}>↵ Enter</span>
                 </div>
               </div>
 
@@ -1004,10 +1017,16 @@ export default function GaragePage() {
                   onChange={(next) => patchTheme({ accent: next })}
                 />
                 <HexColorGroup
-                  key={`legend-${theme.legend}`}
-                  label="Legends"
-                  value={theme.legend}
-                  onChange={(next) => patchTheme({ legend: next })}
+                  key={`primary-legend-${theme.primaryLegend}`}
+                  label="Primary Legends"
+                  value={theme.primaryLegend}
+                  onChange={(next) => patchTheme({ primaryLegend: next })}
+                />
+                <HexColorGroup
+                  key={`secondary-legend-${theme.secondaryLegend}`}
+                  label="Secondary Legends"
+                  value={theme.secondaryLegend}
+                  onChange={(next) => patchTheme({ secondaryLegend: next })}
                 />
               </div>
             </div>
@@ -1724,23 +1743,21 @@ export default function GaragePage() {
             {/* Modal Body / Grid */}
             <div className="flex-1 overflow-y-auto py-6 grid grid-cols-1 md:grid-cols-3 gap-4 pr-1">
               {[
-                { id: "claude", name: "Claude", desc: "Clay · Cream · Espresso · Doubleshot", theme: { base: "#ffffff", modifier: "#7277a9", accent: "#ff79c6", legend: "#050505" } },
-                { id: "gemini", name: "Gemini", desc: "Spark · Blue · Indigo · Doubleshot", theme: { base: "#1a1b2e", modifier: "#3d59a1", accent: "#7aa2f7", legend: "#c0cff7" } },
-                { id: "sakura", name: "Sakura", desc: "Sakura · Neon · Ink · Doubleshot", theme: { base: "#ffd1dc", modifier: "#d4145a", accent: "#ffffff", legend: "#4a0e30" } },
-                { id: "gmk-botanical", name: "GMK Botanical", desc: "Sage · Cream · Charcoal · Doubleshot", theme: { base: "#e2decb", modifier: "#4f5e53", accent: "#a3b19b", legend: "#232f27" } },
-                { id: "gmk-deep-sea", name: "GMK Deep Sea", desc: "Navy · Mist · Plum · Doubleshot", theme: { base: "#0f172a", modifier: "#1e293b", accent: "#bd93f9", legend: "#f8f8f2" } },
-                { id: "gmk-dune", name: "GMK Dune", desc: "Sand · Tan · Clay · Doubleshot", theme: { base: "#ecd5b3", modifier: "#b88d5e", accent: "#ffffff", legend: "#4e3518" } },
-                { id: "gmk-mono", name: "GMK Mono", desc: "White · Black · Doubleshot", theme: { base: "#ffffff", modifier: "#111111", accent: "#111111", legend: "#888888" } },
-                { id: "gmk-shadow", name: "GMK Shadow", desc: "Stealth greys · Doubleshot", theme: { base: "#2d2d2d", modifier: "#1a1a1a", accent: "#1a1a1a", legend: "#cccccc" } },
-                { id: "gmk-moss", name: "GMK Moss", desc: "Olive · Fern · Bone · Doubleshot", theme: { base: "#fcf8e3", modifier: "#5b6c50", accent: "#7d9c66", legend: "#2d3627" } },
-                { id: "gmk-minimal-r", name: "GMK Minimal R", desc: "BoW with red accent · Doubleshot", theme: { base: "#ffffff", modifier: "#ffffff", accent: "#b91c1c", legend: "#000000" } },
-                { id: "gmk-rosette", name: "GMK Rosette", desc: "Rose · Ash · Cocoa · Doubleshot", theme: { base: "#f5ebe0", modifier: "#d5bdaf", accent: "#ffffff", legend: "#4f3c30" } },
+                { id: "claude", name: "Claude", desc: "Clay · Cream · Espresso · Doubleshot", theme: garageTheme("#ffffff", "#7277a9", "#ff79c6", "#050505") },
+                { id: "gemini", name: "Gemini", desc: "Spark · Blue · Indigo · Doubleshot", theme: garageTheme("#1a1b2e", "#3d59a1", "#7aa2f7", "#c0cff7") },
+                { id: "sakura", name: "Sakura", desc: "Sakura · Neon · Ink · Doubleshot", theme: garageTheme("#ffd1dc", "#d4145a", "#ffffff", "#4a0e30") },
+                { id: "gmk-botanical", name: "GMK Botanical", desc: "Sage · Cream · Charcoal · Doubleshot", theme: garageTheme("#e2decb", "#4f5e53", "#a3b19b", "#232f27") },
+                { id: "gmk-deep-sea", name: "GMK Deep Sea", desc: "Navy · Mist · Plum · Doubleshot", theme: garageTheme("#0f172a", "#1e293b", "#bd93f9", "#f8f8f2") },
+                { id: "gmk-dune", name: "GMK Dune", desc: "Sand · Tan · Clay · Doubleshot", theme: garageTheme("#ecd5b3", "#b88d5e", "#ffffff", "#4e3518") },
+                { id: "gmk-mono", name: "GMK Mono", desc: "White · Black · Doubleshot", theme: garageTheme("#ffffff", "#111111", "#111111", "#888888") },
+                { id: "gmk-shadow", name: "GMK Shadow", desc: "Stealth greys · Doubleshot", theme: garageTheme("#2d2d2d", "#1a1a1a", "#1a1a1a", "#cccccc") },
+                { id: "gmk-moss", name: "GMK Moss", desc: "Olive · Fern · Bone · Doubleshot", theme: garageTheme("#fcf8e3", "#5b6c50", "#7d9c66", "#2d3627") },
+                { id: "gmk-minimal-r", name: "GMK Minimal R", desc: "BoW with red accent · Doubleshot", theme: garageTheme("#ffffff", "#ffffff", "#b91c1c", "#000000") },
+                { id: "gmk-rosette", name: "GMK Rosette", desc: "Rose · Ash · Cocoa · Doubleshot", theme: garageTheme("#f5ebe0", "#d5bdaf", "#ffffff", "#4f3c30") },
               ].map((libItem) => {
-                const isSelected = activePresetId === libItem.id ||
-                  (theme.base === libItem.theme.base &&
-                   theme.modifier === libItem.theme.modifier &&
-                   theme.accent === libItem.theme.accent &&
-                   theme.legend === libItem.theme.legend);
+                const isSelected =
+                  activePresetId === libItem.id ||
+                  garageThemesEqual(theme, libItem.theme);
 
                 return (
                   <button
@@ -1763,6 +1780,8 @@ export default function GaragePage() {
                       <span className="h-5 w-5 rounded-none border border-zinc-200" style={{ backgroundColor: libItem.theme.base }} />
                       <span className="h-5 w-5 rounded-none border border-zinc-200" style={{ backgroundColor: libItem.theme.modifier }} />
                       <span className="h-5 w-5 rounded-none border border-zinc-200" style={{ backgroundColor: libItem.theme.accent }} />
+                      <span className="h-5 w-5 rounded-none border border-zinc-200" style={{ backgroundColor: libItem.theme.primaryLegend }} />
+                      <span className="h-5 w-5 rounded-none border border-zinc-200" style={{ backgroundColor: libItem.theme.secondaryLegend }} />
                     </div>
                     {/* Title & Desc */}
                     <p className="font-bold text-sm text-zinc-950">{libItem.name}</p>

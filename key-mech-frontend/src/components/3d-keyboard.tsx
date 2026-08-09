@@ -158,36 +158,37 @@ function buildGarageKeycapMaterial({
     GARAGE_ATLAS_HEIGHT,
   );
 
-  const imageData = ctx.getImageData(
-    0,
-    0,
-    GARAGE_ATLAS_WIDTH,
-    GARAGE_ATLAS_HEIGHT,
-  );
-  const maskData = maskCtx.getImageData(
-    0,
-    0,
-    GARAGE_ATLAS_WIDTH,
-    GARAGE_ATLAS_HEIGHT,
-  ).data;
-  const [legendR, legendG, legendB] = readCanvasColor(theme.legend);
+  for (const region of GARAGE_ATLAS_REGIONS) {
+    const width = region.w;
+    const height = region.h ?? u;
+    const imageData = ctx.getImageData(region.x, region.y, width, height);
+    const maskData = maskCtx.getImageData(region.x, region.y, width, height).data;
+    const legendColor =
+      garageKeycapRole(region.id) === "modifier"
+        ? theme.secondaryLegend
+        : theme.primaryLegend;
+    const [legendR, legendG, legendB] = readCanvasColor(legendColor);
 
-  for (let i = 0; i < imageData.data.length; i += 4) {
-    const luminance =
-      0.2126 * maskData[i] + 0.7152 * maskData[i + 1] + 0.0722 * maskData[i + 2];
-    const maskAlpha = maskData[i + 3] / 255;
-    const legendAlpha = Math.max(0, Math.min(1, (luminance - 40) / 215)) * maskAlpha;
-    if (legendAlpha <= 0) continue;
+    for (let i = 0; i < imageData.data.length; i += 4) {
+      const luminance =
+        0.2126 * maskData[i] +
+        0.7152 * maskData[i + 1] +
+        0.0722 * maskData[i + 2];
+      const maskAlpha = maskData[i + 3] / 255;
+      const legendAlpha =
+        Math.max(0, Math.min(1, (luminance - 40) / 215)) * maskAlpha;
+      if (legendAlpha <= 0) continue;
 
-    imageData.data[i] =
-      imageData.data[i] * (1 - legendAlpha) + legendR * legendAlpha;
-    imageData.data[i + 1] =
-      imageData.data[i + 1] * (1 - legendAlpha) + legendG * legendAlpha;
-    imageData.data[i + 2] =
-      imageData.data[i + 2] * (1 - legendAlpha) + legendB * legendAlpha;
+      imageData.data[i] =
+        imageData.data[i] * (1 - legendAlpha) + legendR * legendAlpha;
+      imageData.data[i + 1] =
+        imageData.data[i + 1] * (1 - legendAlpha) + legendG * legendAlpha;
+      imageData.data[i + 2] =
+        imageData.data[i + 2] * (1 - legendAlpha) + legendB * legendAlpha;
+    }
+
+    ctx.putImageData(imageData, region.x, region.y);
   }
-
-  ctx.putImageData(imageData, 0, 0);
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.flipY = false;

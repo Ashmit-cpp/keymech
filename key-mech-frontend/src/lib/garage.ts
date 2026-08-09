@@ -7,6 +7,7 @@ import type {
 import {
   cloneGarageTheme,
   DEFAULT_GARAGE_PRESET,
+  readableLegendColor,
   type GarageKeycapTheme,
 } from "@/lib/garage-theme";
 
@@ -175,12 +176,22 @@ export const getGarageTheme = (value: unknown): GarageKeycapTheme => {
   }
   const record = parsed as Record<string, unknown>;
   const fallback = DEFAULT_GARAGE_PRESET.theme;
+  const modifier =
+    typeof record.modifier === "string" ? record.modifier : fallback.modifier;
+  const legacyLegend =
+    typeof record.legend === "string" ? record.legend : undefined;
   return {
     base: typeof record.base === "string" ? record.base : fallback.base,
-    modifier:
-      typeof record.modifier === "string" ? record.modifier : fallback.modifier,
+    modifier,
     accent: typeof record.accent === "string" ? record.accent : fallback.accent,
-    legend: typeof record.legend === "string" ? record.legend : fallback.legend,
+    primaryLegend:
+      typeof record.primaryLegend === "string"
+        ? record.primaryLegend
+        : legacyLegend ?? fallback.primaryLegend,
+    secondaryLegend:
+      typeof record.secondaryLegend === "string"
+        ? record.secondaryLegend
+        : readableLegendColor(modifier),
   };
 };
 
