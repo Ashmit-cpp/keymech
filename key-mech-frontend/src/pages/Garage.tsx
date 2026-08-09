@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useState, useRef } from "react";
+import { useCallback, useEffect, useId, useMemo, useState, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -150,6 +150,7 @@ export default function GaragePage() {
   const featuredSlug = searchParams.get("featured");
   const featuredColorway = searchParams.get("colorway");
   const featuredAppliedRef = useRef<string | null>(null);
+  const defaultFeaturedAppliedRef = useRef(false);
   const { isAuthenticated } = useAuthStore();
 
   // Redesign state: tabs
@@ -226,7 +227,7 @@ export default function GaragePage() {
     createBuild.status === "pending" ||
     updateBuild.status === "pending" ||
     addGarageBuild.status === "pending";
-  const [activeBuildId, setActiveBuildId] = useState<string>("gemini");
+  const [activeBuildId, setActiveBuildId] = useState<string | null>(null);
 
   useEffect(() => {
     const build = editBuild.data?.data;
@@ -338,7 +339,6 @@ export default function GaragePage() {
     setTheme({ ...texture.garageTheme });
     setActiveTab("keycaps");
     setActiveBuildId(featuredKey);
-    navigate("/garage", { replace: true });
     toast.success(`${texture.name} complete build loaded in Garage`);
   }, [
     caseQuery.data?.data,
@@ -346,7 +346,6 @@ export default function GaragePage() {
     editBuildId,
     featuredColorway,
     featuredSlug,
-    navigate,
     keycapQuery.data?.data,
     keycapQuery.isLoading,
     pcbQuery.data?.data,
@@ -618,7 +617,7 @@ export default function GaragePage() {
   }, [selectedProducts.plate]);
 
   // Featured builds local database matching presets
-  const FEATURED_BUILDS = [
+  const FEATURED_BUILDS = useMemo(() => [
     {
       id: "claude",
       name: "Claude",
@@ -697,9 +696,9 @@ export default function GaragePage() {
       theme: { base: "#e0f7fa", modifier: "#00b0ff", accent: "#ffffff", legend: "#001b29" },
       image: "https://www.keychron.com/cdn/shop/files/Keychron-Q1-Max-QMK-VIA-Wireless-Custom-Mechanical-Keyboard-75_-Layout-Aluminum-Black-Fully-Assembled-Knob-for-Mac-Windows-Linux-Gateron-Jupiter-Red.jpg?v=1753685590&width=150",
     },
-  ];
+  ], []);
 
-  const applyFeaturedBuild = (build: (typeof FEATURED_BUILDS)[number]) => {
+  const applyFeaturedBuild = useCallback((build: (typeof FEATURED_BUILDS)[number]) => {
     setActiveBuildId(build.id);
     const cases = caseQuery.data?.data ?? [];
     const pcbs = pcbQuery.data?.data ?? [];
@@ -736,7 +735,54 @@ export default function GaragePage() {
 
     setTheme(cloneGarageTheme(build.theme));
     toast.info(`Loaded Featured Build: ${build.name}`);
-  };
+  }, [
+    caseQuery.data?.data,
+    keycapQuery.data?.data,
+    pcbQuery.data?.data,
+    plateQuery.data?.data,
+    setLayout,
+    setSelection,
+    setTheme,
+    stabilizerQuery.data?.data,
+    switchQuery.data?.data,
+  ]);
+
+  useEffect(() => {
+    if (
+      defaultFeaturedAppliedRef.current ||
+      editBuildId ||
+      featuredSlug ||
+      savedBuildId ||
+      GARAGE_SLOTS.some(({ id }) => selections[id].productId) ||
+      caseQuery.isLoading ||
+      pcbQuery.isLoading ||
+      plateQuery.isLoading ||
+      switchQuery.isLoading ||
+      keycapQuery.isLoading ||
+      stabilizerQuery.isLoading
+    ) {
+      return;
+    }
+
+    const defaultBuild = FEATURED_BUILDS.find((build) => build.id === "gemini");
+    if (!defaultBuild) return;
+
+    defaultFeaturedAppliedRef.current = true;
+    applyFeaturedBuild(defaultBuild);
+  }, [
+    FEATURED_BUILDS,
+    applyFeaturedBuild,
+    caseQuery.isLoading,
+    editBuildId,
+    featuredSlug,
+    keycapQuery.isLoading,
+    pcbQuery.isLoading,
+    plateQuery.isLoading,
+    savedBuildId,
+    selections,
+    stabilizerQuery.isLoading,
+    switchQuery.isLoading,
+  ]);
 
   // Carousel ref and scrolling helpers
   const carouselRef = useRef<HTMLDivElement>(null);
