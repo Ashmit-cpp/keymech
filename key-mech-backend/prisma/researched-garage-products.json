@@ -53,7 +53,14 @@
               "colorwayId": "carbon-crimson",
               "textureId": "textured1",
               "texturePath": "/t6.webp",
-              "format": "assembled"
+              "format": "assembled",
+              "garageComponents": {
+                "pcbSku": "GARAGE-PCB-75-HS",
+                "plateSku": "GARAGE-PLATE-75-PC",
+                "switchSku": "GAT-KS3-MY-PRO-110",
+                "keycapSku": "KC-OSA-PBT-WOB-141",
+                "stabilizerSku": "KC-STAB-GOLD-SCREWIN-10"
+              }
             }
           },
           {
@@ -69,7 +76,14 @@
               "colorwayId": "midnight-cyan",
               "textureId": "textured2",
               "texturePath": "/t2.webp",
-              "format": "assembled"
+              "format": "assembled",
+              "garageComponents": {
+                "pcbSku": "GARAGE-PCB-75-HS",
+                "plateSku": "GARAGE-PLATE-75-PC",
+                "switchSku": "GAT-KS3-MY-PRO-110",
+                "keycapSku": "KC-OSA-PBT-WOB-141",
+                "stabilizerSku": "KC-STAB-GOLD-SCREWIN-10"
+              }
             }
           },
           {
@@ -85,7 +99,14 @@
               "colorwayId": "forest-rose",
               "textureId": "textured3",
               "texturePath": "/t3.webp",
-              "format": "assembled"
+              "format": "assembled",
+              "garageComponents": {
+                "pcbSku": "GARAGE-PCB-75-HS",
+                "plateSku": "GARAGE-PLATE-75-PC",
+                "switchSku": "GAT-KS3-MY-PRO-110",
+                "keycapSku": "KC-OSA-PBT-RETRO-141",
+                "stabilizerSku": "KC-STAB-GOLD-SCREWIN-10"
+              }
             }
           }
         ]

@@ -129,6 +129,18 @@ function productUnitPrice(
   return product ? product.price + (variant?.extraPrice ?? 0) : 0;
 }
 
+function productAndVariantBySku(
+  products: ProductResponseDto[],
+  sku: unknown,
+) {
+  if (typeof sku !== "string") return null;
+  const product = products.find((candidate) =>
+    candidate.variants.some((variant) => variant.sku === sku),
+  );
+  const variant = product?.variants.find((candidate) => candidate.sku === sku);
+  return product && variant ? { product, variant } : null;
+}
+
 export default function GaragePage() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -213,6 +225,7 @@ export default function GaragePage() {
     createBuild.status === "pending" ||
     updateBuild.status === "pending" ||
     addGarageBuild.status === "pending";
+  const [activeBuildId, setActiveBuildId] = useState<string>("gemini");
 
   useEffect(() => {
     const build = editBuild.data?.data;
@@ -225,7 +238,17 @@ export default function GaragePage() {
     if (editBuildId || featuredSlug !== "specter-75" || !featuredColorway) return;
 
     const featuredKey = `${featuredSlug}:${featuredColorway}`;
-    if (featuredAppliedRef.current === featuredKey || caseQuery.isLoading) return;
+    if (
+      featuredAppliedRef.current === featuredKey ||
+      caseQuery.isLoading ||
+      pcbQuery.isLoading ||
+      plateQuery.isLoading ||
+      switchQuery.isLoading ||
+      keycapQuery.isLoading ||
+      stabilizerQuery.isLoading
+    ) {
+      return;
+    }
 
     const product = caseQuery.data?.data?.find(
       (candidate) => candidate.slug === featuredSlug,
@@ -242,9 +265,50 @@ export default function GaragePage() {
         (specs as Record<string, unknown>).colorwayId === featuredColorway
       );
     });
+    const parsedSpecs = parseJsonish(variant?.specs);
+    const garageComponents =
+      parsedSpecs && typeof parsedSpecs === "object" && !Array.isArray(parsedSpecs)
+        ? (parsedSpecs as Record<string, unknown>).garageComponents
+        : null;
+    const componentSkus =
+      garageComponents &&
+      typeof garageComponents === "object" &&
+      !Array.isArray(garageComponents)
+        ? (garageComponents as Record<string, unknown>)
+        : null;
+
+    const pcb = productAndVariantBySku(
+      pcbQuery.data?.data ?? [],
+      componentSkus?.pcbSku,
+    );
+    const plate = productAndVariantBySku(
+      plateQuery.data?.data ?? [],
+      componentSkus?.plateSku,
+    );
+    const switches = productAndVariantBySku(
+      switchQuery.data?.data ?? [],
+      componentSkus?.switchSku,
+    );
+    const keycaps = productAndVariantBySku(
+      keycapQuery.data?.data ?? [],
+      componentSkus?.keycapSku,
+    );
+    const stabilizers = productAndVariantBySku(
+      stabilizerQuery.data?.data ?? [],
+      componentSkus?.stabilizerSku,
+    );
 
     featuredAppliedRef.current = featuredKey;
-    if (!product || !variant || !texture) {
+    if (
+      !product ||
+      !variant ||
+      !texture ||
+      !pcb ||
+      !plate ||
+      !switches ||
+      !keycaps ||
+      !stabilizers
+    ) {
       toast.error("The selected Specter 75 configuration is unavailable.");
       return;
     }
@@ -253,10 +317,28 @@ export default function GaragePage() {
     setName(`Specter 75 — ${texture.name}`);
     setLayout("75");
     setSelection("case", { productId: product.id, variantId: variant.id });
+    setSelection("pcb", { productId: pcb.product.id, variantId: pcb.variant.id });
+    setSelection("plate", {
+      productId: plate.product.id,
+      variantId: plate.variant.id,
+    });
+    setSelection("switches", {
+      productId: switches.product.id,
+      variantId: switches.variant.id,
+    });
+    setSelection("keycaps", {
+      productId: keycaps.product.id,
+      variantId: keycaps.variant.id,
+    });
+    setSelection("stabilizers", {
+      productId: stabilizers.product.id,
+      variantId: stabilizers.variant.id,
+    });
     setTheme({ ...texture.garageTheme });
     setActiveTab("keycaps");
+    setActiveBuildId(featuredKey);
     navigate("/garage", { replace: true });
-    toast.success(`${texture.name} loaded in Garage`);
+    toast.success(`${texture.name} complete build loaded in Garage`);
   }, [
     caseQuery.data?.data,
     caseQuery.isLoading,
@@ -264,11 +346,21 @@ export default function GaragePage() {
     featuredColorway,
     featuredSlug,
     navigate,
+    keycapQuery.data?.data,
+    keycapQuery.isLoading,
+    pcbQuery.data?.data,
+    pcbQuery.isLoading,
+    plateQuery.data?.data,
+    plateQuery.isLoading,
     reset,
     setLayout,
     setName,
     setSelection,
     setTheme,
+    stabilizerQuery.data?.data,
+    stabilizerQuery.isLoading,
+    switchQuery.data?.data,
+    switchQuery.isLoading,
   ]);
 
   const productsBySlot = useMemo(
@@ -586,8 +678,6 @@ export default function GaragePage() {
       image: "https://www.keychron.com/cdn/shop/files/Keychron-Q1-Max-QMK-VIA-Wireless-Custom-Mechanical-Keyboard-75_-Layout-Aluminum-Black-Fully-Assembled-Knob-for-Mac-Windows-Linux-Gateron-Jupiter-Red.jpg?v=1753685590&width=150",
     },
   ];
-
-  const [activeBuildId, setActiveBuildId] = useState<string>("gemini");
 
   const applyFeaturedBuild = (build: (typeof FEATURED_BUILDS)[number]) => {
     setActiveBuildId(build.id);
