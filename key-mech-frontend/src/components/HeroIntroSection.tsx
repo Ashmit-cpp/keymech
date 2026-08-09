@@ -29,12 +29,14 @@ interface HeroIntroSectionProps {
   sectionRef?: RefCallback<HTMLElement>;
   dataSection?: number;
   onShopKeyboards?: () => void;
+  isProductLoading?: boolean;
 }
 
 export default function HeroIntroSection({
   sectionRef,
   dataSection,
   onShopKeyboards,
+  isProductLoading = false,
 }: HeroIntroSectionProps) {
   return (
     <section
@@ -88,8 +90,9 @@ export default function HeroIntroSection({
             variant="landing"
             className="group flex items-center gap-3"
             onClick={onShopKeyboards}
+            disabled={isProductLoading || !onShopKeyboards}
           >
-            Shop Specter 75
+            {isProductLoading ? "Loading Specter 75…" : "Shop Specter 75"}
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Button>
         </motion.div>

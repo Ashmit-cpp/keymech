@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useState, useMemo, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,7 @@ import { useAuthStore } from "@/stores/auth-store";
 import { useGuestCartStore } from "@/stores/cart-store";
 import { useGuestWishlistStore } from "@/stores/wishlist-store";
 import { getStringArray } from "@/lib/product-utils";
+import { parseJsonish } from "@/lib/garage";
 
 const CATEGORY_DISPLAY_MAP: Record<string, { label: string; path: string }> = {
   keyboard: { label: "Keyboards", path: "/category/keyboards" },
@@ -25,6 +26,8 @@ const CATEGORY_DISPLAY_MAP: Record<string, { label: string; path: string }> = {
 
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
+  const requestedColorway = searchParams.get("colorway");
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { isAuthenticated } = useAuthStore();
@@ -47,6 +50,26 @@ export default function ProductDetailPage() {
   const [selectedVariant, setSelectedVariant] = useState<any | null>(null);
   const [addError, setAddError] = useState<string | null>(null);
   const [justAddedToWishlist, setJustAddedToWishlist] = useState(false);
+
+  useEffect(() => {
+    if (!product?.variants?.length) {
+      setSelectedVariant(null);
+      return;
+    }
+
+    const requested = requestedColorway
+      ? product.variants.find((variant: any) => {
+          const specs = parseJsonish(variant.specs);
+          return (
+            specs &&
+            typeof specs === "object" &&
+            !Array.isArray(specs) &&
+            (specs as Record<string, unknown>).colorwayId === requestedColorway
+          );
+        })
+      : undefined;
+    setSelectedVariant(requested ?? product.variants[0]);
+  }, [product?.id, product?.variants, requestedColorway]);
 
   const images: string[] = useMemo(() => {
     return getStringArray(product?.images);

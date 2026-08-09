@@ -45,11 +45,13 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import {
   GARAGE_SLOTS,
+  parseJsonish,
   supportsGarageLayout,
   toGarageSelectionsDto,
   type GarageLayout,
   type GarageSlot,
 } from "@/lib/garage";
+import { KEYCAP_TEXTURES } from "@/lib/constants";
 import {
   cloneGarageTheme,
   findMatchingPresetId,
@@ -132,6 +134,9 @@ export default function GaragePage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const editBuildId = searchParams.get("buildId");
+  const featuredSlug = searchParams.get("featured");
+  const featuredColorway = searchParams.get("colorway");
+  const featuredAppliedRef = useRef<string | null>(null);
   const { isAuthenticated } = useAuthStore();
 
   // Redesign state: tabs
@@ -162,6 +167,7 @@ export default function GaragePage() {
     savedBuildId,
     isPublic,
     dirty,
+    setName,
     setLayout,
     setSelection,
     setTheme,
@@ -215,6 +221,56 @@ export default function GaragePage() {
     }
   }, [editBuild.data?.data, loadBuild, savedBuildId]);
 
+  useEffect(() => {
+    if (editBuildId || featuredSlug !== "specter-75" || !featuredColorway) return;
+
+    const featuredKey = `${featuredSlug}:${featuredColorway}`;
+    if (featuredAppliedRef.current === featuredKey || caseQuery.isLoading) return;
+
+    const product = caseQuery.data?.data?.find(
+      (candidate) => candidate.slug === featuredSlug,
+    );
+    const texture = KEYCAP_TEXTURES.find(
+      (candidate) => candidate.colorwayId === featuredColorway,
+    );
+    const variant = product?.variants.find((candidate) => {
+      const specs = parseJsonish(candidate.specs);
+      return (
+        specs &&
+        typeof specs === "object" &&
+        !Array.isArray(specs) &&
+        (specs as Record<string, unknown>).colorwayId === featuredColorway
+      );
+    });
+
+    featuredAppliedRef.current = featuredKey;
+    if (!product || !variant || !texture) {
+      toast.error("The selected Specter 75 configuration is unavailable.");
+      return;
+    }
+
+    reset();
+    setName(`Specter 75 — ${texture.name}`);
+    setLayout("75");
+    setSelection("case", { productId: product.id, variantId: variant.id });
+    setTheme({ ...texture.garageTheme });
+    setActiveTab("keycaps");
+    navigate("/garage", { replace: true });
+    toast.success(`${texture.name} loaded in Garage`);
+  }, [
+    caseQuery.data?.data,
+    caseQuery.isLoading,
+    editBuildId,
+    featuredColorway,
+    featuredSlug,
+    navigate,
+    reset,
+    setLayout,
+    setName,
+    setSelection,
+    setTheme,
+  ]);
+
   const productsBySlot = useMemo(
     () => ({
       case: caseQuery.data?.data ?? [],
@@ -249,6 +305,17 @@ export default function GaragePage() {
       { product?: ProductResponseDto; variant: ProductVariantResponseDto | null }
     >;
   }, [productsBySlot, selections]);
+
+  const selectedTextureId = useMemo(() => {
+    const specs = parseJsonish(selectedProducts.case.variant?.specs);
+    if (!specs || typeof specs !== "object" || Array.isArray(specs)) {
+      return KEYCAP_TEXTURES[0].id;
+    }
+    const textureId = (specs as Record<string, unknown>).textureId;
+    return KEYCAP_TEXTURES.some((texture) => texture.id === textureId)
+      ? (textureId as (typeof KEYCAP_TEXTURES)[number]["id"])
+      : KEYCAP_TEXTURES[0].id;
+  }, [selectedProducts.case.variant?.specs]);
 
   const derived = useMemo(() => {
     const errors: string[] = [];
@@ -708,7 +775,7 @@ export default function GaragePage() {
           </div>
         );
 
-      case "keycaps":
+      case "keycaps": {
         const activeColorwayName = activePresetId
           ? GARAGE_THEME_PRESETS.find((p) => p.id === activePresetId)?.name
           : "Custom Colorway";
@@ -790,6 +857,7 @@ export default function GaragePage() {
             </div>
           </div>
         );
+      }
 
       case "switches":
         return (
@@ -1249,6 +1317,7 @@ export default function GaragePage() {
           <GltfKeyboardViewer
             embedded
             garageKeycapTheme={theme}
+            selectedTextureId={selectedTextureId}
             isInteractive
             isHeroKeyboardInView={false}
             viewMode={viewMode}

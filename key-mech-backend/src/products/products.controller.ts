@@ -60,6 +60,19 @@ export class ProductsController {
     return this.service.findAll({ search, category });
   }
 
+  @Get('slug/:slug')
+  @ApiOperation({ summary: 'Get a product by slug' })
+  @ApiParam({ name: 'slug', description: 'Stable product slug' })
+  @ApiResponse({
+    status: 200,
+    description: 'Product found',
+    type: ProductResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Product not found' })
+  findOneBySlug(@Param('slug') slug: string) {
+    return this.service.findOneBySlug(slug);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get a product by ID' })
   @ApiParam({ name: 'id', description: 'Product UUID' })

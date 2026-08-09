@@ -104,6 +104,39 @@
         ]
       }
     },
+    "/products/slug/{slug}": {
+      "get": {
+        "operationId": "ProductsController_findOneBySlug",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "description": "Stable product slug",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found"
+          }
+        },
+        "summary": "Get a product by slug",
+        "tags": [
+          "products"
+        ]
+      }
+    },
     "/products/{id}": {
       "get": {
         "operationId": "ProductsController_findOne",
@@ -1503,6 +1536,7 @@
           },
           "product": {
             "nullable": true,
+            "type": "object",
             "allOf": [
               {
                 "$ref": "#/components/schemas/ProductResponseDto"
@@ -1511,6 +1545,7 @@
           },
           "variant": {
             "nullable": true,
+            "type": "object",
             "allOf": [
               {
                 "$ref": "#/components/schemas/ProductVariantResponseDto"
@@ -1898,6 +1933,7 @@
           },
           "product": {
             "nullable": true,
+            "type": "object",
             "allOf": [
               {
                 "$ref": "#/components/schemas/OrderProductResponseDto"
@@ -1906,6 +1942,7 @@
           },
           "variant": {
             "nullable": true,
+            "type": "object",
             "allOf": [
               {
                 "$ref": "#/components/schemas/OrderVariantResponseDto"
@@ -1986,6 +2023,7 @@
           },
           "user": {
             "nullable": true,
+            "type": "object",
             "allOf": [
               {
                 "$ref": "#/components/schemas/OrderUserResponseDto"

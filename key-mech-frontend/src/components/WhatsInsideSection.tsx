@@ -1,6 +1,6 @@
 import type { RefCallback } from "react";
 import { motion } from "motion/react";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, Wrench } from "lucide-react";
 import { KeyboardAsideSection } from "@/components/keyboard-aside-section";
 import { Button } from "@/components/ui/button";
 import { KEYCAP_TEXTURES } from "@/lib/constants";
@@ -12,6 +12,12 @@ interface WhatsInsideSectionProps {
   dataSection?: number;
   selectedTextureId?: KeycapTexture["id"];
   applyTexture?: (texture: KeycapTexture) => void;
+  onAddToCart?: () => void | Promise<unknown>;
+  onBuyNow?: () => void | Promise<unknown>;
+  onCustomizeInGarage?: () => void;
+  isCommercePending?: boolean;
+  isProductLoading?: boolean;
+  hasProductError?: boolean;
 }
 
 export default function WhatsInsideSection({
@@ -19,6 +25,12 @@ export default function WhatsInsideSection({
   dataSection,
   selectedTextureId,
   applyTexture,
+  onAddToCart,
+  onBuyNow,
+  onCustomizeInGarage,
+  isCommercePending = false,
+  isProductLoading = false,
+  hasProductError = false,
 }: WhatsInsideSectionProps) {
   return (
     <div>
@@ -56,7 +68,7 @@ export default function WhatsInsideSection({
               </p>
 
               <div className="mt-8 font-serif text-5xl font-bold leading-none tracking-[-0.03em] text-foreground">
-                $200
+                ₹16,999
               </div>
             </motion.div>
 
@@ -127,18 +139,37 @@ export default function WhatsInsideSection({
                 size="lg"
                 variant="landing"
                 className="group w-full"
+                onClick={onAddToCart}
+                disabled={isCommercePending || isProductLoading || hasProductError}
               >
-                <span>Add to Cart</span>
+                <span>{isCommercePending ? "Adding…" : "Add to Cart"}</span>
                 <ArrowUpRight className="ml-4 h-[14px] w-[14px] opacity-70 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
               </Button>
               <Button
                 size="lg"
                 variant="outline"
                 className="group w-full"
+                onClick={onBuyNow}
+                disabled={isCommercePending || isProductLoading || hasProductError}
               >
                 <span>Buy Now</span>
                 <ArrowUpRight className="ml-4 h-[14px] w-[14px] opacity-70 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
               </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="group w-full"
+                onClick={onCustomizeInGarage}
+                disabled={isProductLoading || hasProductError}
+              >
+                <span>Customize in Garage</span>
+                <Wrench className="ml-4 h-[14px] w-[14px] opacity-70 transition-transform group-hover:rotate-12" />
+              </Button>
+              {hasProductError && (
+                <p className="text-sm font-medium text-destructive" role="alert">
+                  Specter 75 is temporarily unavailable. Please try again later.
+                </p>
+              )}
             </motion.div>
           </div>
         </div>

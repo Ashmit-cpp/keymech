@@ -1,6 +1,102 @@
 {
   "products": [
     {
+      "name": "Specter 75",
+      "slug": "specter-75",
+      "description": "An assembled 75% aluminum gasket-mount mechanical keyboard with hot-swap support, tri-mode connectivity, south-facing RGB, and QMK/VIA customization.",
+      "price": 1699900,
+      "category": "KEYBOARD",
+      "status": "IN_STOCK",
+      "images": [
+        "/landing.webp"
+      ],
+      "gallery": [
+        "/landing.webp"
+      ],
+      "technicalSpec": "{\"supportedLayouts\":[\"75\",\"P75\"],\"format\":\"assembled\",\"features\":[\"User-defined key bindings\",\"Dynamic RGB engine\",\"Onboard profiles\",\"USB-C connectivity\",\"Bluetooth\",\"2.4 GHz wireless\"]}",
+      "keyboardSpec": {
+        "create": {
+          "layout": "P75",
+          "mountingStyle": "GASKET",
+          "caseMaterial": "ALUMINUM",
+          "rgbOrientation": "SOUTH",
+          "hotSwap": true,
+          "switchCompatibility": "BOTH",
+          "connectivity": [
+            "WIRED",
+            "BLUETOOTH",
+            "TWO_POINT_FOUR_GHZ"
+          ],
+          "plateMaterial": "PC",
+          "plateMountIncluded": true,
+          "stabilizerType": "SCREW_IN",
+          "firmware": "QMK/VIA",
+          "isoAnsi": "ANSI",
+          "notes": "Assembled Specter 75 with a 75% gasket-mount aluminum chassis, hot-swap PCB, PC plate, and south-facing RGB."
+        }
+      },
+      "variants": {
+        "create": [
+          {
+            "name": "Carbon Crimson",
+            "sku": "KM-S75-CC",
+            "extraPrice": 0,
+            "images": [
+              "/landing.webp"
+            ],
+            "specs": {
+              "layout": "75",
+              "supportedLayouts": [
+                "75",
+                "P75"
+              ],
+              "colorwayId": "carbon-crimson",
+              "textureId": "textured1",
+              "texturePath": "/t6.webp",
+              "format": "assembled"
+            }
+          },
+          {
+            "name": "Midnight Cyan",
+            "sku": "KM-S75-MC",
+            "extraPrice": 0,
+            "specs": {
+              "layout": "75",
+              "supportedLayouts": [
+                "75",
+                "P75"
+              ],
+              "colorwayId": "midnight-cyan",
+              "textureId": "textured2",
+              "texturePath": "/t2.webp",
+              "format": "assembled"
+            }
+          },
+          {
+            "name": "Forest Rose",
+            "sku": "KM-S75-FR",
+            "extraPrice": 0,
+            "specs": {
+              "layout": "75",
+              "supportedLayouts": [
+                "75",
+                "P75"
+              ],
+              "colorwayId": "forest-rose",
+              "textureId": "textured3",
+              "texturePath": "/t3.webp",
+              "format": "assembled"
+            }
+          }
+        ]
+      },
+      "inventory": {
+        "create": {
+          "stock": 100
+        }
+      }
+    },
+    {
       "name": "Keychron Q2 Max Barebone Kit",
       "slug": "keychron-q2-max-barebone-kit",
       "description": "65% full-metal barebone keyboard kit with gasket mount, hot-swap PCB, PC plate, south-facing RGB, QMK/VIA support, and tri-mode connectivity.",

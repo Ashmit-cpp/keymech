@@ -1196,6 +1196,207 @@ export function useProductsControllerFindAll<
 }
 
 /**
+ * @summary Get a product by slug
+ */
+export type productsControllerFindOneBySlugResponse200 = {
+  data: ProductResponseDto;
+  status: 200;
+};
+
+export type productsControllerFindOneBySlugResponse404 = {
+  data: void;
+  status: 404;
+};
+
+export type productsControllerFindOneBySlugResponseSuccess =
+  productsControllerFindOneBySlugResponse200 & {
+    headers: Headers;
+  };
+export type productsControllerFindOneBySlugResponseError =
+  productsControllerFindOneBySlugResponse404 & {
+    headers: Headers;
+  };
+
+export type productsControllerFindOneBySlugResponse =
+  | productsControllerFindOneBySlugResponseSuccess
+  | productsControllerFindOneBySlugResponseError;
+
+export const getProductsControllerFindOneBySlugUrl = (slug: unknown) => {
+  return `/products/slug/${slug}`;
+};
+
+export const productsControllerFindOneBySlug = async (
+  slug: unknown,
+  options?: RequestInit,
+): Promise<productsControllerFindOneBySlugResponse> => {
+  return customFetch<productsControllerFindOneBySlugResponse>(
+    getProductsControllerFindOneBySlugUrl(slug),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getProductsControllerFindOneBySlugQueryKey = (slug?: unknown) => {
+  return [`/products/slug/${slug}`] as const;
+};
+
+export const getProductsControllerFindOneBySlugQueryOptions = <
+  TData = Awaited<ReturnType<typeof productsControllerFindOneBySlug>>,
+  TError = void,
+>(
+  slug: unknown,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof productsControllerFindOneBySlug>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getProductsControllerFindOneBySlugQueryKey(slug);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof productsControllerFindOneBySlug>>
+  > = ({ signal }) =>
+    productsControllerFindOneBySlug(slug, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!slug,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof productsControllerFindOneBySlug>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type ProductsControllerFindOneBySlugQueryResult = NonNullable<
+  Awaited<ReturnType<typeof productsControllerFindOneBySlug>>
+>;
+export type ProductsControllerFindOneBySlugQueryError = void;
+
+export function useProductsControllerFindOneBySlug<
+  TData = Awaited<ReturnType<typeof productsControllerFindOneBySlug>>,
+  TError = void,
+>(
+  slug: unknown,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof productsControllerFindOneBySlug>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof productsControllerFindOneBySlug>>,
+          TError,
+          Awaited<ReturnType<typeof productsControllerFindOneBySlug>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useProductsControllerFindOneBySlug<
+  TData = Awaited<ReturnType<typeof productsControllerFindOneBySlug>>,
+  TError = void,
+>(
+  slug: unknown,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof productsControllerFindOneBySlug>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof productsControllerFindOneBySlug>>,
+          TError,
+          Awaited<ReturnType<typeof productsControllerFindOneBySlug>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useProductsControllerFindOneBySlug<
+  TData = Awaited<ReturnType<typeof productsControllerFindOneBySlug>>,
+  TError = void,
+>(
+  slug: unknown,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof productsControllerFindOneBySlug>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Get a product by slug
+ */
+
+export function useProductsControllerFindOneBySlug<
+  TData = Awaited<ReturnType<typeof productsControllerFindOneBySlug>>,
+  TError = void,
+>(
+  slug: unknown,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof productsControllerFindOneBySlug>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getProductsControllerFindOneBySlugQueryOptions(
+    slug,
+    options,
+  );
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+/**
  * @summary Get a product by ID
  */
 export type productsControllerFindOneResponse200 = {

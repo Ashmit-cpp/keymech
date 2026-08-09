@@ -102,6 +102,21 @@ export class ProductsService {
     return p;
   }
 
+  async findOneBySlug(slug: string) {
+    const product = await this.prisma.product.findUnique({
+      where: { slug },
+      include: {
+        variants: true,
+        keyboardSpec: true,
+        switchSpec: true,
+        keycapSpec: true,
+      },
+    });
+
+    if (!product) throw new NotFoundException('Product not found');
+    return product;
+  }
+
   async update(id: string, dto: UpdateProductDto) {
     await this.findOne(id); // will throw if not found
     // Basic approach: update top-level fields only. For nested specs/variants, implement specific endpoints.

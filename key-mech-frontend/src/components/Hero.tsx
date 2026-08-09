@@ -6,6 +6,7 @@ import GroupBuySection from "./GroupBuySection";
 import GltfKeyboardViewer from "./lazy-gltf-keyboard-viewer";
 import HeroIntroSection from "./HeroIntroSection";
 import WhatsInsideSection from "./WhatsInsideSection";
+import { useSpecterCommerce } from "@/hooks/use-specter-commerce";
 
 const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
@@ -30,7 +31,6 @@ export default function Hero({ onKeyboardReady }: HeroProps) {
     isNarrow,
     isKeyboardInteractive,
     isHeroKeyboardInView,
-    handleShopKeyboards,
     visibleSections,
   } = useHero(containerRef);
 
@@ -39,6 +39,7 @@ export default function Hero({ onKeyboardReady }: HeroProps) {
     (!visibleSections.has(1) &&
       !visibleSections.has(2) &&
       !visibleSections.has(3));
+  const commerce = useSpecterCommerce(selectedTextureId);
 
   return (
     <div
@@ -103,7 +104,8 @@ export default function Hero({ onKeyboardReady }: HeroProps) {
           <HeroIntroSection
             sectionRef={(el) => registerSection(el, 0)}
             dataSection={0}
-            onShopKeyboards={handleShopKeyboards}
+            onShopKeyboards={commerce.viewDetails}
+            isProductLoading={commerce.isLoading}
           />
 
           {/* SECTION 1: Build — desktop only */}
@@ -123,6 +125,12 @@ export default function Hero({ onKeyboardReady }: HeroProps) {
               dataSection={2}
               selectedTextureId={selectedTextureId}
               applyTexture={applyTexture}
+              onAddToCart={commerce.addSelectedToCart}
+              onBuyNow={commerce.buyNow}
+              onCustomizeInGarage={commerce.customizeInGarage}
+              isCommercePending={commerce.isAdding}
+              isProductLoading={commerce.isLoading}
+              hasProductError={commerce.isError}
             />
 
             {/* Group Buy — desktop only */}
@@ -130,6 +138,11 @@ export default function Hero({ onKeyboardReady }: HeroProps) {
               <GroupBuySection
                 sectionRef={(el) => registerSection(el, 3)}
                 dataSection={3}
+                onAddToCart={commerce.addSelectedToCart}
+                onViewDetails={commerce.viewDetails}
+                isCommercePending={commerce.isAdding}
+                isProductLoading={commerce.isLoading}
+                hasProductError={commerce.isError}
               />
             )}
           </div>
