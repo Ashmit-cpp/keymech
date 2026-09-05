@@ -48,6 +48,9 @@ export default function ProductDetailPage() {
 
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedVariant, setSelectedVariant] = useState<any | null>(null);
+  const [selectedSoundTest, setSelectedSoundTest] = useState<string | null>(
+    null
+  );
   const [addError, setAddError] = useState<string | null>(null);
   const [justAddedToWishlist, setJustAddedToWishlist] = useState(false);
 
@@ -78,6 +81,10 @@ export default function ProductDetailPage() {
   const soundTests: string[] = useMemo(() => {
     return getStringArray(product?.soundTests);
   }, [product?.soundTests]);
+  const activeSoundTest =
+    selectedSoundTest && soundTests.includes(selectedSoundTest)
+      ? selectedSoundTest
+      : soundTests[0];
 
   const extractYouTubeVideoId = (url: string): string | null => {
     const patterns = [
@@ -525,12 +532,15 @@ export default function ProductDetailPage() {
                       <div className="flex flex-col items-center gap-4">
                         <div className="w-full max-w-2xl mx-auto">
                           {(() => {
-                            const videoId = extractYouTubeVideoId(soundTests[0]);
+                            const soundTest = activeSoundTest;
+                            const videoId = extractYouTubeVideoId(soundTest);
                             return videoId ? (
-                              <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+                              <div className="relative w-full aspect-video">
                                 <iframe
                                   src={`https://www.youtube.com/embed/${videoId}`}
-                                  title="Sound Test Video"
+                                  title={`Sound test ${
+                                    soundTests.indexOf(soundTest) + 1
+                                  }`}
                                   className="absolute inset-0 w-full h-full rounded-lg"
                                   frameBorder="0"
                                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -541,7 +551,7 @@ export default function ProductDetailPage() {
                               <div className="flex flex-col items-center gap-2">
                                 <Youtube className="w-8 h-8" />
                                 <a
-                                  href={soundTests[0]}
+                                  href={soundTest}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="text-primary hover:underline font-medium"
@@ -553,9 +563,26 @@ export default function ProductDetailPage() {
                           })()}
                         </div>
                         {soundTests.length > 1 && (
-                          <p className="text-sm text-muted-foreground">
-                            {soundTests.length - 1} more video{soundTests.length > 2 ? 's' : ''} available
-                          </p>
+                          <div
+                            className="flex flex-wrap justify-center gap-2"
+                            aria-label="Available sound tests"
+                          >
+                            {soundTests.map((soundTest, index) => (
+                              <Button
+                                key={soundTest}
+                                type="button"
+                                size="sm"
+                                variant={
+                                  activeSoundTest === soundTest
+                                    ? "default"
+                                    : "outline"
+                                }
+                                onClick={() => setSelectedSoundTest(soundTest)}
+                              >
+                                Sound test {index + 1}
+                              </Button>
+                            ))}
+                          </div>
                         )}
                       </div>
                     ) : (

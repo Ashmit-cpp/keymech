@@ -2,7 +2,10 @@ import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Prisma, PrismaClient } from '../generated/prisma/client.js';
-import pg from 'pg';
+import {
+  loadProductEnrichments,
+  soundTestUrls,
+} from './product-enrichments.js';
 
 const connectionString = process.env.DATABASE_URL;
 
@@ -10,8 +13,7 @@ if (!connectionString) {
   throw new Error('DATABASE_URL is required to run the Prisma seed.');
 }
 
-const pool = new pg.Pool({ connectionString });
-const adapter = new PrismaPg(pool);
+const adapter = new PrismaPg({ connectionString });
 const prisma = new PrismaClient({ adapter });
 
 type SeedVariant = {
@@ -115,8 +117,49 @@ async function loadCatalog(): Promise<SeedCatalog> {
   const catalogPath = fileURLToPath(
     new URL('./researched-garage-products.json', import.meta.url),
   );
-  const rawCatalog = await readFile(catalogPath, 'utf8');
-  return JSON.parse(rawCatalog) as SeedCatalog;
+  const [rawCatalog, enrichments] = await Promise.all([
+    readFile(catalogPath, 'utf8'),
+    loadProductEnrichments(),
+  ]);
+  const catalog = JSON.parse(rawCatalog) as SeedCatalog;
+  const productsBySlug = new Map(
+    catalog.products.map((product) => [product.slug, product]),
+  );
+
+  for (const enrichment of enrichments.products) {
+    const product = productsBySlug.get(enrichment.slug);
+    if (!product) {
+      throw new Error(
+        `Product enrichment references unknown slug: ${enrichment.slug}`,
+      );
+    }
+
+    product.soundTests = soundTestUrls(enrichment);
+    if (enrichment.technicalSpec) {
+      product.technicalSpec = enrichment.technicalSpec;
+    }
+    if (enrichment.switchSpecPatch) {
+      if (!product.switchSpec?.create) {
+        throw new Error(
+          `Switch spec enrichment references non-switch product: ${enrichment.slug}`,
+        );
+      }
+      product.switchSpec.create = {
+        ...product.switchSpec.create,
+        ...enrichment.switchSpecPatch,
+      };
+    }
+  }
+
+  for (const unmatched of enrichments.unmatchedProducts) {
+    if (!productsBySlug.has(unmatched.slug)) {
+      throw new Error(
+        `Unmatched enrichment references unknown slug: ${unmatched.slug}`,
+      );
+    }
+  }
+
+  return catalog;
 }
 
 async function syncKeyboardSpec(
@@ -235,5 +278,4 @@ main()
   })
   .finally(async () => {
     await prisma.$disconnect();
-    await pool.end();
   });

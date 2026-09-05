@@ -1,0 +1,118 @@
+{
+  "version": 1,
+  "products": [
+    {
+      "slug": "keychron-q2-max-barebone-kit",
+      "soundTests": [
+        {
+          "url": "https://www.youtube.com/watch?v=b0XzXSbvUZk",
+          "title": "Keychron Q2 Max Typing Sound Test",
+          "channel": "Keychron",
+          "configuration": "Fully assembled Q2 Max tested with Gateron Jupiter Red, Banana, and Brown switches.",
+          "verifiedAt": "2026-08-29"
+        }
+      ]
+    },
+    {
+      "slug": "keychron-q1-max-barebone-kit",
+      "soundTests": [
+        {
+          "url": "https://www.youtube.com/watch?v=9dopQ-n9wFo",
+          "title": "Keychron Q1 Max Typing Sound Test",
+          "channel": "Keychron",
+          "configuration": "Fully assembled Q1 Max tested with Gateron Jupiter Red, Banana, and Brown switches and Keychron KSA double-shot PBT keycaps.",
+          "verifiedAt": "2026-08-29"
+        }
+      ]
+    },
+    {
+      "slug": "keychron-q3-max-barebone-kit",
+      "soundTests": [
+        {
+          "url": "https://www.youtube.com/watch?v=a_5odBC_82M",
+          "title": "The Perfect Combo? Keychron Q3 Max + Q0 Max Full Review!",
+          "channel": "Tristan Pope (Crafting Worlds)",
+          "configuration": "Keychron Q3 Max typing test with Gateron Jupiter Brown switches; sound test begins at 15:18.",
+          "verifiedAt": "2026-08-29"
+        }
+      ]
+    },
+    {
+      "slug": "keychron-v1-max-barebone-kit",
+      "soundTests": [
+        {
+          "url": "https://www.youtube.com/watch?v=op1BvFyAevc",
+          "title": "Keychron V1 Max Typing Sound Test",
+          "channel": "Keychron",
+          "configuration": "Fully assembled V1 Max tested with Gateron Jupiter Red, Brown, and Banana switches.",
+          "verifiedAt": "2026-08-29"
+        }
+      ]
+    },
+    {
+      "slug": "keychron-v3-max-barebone-kit",
+      "soundTests": [
+        {
+          "url": "https://www.youtube.com/watch?v=1dZh0OU5D0c",
+          "title": "Keychron V3 Max Sound Test",
+          "channel": "MechTech Keyboards",
+          "configuration": "Keychron V3 Max typing test with Gateron Jupiter Banana switches.",
+          "verifiedAt": "2026-08-29"
+        }
+      ]
+    },
+    {
+      "slug": "gateron-ks-3-milky-yellow-pro-switch-set",
+      "soundTests": [
+        {
+          "url": "https://www.youtube.com/watch?v=rAw8qIYDc5A",
+          "title": "Gateron Milky Yellow Pro | GMK67 | sound test",
+          "channel": "Jur1cek",
+          "configuration": "Gateron Milky Yellow Pro switches in a foam- and tape-modded GMK67 with Cherry-profile PBT keycaps.",
+          "verifiedAt": "2026-08-29"
+        }
+      ],
+      "technicalSpec": {
+        "operatingForceGf": 50,
+        "preTravelMm": 2,
+        "totalTravelMm": 4,
+        "mount": "5-pin PCB",
+        "factoryLubed": true,
+        "housing": "Milky nylon PA66 top and bottom",
+        "stem": "POM MX-style",
+        "source": "https://www.gateron.co/blogs/news/gateron-yellow-pro-ks-9-vs-gateron-milky-yellow-pro-ks-3"
+      }
+    },
+    {
+      "slug": "cherry-mx2a-rgb-black-switch-set",
+      "soundTests": [
+        {
+          "url": "https://www.youtube.com/watch?v=giv_-U3QyPo",
+          "title": "Cherry MX2A Black | Frog by Geonworks | Aluminum Plate | Switch Sounds #137",
+          "channel": "Linn Types",
+          "configuration": "Cherry MX2A Black switches in a Geonworks Frog with an aluminum plate.",
+          "verifiedAt": "2026-08-29"
+        }
+      ],
+      "technicalSpec": {
+        "actuationForceCn": 60,
+        "preTravelMm": 2,
+        "totalTravelMm": 4,
+        "factoryLubed": true,
+        "ratedKeystrokes": 100000000,
+        "soundDesign": "Noise-reducing barrel spring",
+        "source": "https://www.cherry.de/en-us/product/mx2a-black"
+      },
+      "switchSpecPatch": {
+        "lubed": true,
+        "soundProfile": "Classic firm linear; factory lubricant and a barrel spring reduce spring noise"
+      }
+    }
+  ],
+  "unmatchedProducts": [
+    {
+      "slug": "specter-75",
+      "reason": "No exact-match public YouTube sound test was found. A different 75% keyboard would misrepresent this in-house model."
+    }
+  ]
+}

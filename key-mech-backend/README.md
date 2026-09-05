@@ -59,6 +59,20 @@ Optional seed (see [`prisma/seed.ts`](./prisma/seed.ts)):
 pnpm exec prisma db seed
 ```
 
+Product sound tests and narrowly scoped spec corrections live in
+[`prisma/product-enrichments.json`](./prisma/product-enrichments.json). The
+normal seed merges that file for a fresh database. To update an existing
+database without overwriting prices, inventory, images, or other catalog data:
+
+```bash
+pnpm enrich:check          # validate the local manifest
+pnpm enrich:check:remote   # also verify YouTube metadata and availability
+pnpm enrich:dry-run        # compare the manifest with DATABASE_URL
+pnpm enrich:write          # apply only changed enrichment fields
+```
+
+The sync is idempotent and defaults to validation unless `--write` is used.
+
 Start in watch mode:
 
 ```bash
