@@ -11,7 +11,7 @@ import {
   type GarageKeycapTheme,
 } from "@/lib/garage-theme";
 
-export type GarageLayout = "65" | "75" | "TKL";
+export type GarageLayout = "60" | "65" | "75" | "TKL" | "FULL";
 export type GarageSlot =
   | "case"
   | "pcb"
@@ -47,7 +47,7 @@ export interface GarageBuildSnapshot {
   components: Record<GarageSlot, GarageComponentSnapshot>;
 }
 
-export const GARAGE_LAYOUTS: GarageLayout[] = ["65", "75", "TKL"];
+export const GARAGE_LAYOUTS: GarageLayout[] = ["60", "75", "TKL", "FULL"];
 
 export const GARAGE_SLOTS: {
   id: GarageSlot;
@@ -84,6 +84,8 @@ export const normalizeGarageLayout = (value: unknown): GarageLayout | null => {
     .toUpperCase()
     .replaceAll("%", "")
     .replaceAll(" ", "");
+  if (normalized === "60" || normalized === "P60") return "60";
+  if (["FULL", "FULLSIZE", "FULL-SIZE", "100", "P100"].includes(normalized)) return "FULL";
   if (normalized === "65" || normalized === "P65") return "65";
   if (normalized === "75" || normalized === "P75") return "75";
   if (normalized === "TKL" || normalized === "TENKEYLESS") return "TKL";

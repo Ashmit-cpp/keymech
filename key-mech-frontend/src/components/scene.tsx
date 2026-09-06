@@ -1,3 +1,4 @@
+import type { GarageLayout } from "@/lib/garage";
 import { Keyboard, type KeyboardRefs } from "@/components/3d-keyboard";
 import { COLORWAYS, KEYCAP_TEXTURES } from "@/lib/constants";
 import type { GarageKeycapTheme } from "@/lib/garage-theme";
@@ -138,7 +139,7 @@ function addKeyboardWaveToTimeline({
 }
 
 function CameraController({ viewMode }: { viewMode: string }) {
-  const { camera, size, invalidate } = useThree();
+  const { camera, gl, invalidate } = useThree();
   const mouseRef = useRef({ x: 0.5, y: 0.5 });
   const targetRef = useRef(new THREE.Vector3(0, 0, 0));
   const currentPositionRef = useRef(new THREE.Vector3(0, 0, 2.85));
@@ -185,15 +186,16 @@ function CameraController({ viewMode }: { viewMode: string }) {
     if (prefersReducedMotion || viewMode !== "3d") return;
 
     const handleMouseMove = (event: MouseEvent) => {
-      mouseRef.current.x = event.clientX / size.width;
-      mouseRef.current.y = event.clientY / size.height;
+      const bounds = gl.domElement.getBoundingClientRect();
+      mouseRef.current.x = THREE.MathUtils.clamp((event.clientX - bounds.left) / bounds.width, 0, 1);
+      mouseRef.current.y = THREE.MathUtils.clamp((event.clientY - bounds.top) / bounds.height, 0, 1);
     };
 
     if (typeof window !== "undefined") {
       window.addEventListener("mousemove", handleMouseMove);
       return () => window.removeEventListener("mousemove", handleMouseMove);
     }
-  }, [prefersReducedMotion, size, viewMode]);
+  }, [prefersReducedMotion, gl, viewMode]);
 
   return null;
 }
@@ -240,6 +242,7 @@ function KeyboardRotation({
 }
 
 export interface SceneProps {
+  layout?: GarageLayout;
   rotateX: MotionValue<number>;
   rotateY: MotionValue<number>;
   rotateZ: MotionValue<number>;
@@ -252,6 +255,7 @@ export interface SceneProps {
 }
 
 export function Scene({
+  layout = "75",
   rotateX,
   rotateY,
   rotateZ,
@@ -570,7 +574,7 @@ export function Scene({
         onUpdate: invalidate,
       });
     }
-  }, [viewMode, keyboardRefsReady, invalidate]);
+  }, [viewMode, layout, keyboardRefsReady, invalidate]);
 
   // Hero already applies CSS scale on narrow viewports; keep 3D group near full size.
   const scalingFactor =
@@ -600,10 +604,11 @@ export function Scene({
 
       <group scale={scalingFactor}>
         <group ref={keyboardGroupRef}>
-          <Center>
+          <Center key={layout}>
             <Keyboard
+              layout={layout}
               ref={setKeyboardAnimationRef}
-              scale={10}
+              scale={layout === "FULL" ? 6 : layout === "TKL" ? 7.5 : layout === "60" ? 9 : 10}
               activeColorway={activeColorway}
               garageKeycapTheme={garageKeycapTheme}
               keycapAtlasUsesUv2={keycapAtlasUsesUv2}

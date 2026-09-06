@@ -1,3 +1,4 @@
+import type { GarageLayout } from "@/lib/garage";
 import {
   memo,
   Suspense,
@@ -37,6 +38,7 @@ function DragMotionInvalidate({
 }
 
 export interface GltfKeyboardViewerProps {
+  layout?: GarageLayout;
   baseRotateX?: MotionValue<number> | number;
   baseRotateY?: MotionValue<number> | number;
   baseRotateZ?: MotionValue<number> | number;
@@ -56,6 +58,7 @@ export interface GltfKeyboardViewerProps {
 }
 
 function GltfKeyboardViewer({
+  layout = "75",
   baseRotateX = 28,
   baseRotateY = -8,
   baseRotateZ = 0,
@@ -162,8 +165,8 @@ function GltfKeyboardViewer({
 
   const previewAriaLabel =
     interactive && isInteractive
-      ? "Specter 75 keyboard 3D preview — drag or swipe to rotate"
-      : "Specter 75 keyboard 3D preview";
+      ? `${layout === "FULL" ? "Full-Size" : layout === "TKL" ? "TKL" : layout === "60" ? "60%" : "Specter 75"} keyboard 3D preview — drag or swipe to rotate`
+      : `${layout === "FULL" ? "Full-Size" : layout === "TKL" ? "TKL" : layout === "60" ? "60%" : "Specter 75"} keyboard 3D preview`;
 
   const handlePointerDown = (e: React.PointerEvent) => {
     if (!interactive || viewMode !== "3d") return;
@@ -263,6 +266,7 @@ function GltfKeyboardViewer({
           <Suspense fallback={null}>
             <DragMotionInvalidate dragRx={dragRx} dragRy={dragRy} />
             <Scene
+              layout={layout}
               rotateX={finalRotateX}
               rotateY={finalRotateY}
               rotateZ={mvRz}

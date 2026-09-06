@@ -437,7 +437,7 @@ export default function GaragePage() {
   }
 
   const derived = useMemo(() => {
-    const errors: string[] = [];
+    const errors: string[] = (layout === "60" || layout === "FULL") ? [`${layout === "FULL" ? "Full-Size" : "60%"} is available as a 3D preview; saving and checkout are not available yet.`] : [];
     let total = 0;
 
     GARAGE_SLOTS.forEach(({ id, label }) => {
@@ -516,6 +516,7 @@ export default function GaragePage() {
   }
 
   async function saveBuild(): Promise<GarageBuildResponseDto> {
+    if (layout === "60" || layout === "FULL") throw new Error("This layout is currently preview only");
     if (!requireAuth()) throw new Error("Authentication required");
     const dtoSelections = toGarageSelectionsDto(selections);
     if (!dtoSelections || !isValid) {
@@ -670,19 +671,6 @@ export default function GaragePage() {
       image: "https://www.keychron.com/cdn/shop/files/Keychron-Q1-Max-QMK-VIA-Wireless-Custom-Mechanical-Keyboard-75_-Layout-Aluminum-Black-Fully-Assembled-Knob-for-Mac-Windows-Linux-Gateron-Jupiter-Red.jpg?v=1753685590&width=150",
     },
     {
-      id: "cream-dream",
-      name: "Cream Dream",
-      layout: "65" as const,
-      caseSku: "KM-Q2MAX-BB-WHT",
-      pcbSku: "GARAGE-PCB-65-HS",
-      plateSku: "GARAGE-PLATE-65-PC",
-      switchSku: "GAT-KS3-MY-PRO-45",
-      keycapSku: "KC-OSA-PBT-RETRO-141",
-      stabSku: "KC-STAB-GOLD-SCREWIN-10",
-      theme: garageTheme("#f0d5c0", "#b87045", "#e6db74", "#2e2e2e"),
-      image: "https://www.keychron.com/cdn/shop/files/Keychron-Q2-Max-QMK-VIA-Wireless-Custom-Mechanical-Keyboard-65_-Layout-Aluminum-Black-Fully-Assembled-Knob-for-Mac-Windows-Linux-Gateron-Jupiter-Red.jpg?v=1754098803&width=150",
-    },
-    {
       id: "olive-green",
       name: "Olive Green",
       layout: "TKL" as const,
@@ -821,15 +809,9 @@ export default function GaragePage() {
             <div className="space-y-3">
               {[
                 {
-                  id: "65",
+                  id: "60",
                   title: "60% Compact",
-                  desc: "62 keys · No arrows, pure minimal",
-                  price: 1742900,
-                },
-                {
-                  id: "65-std",
-                  title: "65% Standard",
-                  desc: "66 keys · Arrows and nav column",
+                  desc: "61 keys · No arrows, pure minimal",
                   price: 1742900,
                 },
                 {
@@ -844,8 +826,14 @@ export default function GaragePage() {
                   desc: "87 keys · Standard function row",
                   price: 786400,
                 },
+                {
+                  id: "FULL",
+                  title: "Full-Size",
+                  desc: "104 keys · Navigation, arrows and numpad",
+                  price: null,
+                },
               ].map((item) => {
-                const normalizedId = item.id.includes("65") ? "65" : (item.id as GarageLayout);
+                const normalizedId = item.id as GarageLayout;
                 const isSelected = layout === normalizedId;
                 return (
                   <button
@@ -864,7 +852,7 @@ export default function GaragePage() {
                       <p className="text-xs text-muted-foreground">{item.desc}</p>
                     </div>
                     <span className="font-semibold text-xs shrink-0 ml-2">
-                      {formatINR(item.price)}
+                      {item.price === null ? "3D preview" : formatINR(item.price)}
                     </span>
                   </button>
                 );
@@ -1358,7 +1346,7 @@ export default function GaragePage() {
 
           <nav className="space-y-1">
             {[
-              { id: "layout", label: "Layout", icon: Keyboard, swatch: null, badge: `${layout}%` },
+              { id: "layout", label: "Layout", icon: Keyboard, swatch: null, badge: layout === "FULL" ? "100%" : layout === "TKL" ? "TKL" : `${layout}%` },
               { id: "keycaps", label: "Keycaps", icon: Grid, swatch: theme.accent, badge: null },
               { id: "switches", label: "Switches", icon: Zap, swatch: selectedSwitchesColor, badge: null },
               { id: "case", label: "Case", icon: Box, swatch: selectedCaseColor, badge: null },
@@ -1494,6 +1482,7 @@ export default function GaragePage() {
         {/* 3D Model Display */}
         <div className="h-[40vh] md:h-auto md:flex-1 w-full flex items-center justify-center relative min-h-0">
           <GltfKeyboardViewer
+            layout={layout}
             embedded
             garageKeycapTheme={theme}
             selectedTextureId={selectedTextureId}

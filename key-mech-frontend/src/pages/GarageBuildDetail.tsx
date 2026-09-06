@@ -152,6 +152,7 @@ export default function GarageBuildDetailPage() {
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
           <div className="min-h-[520px] overflow-hidden border border-border">
             <GltfKeyboardViewer
+              layout={build.layout}
               embedded
               garageKeycapTheme={theme}
               isInteractive

@@ -1,5 +1,7 @@
 import * as THREE from "three";
-import React, { useRef, forwardRef, useImperativeHandle, useMemo, useEffect } from "react";
+import { KeyboardVariantModel } from "./keyboard-variant";
+import type { GarageLayout } from "@/lib/garage";
+import React, { useRef, forwardRef, useImperativeHandle, useMemo, useEffect, useCallback } from "react";
 import { useGLTF, useTexture } from "@react-three/drei";
 import { COLORWAYS } from "@/lib/constants";
 import type { GarageKeycapTheme } from "@/lib/garage-theme";
@@ -392,6 +394,7 @@ export interface KeyboardRefs {
 }
 
 interface KeyboardProps extends React.ComponentProps<"group"> {
+  layout?: GarageLayout;
   keycapMaterial?: THREE.Material;
   /** When the active keycap texture maps legends to `uv2` instead of `uv`; defaults from material. */
   keycapAtlasUsesUv2?: boolean;
@@ -412,6 +415,7 @@ function materialUsesKeycapTextureMap(
 export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
   (
     {
+      layout = "75",
       keycapMaterial,
       keycapAtlasUsesUv2,
       knobColor,
@@ -621,8 +625,8 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
       keycapAtlasUsesUv2 !== undefined
         ? keycapAtlasUsesUv2 && materialUsesKeycapTextureMap(renderedKeycapMat)
         : materialUsesKeycapTextureMap(renderedKeycapMat);
-    const keycapGeo = (geometry: THREE.BufferGeometry) =>
-      keycapGeometryForTexturedAtlas(geometry, useSecondUvForAtlas);
+    const keycapGeo = useCallback((geometry: THREE.BufferGeometry) =>
+      keycapGeometryForTexturedAtlas(geometry, useSecondUvForAtlas), [useSecondUvForAtlas]);
 
     const knobMat = new THREE.MeshStandardMaterial({
       color: knobColor || "#D4145A",   // brighter orange pops on dark bg
@@ -668,6 +672,23 @@ export const Keyboard = forwardRef<KeyboardRefs, KeyboardProps>(
       roughness: 0.1,
       metalness: 1,
     });
+    if (layout === "60" || layout === "TKL" || layout === "FULL") {
+      return <group {...props} dispose={null} ref={containerRef}>
+        <KeyboardVariantModel
+          layout={layout}
+          nodes={nodes}
+          keycapMaterial={renderedKeycapMat}
+          keycapGeo={keycapGeo}
+          topCaseMaterial={topCaseMat}
+          bottomCaseMaterial={bottomCaseMat}
+          plateMaterial={plateMat}
+          feetMaterial={feetMat}
+          switchMaterials={[switchMat, switchContactsMat, switchStemMat, switchMat]}
+          theme={garageKeycapTheme}
+          parts={{ topCase: topCaseRef, bottomCase: bottomCaseRef, plate: plateRef, pcb: pcbRef, weight: weightRef, keycapsRoot: keycapsRootRef, switches: switchNumberRowRef }}
+        />
+      </group>;
+    }
     return (
       <group {...props} dispose={null} ref={containerRef}>
         <group position={[0.02, 0, 0]}>
